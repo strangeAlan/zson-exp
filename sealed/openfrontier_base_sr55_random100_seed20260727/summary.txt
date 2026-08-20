@@ -1,0 +1,7 @@
+episodes=100
+successes=55
+sr=0.550000
+spl=0.253179
+elapsed_seconds=22533.170
+exceptions=0
+exit_code=0

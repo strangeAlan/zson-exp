@@ -1,0 +1,11 @@
+{
+  "qwen": {
+    "ok": true,
+    "backend": "vllm-openai",
+    "model": "qwen3-vl-8b"
+  },
+  "sam3": {
+    "ok": true,
+    "service": "sam3"
+  }
+}

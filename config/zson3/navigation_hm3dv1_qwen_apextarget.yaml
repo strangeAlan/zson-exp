@@ -1,0 +1,31 @@
+# OF-ApexTarget v1: OpenFrontier exploration with the evaluated T1 target chain.
+extends: navigation_hm3dv1_qwen.yaml
+
+target_perception: t1_apex_fusion
+
+# T1 executes target perception on every RGB-D observation.  There is
+# deliberately no cadence parameter in v1.
+apex_target_yolo_threshold: 0.8
+apex_target_dino_threshold: 0.4
+apex_target_reliable_confidence: 0.65
+apex_target_reliable_min_volume: 8
+apex_target_min_positive_observations: 2
+apex_target_voxel_size_m: 0.10
+apex_target_cluster_match_radius_m: 0.60
+apex_target_cluster_strict_match_radius_m: 0.25
+apex_target_cluster_min_overlap_voxels: 3
+apex_target_cluster_bounds_margin_m: 0.25
+apex_target_lambda_neg: 0.20
+apex_target_min_negative_overlap_voxels: 8
+apex_target_depth_cloud_stride: 4
+apex_target_erosion_size: 1
+apex_target_min_depth_m: 0.5
+apex_target_max_depth_m: 3.5
+
+# Do not issue an extra Qwen request when a reliable target is acquired. Qwen
+# remains part of the unchanged OpenFrontier frontier-scoring policy only.
+apex_target_qwen_audit: false
+
+# Match T1's horizontal PointNav stop gate. Habitat success remains the
+# evaluator's separately configured 0.1 m protocol.
+success_threshold: 0.9

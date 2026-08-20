@@ -1,0 +1,92 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# vscode
+*.vscode*
+
+# build folder
+build/
+Release/
+
+# pycache
+__pycache__/
+
+cmake_example
+data/
+
+# logging
+*.log
+*.npz
+/logs/
+/results/*
+!/results/README.md
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/
+/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/*
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/manifest.json
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/progress.log
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/services.json
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/summary.json
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/summary.txt
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/floor_summary.json
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/floor_summary.txt
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/
+/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/*
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/manifest.json
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/progress.log
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/services.json
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/summary.json
+!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/summary.txt
+
+# files
+output_*/
+output/
+model_weights/
+/examples/*.glb
+
+.env
+api_keys.py
+/sam3/
+lockfiles
+.runtime/
+.local/
+artifacts/
+
+# Machine-local continuation notes and active research drafts.
+/docs/HANDOFF.md
+
+ovon/*
+ompl-1.7.0/*
+
+topdown*.png
+test.py
+navigation_output/*

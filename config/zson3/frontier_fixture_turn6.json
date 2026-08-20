@@ -1,0 +1,39 @@
+{
+  "source": {
+    "dataset": "HM3D ObjectNav v1 val",
+    "scene": "6s7QHgap2fW",
+    "episode_id": "0",
+    "action_prefix": [
+      "turn_right",
+      "turn_right",
+      "turn_right",
+      "turn_right",
+      "turn_right",
+      "turn_right"
+    ]
+  },
+  "fixture_arrays_sha256": {
+    "camera_extrinsic": "1b0fb9940f0b22ad433eba57181c9d30eaf1363840b0ab27d6ae6dba503cd6e7",
+    "camera_intrinsic": "874d76b63cf308cfc807da39691b68bccbd5ea3afe7f41f753edb0e6dd05b0f3",
+    "compass": "85552af8a6135cf71f7059eae5fcace95c1ac333fb8d0d862b59ead80eeaa35a",
+    "depth": "21b83fb2b981115c05d9bcb409f0f50b6e8184e5103737ad1e8764af5cdc7e81",
+    "gps": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+    "rgb": "d0909c57f815bc8653e1f01c457eefdf2d7f62bd928cad211c85dc3d26885c35"
+  },
+  "frontier_cpu_trace": {
+    "frontier_region_pixels": 1589,
+    "frontier_region_sha256": "c6ce464a346b4150205e03cb9d32a1152bf7a582544f3c751acd74ed1781467c",
+    "information_gain_sha256": "ce57c4ba1dcf5517047b7195d48c42a5200c378729679b91ba40d5585184e80e",
+    "anchored_frontier_count": 3,
+    "positions_xyz": [
+      [20.696910075068914, 0.2304558070871489, 0.11906017705468173],
+      [20.143622031835125, -0.09357094383110165, 1.3676596610269227],
+      [20.41749669021296, 0.1759454427200457, 1.5337562079807772]
+    ]
+  },
+  "notes": [
+    "The NPZ container is generated locally and ignored by git; array hashes are the stable fixture identity.",
+    "This trace freezes upstream FrontierNet preprocessing, postprocessing, depth anchoring, and HDBSCAN behavior on CPU.",
+    "GPU floating-point parity has not yet been asserted."
+  ]
+}

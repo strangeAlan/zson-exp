@@ -1,0 +1,511 @@
+{
+  "metadata": {
+    "name": "hm3dv1_t1_random100_seed20260727",
+    "source": "historical VLFM sealed T1 episode identities",
+    "source_run": "t1_apex_fusion_medoid_random100_seed20260727",
+    "identity_guarantee": "same 100 (scene_id, episode_id) pairs; canonical scene/episode order",
+    "seed": 20260727
+  },
+  "selection": [
+    {
+      "scene_id": "4ok3usBNeis",
+      "episode_id": "10",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "5cdEh9F2hJL",
+      "episode_id": "2",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "5cdEh9F2hJL",
+      "episode_id": "69",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "5cdEh9F2hJL",
+      "episode_id": "97",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "6s7QHgap2fW",
+      "episode_id": "7",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "6s7QHgap2fW",
+      "episode_id": "42",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "6s7QHgap2fW",
+      "episode_id": "47",
+      "source_target": "potted plant"
+    },
+    {
+      "scene_id": "6s7QHgap2fW",
+      "episode_id": "48",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "6s7QHgap2fW",
+      "episode_id": "77",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "6s7QHgap2fW",
+      "episode_id": "85",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "DYehNKdT76V",
+      "episode_id": "13",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "DYehNKdT76V",
+      "episode_id": "36",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "DYehNKdT76V",
+      "episode_id": "67",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "DYehNKdT76V",
+      "episode_id": "90",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "Dd4bFSTQ8gi",
+      "episode_id": "0",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "Dd4bFSTQ8gi",
+      "episode_id": "51",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "Dd4bFSTQ8gi",
+      "episode_id": "90",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "Nfvxx8J5NCo",
+      "episode_id": "9",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "Nfvxx8J5NCo",
+      "episode_id": "29",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "Nfvxx8J5NCo",
+      "episode_id": "48",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "Nfvxx8J5NCo",
+      "episode_id": "55",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "Nfvxx8J5NCo",
+      "episode_id": "56",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "Nfvxx8J5NCo",
+      "episode_id": "80",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "QaLdnwvtxbs",
+      "episode_id": "6",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "QaLdnwvtxbs",
+      "episode_id": "8",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "QaLdnwvtxbs",
+      "episode_id": "14",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "QaLdnwvtxbs",
+      "episode_id": "25",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "QaLdnwvtxbs",
+      "episode_id": "32",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "QaLdnwvtxbs",
+      "episode_id": "41",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "QaLdnwvtxbs",
+      "episode_id": "70",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "QaLdnwvtxbs",
+      "episode_id": "95",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "TEEsavR23oF",
+      "episode_id": "10",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "TEEsavR23oF",
+      "episode_id": "20",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "TEEsavR23oF",
+      "episode_id": "40",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "TEEsavR23oF",
+      "episode_id": "62",
+      "source_target": "potted plant"
+    },
+    {
+      "scene_id": "TEEsavR23oF",
+      "episode_id": "71",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "TEEsavR23oF",
+      "episode_id": "73",
+      "source_target": "potted plant"
+    },
+    {
+      "scene_id": "TEEsavR23oF",
+      "episode_id": "79",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "TEEsavR23oF",
+      "episode_id": "82",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "TEEsavR23oF",
+      "episode_id": "83",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "XB4GS9ShBRE",
+      "episode_id": "28",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "XB4GS9ShBRE",
+      "episode_id": "39",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "XB4GS9ShBRE",
+      "episode_id": "72",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "XB4GS9ShBRE",
+      "episode_id": "73",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "XB4GS9ShBRE",
+      "episode_id": "82",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "XB4GS9ShBRE",
+      "episode_id": "88",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "bxsVRursffK",
+      "episode_id": "32",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "bxsVRursffK",
+      "episode_id": "45",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "bxsVRursffK",
+      "episode_id": "62",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "bxsVRursffK",
+      "episode_id": "89",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "cvZr5TUy5C5",
+      "episode_id": "3",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "cvZr5TUy5C5",
+      "episode_id": "6",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "cvZr5TUy5C5",
+      "episode_id": "58",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "cvZr5TUy5C5",
+      "episode_id": "77",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "mL8ThkuaVTM",
+      "episode_id": "63",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "mL8ThkuaVTM",
+      "episode_id": "65",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "mL8ThkuaVTM",
+      "episode_id": "82",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "mL8ThkuaVTM",
+      "episode_id": "90",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "mv2HUxq3B53",
+      "episode_id": "14",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "mv2HUxq3B53",
+      "episode_id": "17",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "mv2HUxq3B53",
+      "episode_id": "28",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "mv2HUxq3B53",
+      "episode_id": "39",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "mv2HUxq3B53",
+      "episode_id": "54",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "mv2HUxq3B53",
+      "episode_id": "63",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "mv2HUxq3B53",
+      "episode_id": "81",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "p53SfW6mjZe",
+      "episode_id": "19",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "p53SfW6mjZe",
+      "episode_id": "29",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "p53SfW6mjZe",
+      "episode_id": "55",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "p53SfW6mjZe",
+      "episode_id": "64",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "p53SfW6mjZe",
+      "episode_id": "98",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "q3zU7Yy5E5s",
+      "episode_id": "5",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "q3zU7Yy5E5s",
+      "episode_id": "34",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "q3zU7Yy5E5s",
+      "episode_id": "41",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "q3zU7Yy5E5s",
+      "episode_id": "78",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "qyAac8rV8Zk",
+      "episode_id": "9",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "qyAac8rV8Zk",
+      "episode_id": "17",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "qyAac8rV8Zk",
+      "episode_id": "52",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "qyAac8rV8Zk",
+      "episode_id": "56",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "qyAac8rV8Zk",
+      "episode_id": "98",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "svBbv1Pavdk",
+      "episode_id": "10",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "svBbv1Pavdk",
+      "episode_id": "20",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "svBbv1Pavdk",
+      "episode_id": "36",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "svBbv1Pavdk",
+      "episode_id": "43",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "svBbv1Pavdk",
+      "episode_id": "61",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "svBbv1Pavdk",
+      "episode_id": "97",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "wcojb4TFT35",
+      "episode_id": "24",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "wcojb4TFT35",
+      "episode_id": "76",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "ziup5kvtCCR",
+      "episode_id": "32",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "ziup5kvtCCR",
+      "episode_id": "34",
+      "source_target": "chair"
+    },
+    {
+      "scene_id": "ziup5kvtCCR",
+      "episode_id": "39",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "ziup5kvtCCR",
+      "episode_id": "66",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "ziup5kvtCCR",
+      "episode_id": "68",
+      "source_target": "potted plant"
+    },
+    {
+      "scene_id": "ziup5kvtCCR",
+      "episode_id": "95",
+      "source_target": "tv"
+    },
+    {
+      "scene_id": "zt1RVoi7PcG",
+      "episode_id": "0",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "zt1RVoi7PcG",
+      "episode_id": "1",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "zt1RVoi7PcG",
+      "episode_id": "18",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "zt1RVoi7PcG",
+      "episode_id": "43",
+      "source_target": "couch"
+    },
+    {
+      "scene_id": "zt1RVoi7PcG",
+      "episode_id": "45",
+      "source_target": "toilet"
+    },
+    {
+      "scene_id": "zt1RVoi7PcG",
+      "episode_id": "98",
+      "source_target": "bed"
+    },
+    {
+      "scene_id": "zt1RVoi7PcG",
+      "episode_id": "106",
+      "source_target": "bed"
+    }
+  ]
+}

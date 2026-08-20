@@ -1,0 +1,11 @@
+# Runtime-only overlay. All exploration, mapping, manager, utility and planner
+# parameters are inherited unchanged from the OpenFrontier configuration.
+extends: ../navigation.yaml
+
+probabilities_source: qwen3-vl-8b-local
+detection_source: qwen3-vl-8b-local
+segmentation_source: sam3
+
+# The legacy VLFM checkpoint is loaded strictly through the Habitat-Baselines
+# 0.3.3 compatibility adapter; project-local weight files remain untracked.
+pointnav_weights_path: model_weights/pointnav_weights.pth

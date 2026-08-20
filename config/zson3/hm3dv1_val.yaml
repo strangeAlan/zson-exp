@@ -1,0 +1,30 @@
+# Frozen ZSON3 comparison protocol. The executable source of truth is
+# zson3.runtime.hm3d.HM3DProtocol; this file is the human-readable manifest.
+dataset:
+  name: HM3D ObjectNav
+  version: v1
+  split: val
+  root: data/datasets/objectnav/hm3d/v1
+  scenes_root: data/scene_datasets
+
+simulator:
+  habitat_sim: 0.3.3
+  habitat_lab: 0.3.3
+  max_episode_steps: 500
+  forward_step_size: 0.25
+  turn_angle: 30
+  actions: [stop, move_forward, turn_left, turn_right]
+
+sensors:
+  rgb: {height: 480, width: 640, hfov: 79}
+  depth:
+    {height: 480, width: 640, hfov: 79, min_depth: 0.5, max_depth: 3.5, normalize: false}
+  pose: [gps, compass]
+
+evaluation:
+  success_distance: 0.1
+  metrics: [success, spl, distance_to_goal, collisions]
+
+smoke_episode:
+  scene: 6s7QHgap2fW
+  episode_id: "0"

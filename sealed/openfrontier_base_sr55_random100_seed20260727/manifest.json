@@ -1,0 +1,514 @@
+{
+  "dataset": "HM3Dv1 val",
+  "seed": 20260727,
+  "episodes": 100,
+  "iterator": {
+    "shuffle": true,
+    "group_by_scene": true,
+    "num_episode_sample": 100,
+    "max_scene_repeat_episodes": 1,
+    "max_scene_repeat_steps": -1
+  },
+  "selection": [
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00800-TEEsavR23oF/TEEsavR23oF.basis.glb",
+      "episode_id": "95",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00880-Nfvxx8J5NCo/Nfvxx8J5NCo.basis.glb",
+      "episode_id": "89",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00813-svBbv1Pavdk/svBbv1Pavdk.basis.glb",
+      "episode_id": "84",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00878-XB4GS9ShBRE/XB4GS9ShBRE.basis.glb",
+      "episode_id": "81",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00820-mL8ThkuaVTM/mL8ThkuaVTM.basis.glb",
+      "episode_id": "56",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "7",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00891-cvZr5TUy5C5/cvZr5TUy5C5.basis.glb",
+      "episode_id": "20",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00877-4ok3usBNeis/4ok3usBNeis.basis.glb",
+      "episode_id": "78",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "32",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "52",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00824-Dd4bFSTQ8gi/Dd4bFSTQ8gi.basis.glb",
+      "episode_id": "48",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00853-5cdEh9F2hJL/5cdEh9F2hJL.basis.glb",
+      "episode_id": "0",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00802-wcojb4TFT35/wcojb4TFT35.basis.glb",
+      "episode_id": "30",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00839-zt1RVoi7PcG/zt1RVoi7PcG.basis.glb",
+      "episode_id": "26",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00835-q3zU7Yy5E5s/q3zU7Yy5E5s.basis.glb",
+      "episode_id": "98",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "20",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00876-mv2HUxq3B53/mv2HUxq3B53.basis.glb",
+      "episode_id": "69",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00848-ziup5kvtCCR/ziup5kvtCCR.basis.glb",
+      "episode_id": "56",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00843-DYehNKdT76V/DYehNKdT76V.basis.glb",
+      "episode_id": "90",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00873-bxsVRursffK/bxsVRursffK.basis.glb",
+      "episode_id": "76",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00800-TEEsavR23oF/TEEsavR23oF.basis.glb",
+      "episode_id": "32",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00880-Nfvxx8J5NCo/Nfvxx8J5NCo.basis.glb",
+      "episode_id": "32",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00813-svBbv1Pavdk/svBbv1Pavdk.basis.glb",
+      "episode_id": "3",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00878-XB4GS9ShBRE/XB4GS9ShBRE.basis.glb",
+      "episode_id": "54",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00820-mL8ThkuaVTM/mL8ThkuaVTM.basis.glb",
+      "episode_id": "29",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "59",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00891-cvZr5TUy5C5/cvZr5TUy5C5.basis.glb",
+      "episode_id": "36",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00877-4ok3usBNeis/4ok3usBNeis.basis.glb",
+      "episode_id": "5",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "8",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "17",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00824-Dd4bFSTQ8gi/Dd4bFSTQ8gi.basis.glb",
+      "episode_id": "77",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00853-5cdEh9F2hJL/5cdEh9F2hJL.basis.glb",
+      "episode_id": "90",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00802-wcojb4TFT35/wcojb4TFT35.basis.glb",
+      "episode_id": "19",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00835-q3zU7Yy5E5s/q3zU7Yy5E5s.basis.glb",
+      "episode_id": "1",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "79",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00876-mv2HUxq3B53/mv2HUxq3B53.basis.glb",
+      "episode_id": "2",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00848-ziup5kvtCCR/ziup5kvtCCR.basis.glb",
+      "episode_id": "87",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00843-DYehNKdT76V/DYehNKdT76V.basis.glb",
+      "episode_id": "82",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00873-bxsVRursffK/bxsVRursffK.basis.glb",
+      "episode_id": "24",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00880-Nfvxx8J5NCo/Nfvxx8J5NCo.basis.glb",
+      "episode_id": "62",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00813-svBbv1Pavdk/svBbv1Pavdk.basis.glb",
+      "episode_id": "39",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00878-XB4GS9ShBRE/XB4GS9ShBRE.basis.glb",
+      "episode_id": "39",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00820-mL8ThkuaVTM/mL8ThkuaVTM.basis.glb",
+      "episode_id": "80",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "48",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00891-cvZr5TUy5C5/cvZr5TUy5C5.basis.glb",
+      "episode_id": "61",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00877-4ok3usBNeis/4ok3usBNeis.basis.glb",
+      "episode_id": "34",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "41",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "9",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00824-Dd4bFSTQ8gi/Dd4bFSTQ8gi.basis.glb",
+      "episode_id": "47",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00853-5cdEh9F2hJL/5cdEh9F2hJL.basis.glb",
+      "episode_id": "51",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00835-q3zU7Yy5E5s/q3zU7Yy5E5s.basis.glb",
+      "episode_id": "0",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "83",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00876-mv2HUxq3B53/mv2HUxq3B53.basis.glb",
+      "episode_id": "97",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00843-DYehNKdT76V/DYehNKdT76V.basis.glb",
+      "episode_id": "65",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00800-TEEsavR23oF/TEEsavR23oF.basis.glb",
+      "episode_id": "39",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00880-Nfvxx8J5NCo/Nfvxx8J5NCo.basis.glb",
+      "episode_id": "45",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00878-XB4GS9ShBRE/XB4GS9ShBRE.basis.glb",
+      "episode_id": "63",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00820-mL8ThkuaVTM/mL8ThkuaVTM.basis.glb",
+      "episode_id": "48",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "93",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00891-cvZr5TUy5C5/cvZr5TUy5C5.basis.glb",
+      "episode_id": "43",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00877-4ok3usBNeis/4ok3usBNeis.basis.glb",
+      "episode_id": "41",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "98",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00824-Dd4bFSTQ8gi/Dd4bFSTQ8gi.basis.glb",
+      "episode_id": "42",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00839-zt1RVoi7PcG/zt1RVoi7PcG.basis.glb",
+      "episode_id": "11",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00835-q3zU7Yy5E5s/q3zU7Yy5E5s.basis.glb",
+      "episode_id": "45",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "82",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00848-ziup5kvtCCR/ziup5kvtCCR.basis.glb",
+      "episode_id": "33",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00800-TEEsavR23oF/TEEsavR23oF.basis.glb",
+      "episode_id": "34",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00813-svBbv1Pavdk/svBbv1Pavdk.basis.glb",
+      "episode_id": "9",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00878-XB4GS9ShBRE/XB4GS9ShBRE.basis.glb",
+      "episode_id": "14",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00820-mL8ThkuaVTM/mL8ThkuaVTM.basis.glb",
+      "episode_id": "55",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "92",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "25",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "56",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00839-zt1RVoi7PcG/zt1RVoi7PcG.basis.glb",
+      "episode_id": "97",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00835-q3zU7Yy5E5s/q3zU7Yy5E5s.basis.glb",
+      "episode_id": "18",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "71",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00843-DYehNKdT76V/DYehNKdT76V.basis.glb",
+      "episode_id": "63",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00813-svBbv1Pavdk/svBbv1Pavdk.basis.glb",
+      "episode_id": "49",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00878-XB4GS9ShBRE/XB4GS9ShBRE.basis.glb",
+      "episode_id": "28",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00820-mL8ThkuaVTM/mL8ThkuaVTM.basis.glb",
+      "episode_id": "9",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "70",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00824-Dd4bFSTQ8gi/Dd4bFSTQ8gi.basis.glb",
+      "episode_id": "7",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00839-zt1RVoi7PcG/zt1RVoi7PcG.basis.glb",
+      "episode_id": "78",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00835-q3zU7Yy5E5s/q3zU7Yy5E5s.basis.glb",
+      "episode_id": "43",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00800-TEEsavR23oF/TEEsavR23oF.basis.glb",
+      "episode_id": "68",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00813-svBbv1Pavdk/svBbv1Pavdk.basis.glb",
+      "episode_id": "75",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00891-cvZr5TUy5C5/cvZr5TUy5C5.basis.glb",
+      "episode_id": "97",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "14",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00824-Dd4bFSTQ8gi/Dd4bFSTQ8gi.basis.glb",
+      "episode_id": "85",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "62",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00800-TEEsavR23oF/TEEsavR23oF.basis.glb",
+      "episode_id": "66",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00891-cvZr5TUy5C5/cvZr5TUy5C5.basis.glb",
+      "episode_id": "10",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00839-zt1RVoi7PcG/zt1RVoi7PcG.basis.glb",
+      "episode_id": "23",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00878-XB4GS9ShBRE/XB4GS9ShBRE.basis.glb",
+      "episode_id": "17",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "10",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "6",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "73",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "95",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "40",
+      "target": "bed"
+    }
+  ]
+}

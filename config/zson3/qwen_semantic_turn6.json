@@ -1,0 +1,45 @@
+{
+  "classification": "runtime backend substitution; not a Gemini parity claim",
+  "source": {
+    "dataset": "HM3D ObjectNav v1 val",
+    "scene": "6s7QHgap2fW",
+    "episode_id": "0",
+    "action_prefix": [
+      "turn_right",
+      "turn_right",
+      "turn_right",
+      "turn_right",
+      "turn_right",
+      "turn_right"
+    ],
+    "target": "chair",
+    "labels": ["A", "B", "C"]
+  },
+  "model": {
+    "backend": "qwen3-vl-8b-local",
+    "model_path": ".local/models/qwen3-vl-8b",
+    "temperature": 0.0,
+    "endpoint": "http://127.0.0.1:18080/generate"
+  },
+  "trace": {
+    "som_image_array_sha256": "4edead7f8d0f5bb5f953b9fd7668eb0e516287b85fa1d166b205584ad1227b27",
+    "prompt_sha256": "5d899ff8772232783ddd43a22f80f894644bf99de1306f748af180dbdb577ba7",
+    "raw_response_sha256": "a07c04a342c6e3120241dc79f07bafe3614db47fdac7a820c861636a335bf7bc",
+    "latency_seconds_observed": 61.112749530002475,
+    "parsed_probabilities": {
+      "A": [
+        0.1,
+        "A is near a pile of clothes and a radiator, suggesting a cluttered area but no clear chair structure nearby; low probability of chair"
+      ],
+      "B": [
+        0.4,
+        "B is at a doorway leading into a room with visible furniture (like a door and wall), making it more likely to contain a chair than A or C"
+      ],
+      "C": [
+        0.5,
+        "C is near hanging clothes and a wall, with no clear furniture context; unseen label, so default 0.5 probability"
+      ]
+    }
+  },
+  "result": "OpenFrontier prompt -> local Qwen -> upstream JSON parser passed"
+}

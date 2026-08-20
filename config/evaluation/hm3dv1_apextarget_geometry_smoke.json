@@ -1,0 +1,14 @@
+{
+  "metadata": {
+    "name": "hm3dv1_apextarget_geometry_smoke",
+    "purpose": "single fixed episode for the one-time OF/T1 coordinate and fusion check",
+    "source_manifest": "hm3dv1_t1_random100_seed20260727"
+  },
+  "selection": [
+    {
+      "scene_id": "Nfvxx8J5NCo",
+      "episode_id": "80",
+      "source_target": "couch"
+    }
+  ]
+}
