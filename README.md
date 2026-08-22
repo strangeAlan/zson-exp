@@ -2,12 +2,19 @@
 
 ZSON3 is a research fork of
 [OpenFrontier](https://github.com/cvg/OpenFrontier) for zero-shot ObjectNav in
-Habitat. The current baseline keeps OpenFrontier exploration and adds:
+Habitat. The main development line is called **OF-base**. Apart from the
+Habitat/runtime port and the local Qwen backend, it follows the original
+OpenFrontier method as closely as the current environment permits. In
+particular, it does not use ApexTarget. The port provides:
 
 - a Habitat 0.3.3 runtime for HM3Dv1 and HM3Dv2;
 - local Qwen3-VL frontier scoring and target verification;
-- the pre-Apex OpenFrontier target path with SAM3 segmentation;
+- the OpenFrontier target path, with SAM3 serving the segmentation role;
 - resumable full-split evaluation with frozen manifests.
+
+`pre-Apex` may appear in historical notes because OF-base predates the
+ApexTarget experiment; it is a timeline label, not the method name. New
+experiments and reports should use **OF-base**.
 
 The imported OpenFrontier revision is
 `a3f8b83da6135a88247651534061df2ea05850f6`. This is not the official
@@ -18,12 +25,15 @@ OpenFrontier repository.
 | Benchmark / method | Episodes | Primary SR | Primary SPL |
 | --- | ---: | ---: | ---: |
 | HM3Dv1 val / ApexTarget experiment | 2000 | 50.45% at 0.1 m | 0.2300 |
-| **HM3Dv2 val / pre-Apex main** | **1000** | **70.80% at 1 m** | **0.3299** |
+| HM3Dv1 val / OF-base main | 2000 | running | running |
+| **HM3Dv2 val / OF-base main** | **1000** | **70.80% at 1 m** | **0.3299** |
 | HM3Dv2 val / ApexTarget experiment | 1000 | 65.20% at 1 m | 0.2790 |
 
 Lightweight manifests and logs are under [results](results/README.md). Detailed
 analysis is in the
 [HM3Dv2 paired audit](docs/HM3DV2_PREAPEX_PAIRED_AUDIT.md).
+The ongoing HM3Dv1 OF-base run will provide the common basis for comparison
+with the earlier T1 and ApexTarget results.
 
 ## Repository layout
 
@@ -243,7 +253,7 @@ An optional environment-only check is:
 ApexTarget is not the default HM3Dv2 module. Its frozen implementation and
 logs are retained on the `apextarget-experimental` branch for research
 traceability. On the same 1000 episodes it reached 65.20% SR@1m and 0.2790
-SPL@1m, below the pre-Apex baseline; see the paired audit above. No hybrid or
+SPL@1m, below OF-base; see the paired audit above. No hybrid or
 threshold changes are part of the main branch.
 
 ## Attribution
