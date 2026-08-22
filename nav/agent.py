@@ -3,7 +3,6 @@ import time
 import logging
 import argparse
 import gc
-import json
 from typing import Optional, List, Callable
 import numpy as np
 import torch
@@ -41,7 +40,6 @@ from planner.planner_base import PlannerBase
 from utils.api_key import get_google_api_key, mask_api_key
 from utils.vis_utils import is_same_pose, pose_difference
 from zson3.services import QwenServiceError, Sam3ServiceError
-from zson3.target import ApexTargetPipeline
 
 
 class NavigationAgent:
@@ -66,13 +64,11 @@ class NavigationAgent:
         move_fn: Callable,
         rotate_fn: Callable,
         cam_to_agent: np.ndarray = np.eye(4),
-        fix_view_level = False,
-        target_category: Optional[str] = None,
+        fix_view_level = False
     ) -> None:
 
         self.args = args
         self.goal = target
-        self.target_category = target_category or target
         self.bbox = bbox
         self.cam_intrinsic = cam_intrinsic
         self.save_dir = save_dir
@@ -102,13 +98,6 @@ class NavigationAgent:
         self.detection_source: str = self.config.get(
             "detection_source", "gemini-2.5-flash"
         )
-        self.target_perception_mode = self.config.get(
-            "target_perception", "openfrontier_legacy"
-        )
-        if self.target_perception_mode not in {"openfrontier_legacy", "t1_apex_fusion"}:
-            raise ValueError(
-                f"Unsupported target_perception: {self.target_perception_mode}"
-            )
 
         # Frontier, mapping, detector
         self.mapper: Optional[WaveMapper] = None
@@ -186,25 +175,11 @@ class NavigationAgent:
         self.detected_objects = []
         self.goal_object = None
         self.appoaching_object = False
-        self.apex_target = None
-        self._apex_reobserved_reliable_cluster_id = None
-        self.apex_target_diagnostic_capture = bool(
-            getattr(args, "apex_target_diagnostics", False)
-        )
-        if self.target_perception_mode == "t1_apex_fusion":
-            self.apex_target = ApexTargetPipeline(
-                raw_target=self.target_category,
-                intrinsic=self.cam_intrinsic.intrinsic_matrix,
-                config=self.config,
-            )
         self.target_diagnostics = {
             "segmentation_events": [],
             "verification_events": [],
             "visibility_events": [],
             "termination_event": None,
-            "target_perception": self.target_perception_mode,
-            "apex_fusion_events": [],
-            "qwen_audit_events": [],
         }
 
         self.optimal_path_length = float("inf")
@@ -364,115 +339,13 @@ class NavigationAgent:
         if len(self.termination_images) == self.n_images:
             self.termination_images.pop(0)
 
+        self.composition_images.append(rgb)
         self.termination_images.append(rgb)
-        if self.target_perception_mode == "openfrontier_legacy":
-            self.composition_images.append(rgb)
-            self.composition_depths.append(depth)
-            self.composition_viewpoints.append(W_T_C2.copy())
-
-        # T1 fidelity boundary: one detector/fusion update for every RGB-D pose.
-        # Nothing created here enters FrontierManager until the fusion manager
-        # exposes a reliable target.
-        if self.target_perception_mode == "t1_apex_fusion":
-            assert self.apex_target is not None
-            previous_target = self.ft_manager.object_lockin
-            self._apex_reobserved_reliable_cluster_id = None
-            apex_start = time.time()
-            reliable_goal, apex_trace = self.apex_target.update(
-                rgb=rgb,
-                depth_m=depth,
-                world_from_camera=W_T_C2,
-                robot_xy=W_T_C2[:2, 3],
-                step=self.navigation_steps,
-            )
-            apex_elapsed = time.time() - apex_start
-            sam_time += apex_elapsed
-            self.timings["sam"]["total_time"] += apex_elapsed
-            self.timings["sam"]["calls"] += 1
-            if reliable_goal is None:
-                control_transition = "explore"
-                if previous_target is not None:
-                    # T1 evaluates reliability from the current posterior on
-                    # every step.  Revoked evidence therefore returns control
-                    # completely to OpenFrontier exploration.
-                    self.ft_manager.object_lockin = None
-                    self.ft_manager.current_goal_pose = None
-                    self.ft_manager.last_plan_outcome = None
-                    self.path_to_go = []
-                    self.goal_object = None
-                    self.move_enough = True
-                    control_transition = "target_to_explore"
-                    self.log(
-                        "info",
-                        self.logging_file,
-                        "T1 ApexFusion target reliability revoked; returning to exploration.",
-                    )
-            else:
-                is_new_target = (
-                    previous_target is None
-                    or previous_target.id != reliable_goal.id
-                )
-                positive_cluster_ids = {
-                    event.get("cluster_id")
-                    for event in apex_trace["fusion"]["events"]
-                    if event.get("event") == "positive_fusion"
-                }
-                if (
-                    previous_target is not None
-                    and previous_target.id == reliable_goal.id
-                    and reliable_goal.id in positive_cluster_ids
-                ):
-                    # A safe endpoint is only an observation pose. Record that
-                    # the already-reliable physical cluster was seen again in
-                    # the RGB-D frame acquired at this pose.
-                    self._apex_reobserved_reliable_cluster_id = reliable_goal.id
-                self.ft_manager.lock_into_object(reliable_goal)
-                control_transition = "target"
-                if is_new_target:
-                    control_transition = "explore_to_target"
-                    self.path_to_go = []
-                    self.move_enough = True
-                    self.emergency_rotation = False
-                    if save_images:
-                        self._save_apex_geometry_diagnostic(
-                            rgb, apex_trace, reliable_goal
-                        )
-                    self._record_qwen_target_audit(rgb, W_T_C2, reliable_goal)
-                    self.log(
-                        "info",
-                        self.logging_file,
-                        "T1 ApexFusion reliable target acquired: "
-                        f"cluster={reliable_goal.id}, confidence={reliable_goal.confidence:.3f}, "
-                        f"observations={reliable_goal.positive_observation_count}.",
-                    )
-            self.target_diagnostics["apex_fusion_events"].append(
-                {
-                    "step": self.navigation_steps,
-                    "camera_pose_world": W_T_C2.astype(float).tolist(),
-                    "view_direction_world": W_T_C2[:3, 2].astype(float).tolist(),
-                    "detector": apex_trace["detector"],
-                    "detection_count": len(apex_trace["detections"]),
-                    "geometry_observation_count": apex_trace[
-                        "geometry_observation_count"
-                    ],
-                    "detections": apex_trace["detections"],
-                    "fusion_events": apex_trace["fusion"]["events"],
-                    "reliable_target": apex_trace["reliable_target"],
-                    "control_transition": control_transition,
-                    "elapsed_seconds": apex_trace["elapsed_seconds"],
-                }
-            )
-            if self.apex_target_diagnostic_capture:
-                self._save_apex_replay_frame(
-                    rgb=rgb,
-                    world_from_camera=W_T_C2,
-                    apex_trace=apex_trace,
-                    control_transition=control_transition,
-                )
+        self.composition_depths.append(depth)
+        self.composition_viewpoints.append(W_T_C2.copy())
 
         if (
-            self.target_perception_mode == "openfrontier_legacy"
-            and len(self.composition_images) == self.n_images
+            len(self.composition_images) == self.n_images
             and self.ft_manager.object_lockin is None
         ):
             start_segm = time.time()
@@ -791,7 +664,7 @@ class NavigationAgent:
         self.timings["frontier_manager_update"]["total_time"] += (end_ft_manager - start_ft_manager)
         self.timings["frontier_manager_update"]["calls"] += 1
 
-        if self.ft_manager.object_lockin is None and (
+        if (
             self.ft_manager.valid_frontiers is None
             or len(self.ft_manager.valid_frontiers) == 0
         ):
@@ -836,11 +709,7 @@ class NavigationAgent:
             self.ft_manager.reset_emergency_rotation()
 
         # Replan if needed
-        if (
-            self.ft_manager.object_lockin is not None
-            or self.is_pointnav
-            or (reach_next_update and self.move_enough)
-        ):
+        if self.is_pointnav or (reach_next_update and self.move_enough):
             self.log("info", self.logging_file, "Replanning...")
             logging.debug(f"Replanning (interval={self.plan_interval}).")
 
@@ -858,7 +727,7 @@ class NavigationAgent:
                     self.ft_manager.current_goal_ft_id
                 )
 
-                if goal_frontier is not None and goal_frontier.is_object:
+                if goal_frontier.is_object:
                     self.goal_object = goal_frontier.linked_object
 
             if self.path_to_go:
@@ -873,11 +742,7 @@ class NavigationAgent:
                 self.move_enough = True  # try again next cycle
 
         # Check if reached target viewpoint
-        if (
-            self.target_perception_mode == "openfrontier_legacy"
-            and self.ft_manager.object_lockin is None
-            and self.goal_object is not None
-        ):
+        if self.ft_manager.object_lockin is None and self.goal_object is not None:
 
             # If planning failed and path is empty, consider reached to trigger detection
             if self.ft_manager.current_goal_pose is None:
@@ -1041,7 +906,7 @@ class NavigationAgent:
 
         if self.ft_manager.object_lockin is not None:
             object_pos = self.ft_manager.object_lockin.centroid
-            dist = self._locked_target_distance(W_T_C2)
+            dist = np.linalg.norm(object_pos - W_T_C2[:3, 3])
 
             self.log(
                 "info",
@@ -1049,31 +914,22 @@ class NavigationAgent:
                 f"Approaching locked-in object. Distance to object center: {dist:.2f} m",
             )
 
-            legacy_path_stop = (
-                self.target_perception_mode == "openfrontier_legacy"
-                and len(self.path_to_go) == 0
-            )
-            apex_endpoint_reobserved = (
-                self.target_perception_mode == "t1_apex_fusion"
-                and self.ft_manager.last_plan_outcome == "reached"
-                and self._apex_reobserved_reliable_cluster_id
-                == self.ft_manager.object_lockin.id
-            )
-            if (
-                self.target_perception_mode == "t1_apex_fusion"
-                and self.ft_manager.last_plan_outcome == "reached"
-                and not apex_endpoint_reobserved
-            ):
+            if len(self.path_to_go) == 0 or dist < self.success_threshold:
+                self.target_diagnostics["termination_event"] = {
+                    "step": self.navigation_steps,
+                    "object_id": self.ft_manager.object_lockin.id,
+                    "object_centroid": np.asarray(object_pos, dtype=float).tolist(),
+                    "agent_position": W_T_C2[:3, 3].astype(float).tolist(),
+                    "distance_to_object": float(dist),
+                    "path_exhausted": len(self.path_to_go) == 0,
+                    "success_threshold": self.success_threshold,
+                }
                 self.log(
                     "info",
                     self.logging_file,
-                    "Reached safe endpoint without current-frame confirmation; "
-                    "continuing target observation/planning.",
+                    f"Reached object, navigation finished successfully.",
                 )
-            if legacy_path_stop or apex_endpoint_reobserved or dist < self.success_threshold:
-                return self._finish_locked_target(
-                    W_T_C2, path_exhausted=len(self.path_to_go) == 0
-                )
+                return False, "object_found"
             
         # Execute one movement step if path exists
         if self.path_to_go:
@@ -1135,300 +991,7 @@ class NavigationAgent:
         return {
             **self.target_diagnostics,
             "final_object_tracks": [obj.to_dict() for obj in self.detected_objects],
-            "final_apex_fusion": (
-                None if self.apex_target is None else self.apex_target.fusion.trace
-            ),
-            "camera_trajectory_xyz": [
-                np.asarray(pose[:3, 3], dtype=float).tolist()
-                for pose in getattr(self, "poses", [])
-            ],
         }
-
-    def _locked_target_distance(self, world_from_camera: np.ndarray) -> float:
-        if self.ft_manager.object_lockin is None:
-            return float("inf")
-        target = np.asarray(self.ft_manager.object_lockin.centroid, dtype=float)
-        camera = np.asarray(world_from_camera[:3, 3], dtype=float)
-        if self.target_perception_mode == "t1_apex_fusion":
-            # T1's PointNav stop gate is horizontal rho to the stable target
-            # medoid; object height must not prevent STOP.
-            return float(np.linalg.norm(target[:2] - camera[:2]))
-        return float(np.linalg.norm(target - camera))
-
-    def _locked_target_is_reached(self, world_from_camera: np.ndarray) -> bool:
-        return (
-            self.ft_manager.object_lockin is not None
-            and self._locked_target_distance(world_from_camera) < self.success_threshold
-        )
-
-    def _finish_locked_target(
-        self, world_from_camera: np.ndarray, *, path_exhausted: bool
-    ) -> tuple[bool, str]:
-        target = self.ft_manager.object_lockin
-        distance = self._locked_target_distance(world_from_camera)
-        if distance < self.success_threshold:
-            stop_trigger = "target_distance"
-        elif (
-            self.target_perception_mode == "t1_apex_fusion"
-            and self.ft_manager.last_plan_outcome == "reached"
-            and self._apex_reobserved_reliable_cluster_id == target.id
-        ):
-            stop_trigger = "safe_endpoint_reobserved_target"
-        else:
-            stop_trigger = "legacy_path_exhausted"
-        self.target_diagnostics["termination_event"] = {
-            "step": self.navigation_steps,
-            "object_id": target.id,
-            "object_centroid": np.asarray(target.centroid, dtype=float).tolist(),
-            "agent_position": world_from_camera[:3, 3].astype(float).tolist(),
-            "distance_to_object": distance,
-            "distance_mode": (
-                "horizontal_t1_rho"
-                if self.target_perception_mode == "t1_apex_fusion"
-                else "euclidean_3d"
-            ),
-            "path_exhausted": bool(path_exhausted),
-            "stop_trigger": stop_trigger,
-            "success_threshold": self.success_threshold,
-            "target_perception": self.target_perception_mode,
-            "approach_endpoint": self._current_planner_endpoint(),
-            "reobserved_reliable_cluster_id": (
-                self._apex_reobserved_reliable_cluster_id
-            ),
-        }
-        if self.apex_target_diagnostic_capture:
-            diagnostic_dir = os.path.join(self.save_dir, "apex_target_replay")
-            os.makedirs(diagnostic_dir, exist_ok=True)
-            with open(
-                os.path.join(diagnostic_dir, "termination.json"),
-                "w",
-                encoding="utf-8",
-            ) as handle:
-                json.dump(
-                    self.target_diagnostics["termination_event"],
-                    handle,
-                    indent=2,
-                )
-                handle.write("\n")
-        self.log("info", self.logging_file, "Reached object, navigation finished successfully.")
-        return False, "object_found"
-
-    def _current_planner_endpoint(self) -> Optional[list[float]]:
-        goal_pose = getattr(self.planner, "goal_pose", None)
-        if goal_pose is None:
-            return None
-        return np.asarray(goal_pose[:3, 3], dtype=float).tolist()
-
-    def _save_apex_replay_frame(
-        self,
-        *,
-        rgb: np.ndarray,
-        world_from_camera: np.ndarray,
-        apex_trace: dict,
-        control_transition: str,
-    ) -> None:
-        """Persist evaluator-only evidence for a fixed diagnostic replay."""
-        replay_dir = os.path.join(self.save_dir, "apex_target_replay")
-        frame_dir = os.path.join(replay_dir, "frames")
-        metadata_dir = os.path.join(replay_dir, "metadata")
-        mask_dir = os.path.join(replay_dir, "masks")
-        for path in (frame_dir, metadata_dir, mask_dir):
-            os.makedirs(path, exist_ok=True)
-
-        stem = f"{self.navigation_steps:06d}"
-        source = np.asarray(rgb, dtype=np.uint8)
-        overlay = source.copy()
-        semantic_mask = getattr(self, "latest_target_semantic_mask", None)
-        if semantic_mask is not None:
-            semantic_mask = np.asarray(semantic_mask, dtype=bool)
-            overlay[semantic_mask] = (
-                0.35 * overlay[semantic_mask]
-                + 0.65 * np.array([255, 0, 255], dtype=float)
-            ).astype(np.uint8)
-            cv2.imwrite(
-                os.path.join(mask_dir, f"{stem}_semantic_gt.png"),
-                semantic_mask.astype(np.uint8) * 255,
-            )
-
-        masks = list(getattr(self.apex_target, "last_masks", []))
-        height, width = source.shape[:2]
-        mask_paths = []
-        for index, (record, mask) in enumerate(
-            zip(apex_trace["detections"], masks)
-        ):
-            mask = np.asarray(mask, dtype=bool)
-            color = np.array(
-                [0, 255, 0]
-                if record["canonical_label"] == "target"
-                else [255, 165, 0],
-                dtype=float,
-            )
-            overlay[mask] = (0.55 * overlay[mask] + 0.45 * color).astype(
-                np.uint8
-            )
-            mask_name = f"{stem}_{index:02d}_{record['canonical_label']}.png"
-            cv2.imwrite(
-                os.path.join(mask_dir, mask_name), mask.astype(np.uint8) * 255
-            )
-            mask_paths.append(mask_name)
-
-            box = np.asarray(record["bbox_xyxy_normalized"], dtype=float)
-            box *= np.array([width, height, width, height], dtype=float)
-            x1, y1, x2, y2 = box.astype(int)
-            draw_color = tuple(int(value) for value in color)
-            cv2.rectangle(overlay, (x1, y1), (x2, y2), draw_color, 2)
-            cv2.putText(
-                overlay,
-                f"{record['phrase']} {record['confidence']:.2f}",
-                (max(0, x1), max(18, y1 - 4)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.5,
-                draw_color,
-                1,
-                cv2.LINE_AA,
-            )
-
-        reliable = apex_trace.get("reliable_target")
-        state_text = (
-            f"step={self.navigation_steps} control={control_transition} "
-            f"reliable={None if reliable is None else reliable['cluster_id']}"
-        )
-        cv2.putText(
-            overlay,
-            state_text,
-            (8, height - 12),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
-            (255, 255, 255),
-            2,
-            cv2.LINE_AA,
-        )
-        self.save_rgb_image(source, os.path.join(frame_dir, f"{stem}_rgb.jpg"))
-        self.save_rgb_image(
-            overlay, os.path.join(frame_dir, f"{stem}_evidence.jpg")
-        )
-
-        metadata = {
-            "step": self.navigation_steps,
-            "camera_pose_world": np.asarray(
-                world_from_camera, dtype=float
-            ).tolist(),
-            "view_direction_world": np.asarray(
-                world_from_camera[:3, 2], dtype=float
-            ).tolist(),
-            "control_transition": control_transition,
-            "manager_last_plan_outcome": self.ft_manager.last_plan_outcome,
-            "approach_endpoint": self._current_planner_endpoint(),
-            "locked_target": (
-                None
-                if self.ft_manager.object_lockin is None
-                else self.ft_manager.object_lockin.to_dict()
-            ),
-            "semantic_target_pixels": (
-                0 if semantic_mask is None else int(semantic_mask.sum())
-            ),
-            "mask_files": mask_paths,
-            "detections": apex_trace["detections"],
-            "fusion_events": apex_trace["fusion"]["events"],
-            "clusters": apex_trace["fusion"]["clusters"],
-            "reliable_target": reliable,
-        }
-        with open(
-            os.path.join(metadata_dir, f"{stem}.json"),
-            "w",
-            encoding="utf-8",
-        ) as handle:
-            json.dump(metadata, handle, indent=2)
-            handle.write("\n")
-
-    def _record_qwen_target_audit(
-        self, rgb: np.ndarray, world_from_camera: np.ndarray, reliable_goal
-    ) -> None:
-        """Record Qwen's opinion once; never feed it back into policy state."""
-        if not bool(self.config.get("apex_target_qwen_audit", True)):
-            return
-        event = {
-            "step": self.navigation_steps,
-            "cluster_id": reliable_goal.id,
-            "object_centroid": reliable_goal.centroid.tolist(),
-            "agent_position": world_from_camera[:3, 3].astype(float).tolist(),
-            "control_effect": False,
-        }
-        try:
-            success, response, raw_response = detect_target_object(
-                rgb=rgb,
-                target_object=self.target_category,
-                vlm_model=self.detection_source,
-                api_key=self.get_api_key_for_model(self.detection_source),
-            )
-            event["request_succeeded"] = bool(success)
-            event["raw_response"] = raw_response
-            if isinstance(response, dict):
-                event["probability"] = float(response.get("probability", 0.0))
-                event["reason"] = response.get("reason", "")
-        except Exception as error:
-            # Audit availability is explicitly outside the target control loop.
-            event["request_succeeded"] = False
-            event["error"] = f"{type(error).__name__}: {error}"
-        self.target_diagnostics["qwen_audit_events"].append(event)
-
-    def _save_apex_geometry_diagnostic(
-        self, rgb: np.ndarray, apex_trace: dict, reliable_goal
-    ) -> None:
-        """Save the one visual coordinate check requested for OF-ApexTarget v1."""
-        diagnostic_dir = os.path.join(self.save_dir, "apex_target_geometry")
-        os.makedirs(diagnostic_dir, exist_ok=True)
-        stem = f"{self.navigation_steps:06d}_cluster_{reliable_goal.id}"
-
-        overlay = np.asarray(rgb).copy()
-        height, width = overlay.shape[:2]
-        for record in apex_trace["detections"]:
-            box = np.asarray(record["bbox_xyxy_normalized"], dtype=float)
-            box *= np.array([width, height, width, height], dtype=float)
-            x1, y1, x2, y2 = box.astype(int)
-            color = (0, 255, 0) if record["canonical_label"] == "target" else (255, 165, 0)
-            cv2.rectangle(overlay, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(
-                overlay,
-                f"{record['phrase']} {record['confidence']:.2f}",
-                (max(0, x1), max(18, y1 - 4)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.5,
-                color,
-                1,
-                cv2.LINE_AA,
-            )
-        self.save_rgb_image(overlay, os.path.join(diagnostic_dir, f"{stem}_rgb.png"))
-
-        cloud = self.apex_target.fusion.reliable_target_cloud(reliable_goal.id)
-        trajectory = np.asarray([pose[:3, 3] for pose in self.poses], dtype=float)
-        np.savez_compressed(
-            os.path.join(diagnostic_dir, f"{stem}.npz"),
-            target_cloud_xyz=cloud,
-            target_medoid_xyz=np.asarray(reliable_goal.centroid, dtype=float),
-            camera_trajectory_xyz=trajectory,
-        )
-        figure, axis = plt.subplots(figsize=(7, 7))
-        if len(trajectory):
-            axis.plot(trajectory[:, 0], trajectory[:, 1], "k.-", label="camera trajectory")
-        if len(cloud):
-            axis.scatter(cloud[:, 0], cloud[:, 1], s=5, alpha=0.35, label="fused target cloud")
-        axis.scatter(
-            [reliable_goal.centroid[0]],
-            [reliable_goal.centroid[1]],
-            marker="*",
-            s=160,
-            c="red",
-            label="stable medoid",
-        )
-        axis.set_aspect("equal", adjustable="box")
-        axis.set_xlabel("OpenFrontier world x [m]")
-        axis.set_ylabel("OpenFrontier world y [m]")
-        axis.legend()
-        axis.grid(True, alpha=0.25)
-        figure.tight_layout()
-        figure.savefig(os.path.join(diagnostic_dir, f"{stem}_topdown.png"), dpi=160)
-        plt.close(figure)
 
     def move(self, steps: int) -> None:
         """

@@ -1,24 +1,21 @@
-# Published evaluation artifacts
+# Frozen evaluation artifacts
 
-Only lightweight, reproducibility-relevant files from the completed full runs
-are versioned here:
+This directory keeps only lightweight files needed to identify and reproduce
+important full-split runs. Datasets, checkpoints, `raw.log`, per-episode JSON
+traces and visual diagnostics remain local.
 
-- `manifest.json`: frozen episode identities and order;
-- `progress.log`: one compact heartbeat per completed episode;
-- `summary.json` / `summary.txt`: aggregate metrics;
-- `services.json`: model-service runtime metadata;
-- V1 `floor_summary.*`: offline evaluator-only floor grouping summary.
+## HM3Dv2 pre-Apex main baseline
 
-Raw logs, per-episode traces, images and checkpoints are intentionally omitted.
-They remain local because the complete result directory is several gigabytes.
+`openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/` contains the frozen
+1000-episode manifest, evaluator contract, service metadata, progress heartbeat
+and final summaries for OpenFrontier + SAM3 + Qwen:
 
-| Run | Primary result |
-| --- | --- |
-| `openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727` | SR 50.45%, SPL 0.2300 at 0.1 m |
-| `openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727` | SR 65.20%, SPL 0.2790 at the official 1 m radius |
+- official SR@1m: **70.80%**;
+- official SPL@1m: **0.3299**;
+- diagnostic SR@0.1m / SPL@0.1m: 39.50% / 0.1821;
+- exceptions: 0.
 
-The HM3Dv2 `summary.json` preserves both radii. Its primary fields are
-`sr_at_1m` and `spl_at_1m`; `sr` and `spl` are the retained 0.1 m diagnostic.
-
-See `docs/HM3DV1_FULL_AUDIT.md` and `docs/HM3DV2_FULL_AUDIT.md` for analysis
-and interpretation boundaries.
+The corresponding ApexTarget artifacts remain on the
+`apextarget-experimental` branch. See
+[`docs/HM3DV2_PREAPEX_PAIRED_AUDIT.md`](../docs/HM3DV2_PREAPEX_PAIRED_AUDIT.md)
+for the strict paired analysis.

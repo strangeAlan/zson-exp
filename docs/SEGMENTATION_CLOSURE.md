@@ -36,7 +36,7 @@ conda activate zson3-sam3
 python -m pip install --upgrade "setuptools<82" wheel
 python -m pip install torch==2.10.0 torchvision \
   --index-url https://download.pytorch.org/whl/cu128
-python -m pip install -e third_party/sam3
+python -m pip install -e /home/hsy/zson-exp/third_party/sam3
 python -m pip install flask
 
 hf auth login
@@ -73,8 +73,8 @@ duplicate Qwen or stop existing services merely to make SAM3 fit.
 - The OpenFrontier mask/box parsing path passed a contract-level mock smoke.
 
 While official `facebook/sam3` access is pending, the compatible `sam3.pt` was
-downloaded from the user-provided `1038lab/sam3` mirror and exposed at the
-project-local `.local/models/sam3.pt` path. Its SHA256 is
+downloaded from the user-provided `1038lab/sam3` mirror to
+`/home/hsy/models/sam3/1038lab/sam3.pt`. Its SHA256 is
 `9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e`.
 Several independently hosted Hugging Face mirrors advertise the same SHA256,
 but byte identity with the inaccessible official repository has not been

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="${ZSON3_ROOT:-$(cd -- "${SCRIPT_DIR}/.." && pwd)}"
-PYTHON="${ZSON3_PYTHON:-${ROOT}/.local/envs/zson3/bin/python}"
+ROOT="${ZSON3_ROOT:-/home/hsy/zson-exp}"
+PYTHON="${ZSON3_PYTHON:-/home/hsy/miniconda3/envs/zson3/bin/python}"
 SEED="${ZSON3_EVAL_SEED:-20260727}"
 RUN_ID="${ZSON3_RUN_ID:-openfrontier_random100_runtimefix_seed${SEED}}"
 OUT_DIR="${ROOT}/results/${RUN_ID}"

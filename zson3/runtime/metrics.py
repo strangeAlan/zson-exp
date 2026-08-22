@@ -11,16 +11,12 @@ def success_spl_at_distance(
     *,
     success_distance: float,
 ) -> dict[str, float]:
-    """Compute Habitat Success/SPL at another radius from the same trajectory.
-
-    Habitat's SPL measure already tracks the episode's initial geodesic
-    distance and the exact executed path length. Reusing those accumulators
-    makes this counterfactual metric identical to Habitat SPL except for the
-    requested success radius; STOP is still required.
-    """
+    """Compute Habitat Success/SPL at another radius from the same trajectory."""
 
     distance = float(metrics.get("distance_to_goal", float("inf")))
-    stop_called = bool(getattr(getattr(habitat_env, "task", None), "is_stop_called", False))
+    stop_called = bool(
+        getattr(getattr(habitat_env, "task", None), "is_stop_called", False)
+    )
     success = float(stop_called and distance < success_distance)
 
     measures = getattr(
@@ -38,7 +34,4 @@ def success_spl_at_distance(
         travelled = float(travelled)
         spl = success * shortest / max(shortest, travelled)
 
-    return {
-        "success_at_1m": success,
-        "spl_at_1m": float(spl),
-    }
+    return {"success": success, "spl": float(spl)}

@@ -17,7 +17,7 @@
   },
   "model": {
     "backend": "qwen3-vl-8b-local",
-    "model_path": ".local/models/qwen3-vl-8b",
+    "model_path": "/home/hsy/model/qwen/Qwen3-VL-8B-Instruct",
     "temperature": 0.0,
     "endpoint": "http://127.0.0.1:18080/generate"
   },

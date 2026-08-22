@@ -1,7 +1,7 @@
 {
   "metadata": {
     "name": "hm3dv1_t1_random100_seed20260727",
-    "source": "historical VLFM sealed T1 episode identities",
+    "source": "/home/hsy/vlfm/results/_sealed_metrics/episode_jsons.tar.gz",
     "source_run": "t1_apex_fusion_medoid_random100_seed20260727",
     "identity_guarantee": "same 100 (scene_id, episode_id) pairs; canonical scene/episode order",
     "seed": 20260727

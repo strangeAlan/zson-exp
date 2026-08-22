@@ -50,7 +50,6 @@ class HabitatAgent(NavigationAgent):
             for goal in episode.goals
             if getattr(goal, "object_id", None) is not None
         }
-        self.latest_target_semantic_mask = None
 
         agent_state = habitat_env.sim.get_agent_state()
         cam_state = agent_state.sensor_states["rgb"]
@@ -104,7 +103,6 @@ class HabitatAgent(NavigationAgent):
             rotate_fn=self.rotate_fn,
             cam_to_agent=cam_to_agent,
             fix_view_level=fix_view_level,
-            target_category=self.target,
         )
 
         self.video_frames = []
@@ -345,11 +343,8 @@ class HabitatAgent(NavigationAgent):
         semantic = obs.get("semantic")
         if semantic is not None and hasattr(self, "target_diagnostics"):
             semantic = np.asarray(semantic).squeeze()
-            self.latest_target_semantic_mask = np.isin(
-                semantic, tuple(self.target_semantic_ids)
-            )
             target_pixels = int(
-                self.latest_target_semantic_mask.sum()
+                np.isin(semantic, tuple(self.target_semantic_ids)).sum()
             )
             event = {
                 "step": self.navigation_steps,

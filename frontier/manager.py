@@ -68,7 +68,6 @@ class FrontierManager(Base):
         self.planner: PlannerBase = planner
         self.current_goal_pose: Optional[np.ndarray] = None
         self.current_goal_ft_id: Optional[int] = None
-        self.last_plan_outcome: Optional[str] = None
         self._unreachable_positions = []
 
         # IDs
@@ -1226,11 +1225,9 @@ class FrontierManager(Base):
         Returns:
             List of (4,4) poses along the path (world-frame), or None if planning fails.
         """
-        self.last_plan_outcome = "planning"
         goal_pose, goal_ft = self.get_goal_pose(current_pose, use_graph=use_graph)
 
         if goal_pose is None:
-            self.last_plan_outcome = "no_goal"
             self.log(
                 "error",
                 self.logging_file,
@@ -1248,7 +1245,6 @@ class FrontierManager(Base):
             )
 
             if not path_found:
-                self.last_plan_outcome = "failed"
                 # If unreachable, drop this frontier as a goal candidate
                 if goal_ft is not None:
                     self.remove_frontiers([goal_ft.id], planning_failure=True)
@@ -1267,7 +1263,6 @@ class FrontierManager(Base):
                 self.planner.interpolate_path()
 
             if len(self.planner.solution) == 0:
-                self.last_plan_outcome = "reached"
                 if goal_ft is not None:
                     self.remove_frontiers([goal_ft.id], planning_failure=False)
                     self.current_goal_ft_id = None
@@ -1275,11 +1270,9 @@ class FrontierManager(Base):
                 self.log("error", self.logging_file, "Reached goal, deleting frontier.")
                 return None
 
-            self.last_plan_outcome = "path"
             return self.planner.get_solution_path(return_type="mat")
 
         except Exception as e:
-            self.last_plan_outcome = "error"
             self.log("error", self.logging_file, f"Path planning failed: {e}")
             # If planning fails, drop this frontier as a goal candidate
             if goal_ft is not None:

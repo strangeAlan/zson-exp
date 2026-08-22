@@ -11,7 +11,4 @@ esac
 if [[ "${ZSON3_REQUIRE_SAM3:-0}" == "1" ]]; then
   "${ROOT}/scripts/start_sam3.sh"
 fi
-if [[ "${ZSON3_REQUIRE_APEX_TARGET:-0}" == "1" ]]; then
-  "${ROOT}/scripts/start_apex_target_services.sh"
-fi
 "${ROOT}/scripts/check_model_services.sh"

@@ -5,9 +5,8 @@ ZSON3 is a research fork of
 Habitat. The current baseline keeps OpenFrontier exploration and adds:
 
 - a Habitat 0.3.3 runtime for HM3Dv1 and HM3Dv2;
-- local Qwen3-VL frontier scoring;
-- YOLOv7/GroundingDINO + MobileSAM target perception;
-- multi-frame ApexTarget geometry/fusion;
+- local Qwen3-VL frontier scoring and target verification;
+- the pre-Apex OpenFrontier target path with SAM3 segmentation;
 - resumable full-split evaluation with frozen manifests.
 
 The imported OpenFrontier revision is
@@ -16,14 +15,15 @@ OpenFrontier repository.
 
 ## Current results
 
-| Benchmark | Episodes | Primary SR | Primary SPL |
+| Benchmark / method | Episodes | Primary SR | Primary SPL |
 | --- | ---: | ---: | ---: |
-| HM3Dv1 val | 2000 | 50.45% at 0.1 m | 0.2300 |
-| HM3Dv2 val | 1000 | 65.20% at 1 m | 0.2790 |
+| HM3Dv1 val / ApexTarget experiment | 2000 | 50.45% at 0.1 m | 0.2300 |
+| **HM3Dv2 val / pre-Apex main** | **1000** | **70.80% at 1 m** | **0.3299** |
+| HM3Dv2 val / ApexTarget experiment | 1000 | 65.20% at 1 m | 0.2790 |
 
 Lightweight manifests and logs are under [results](results/README.md). Detailed
-analysis is in [HM3Dv1 full audit](docs/HM3DV1_FULL_AUDIT.md) and
-[HM3Dv2 full audit](docs/HM3DV2_FULL_AUDIT.md).
+analysis is in the
+[HM3Dv2 paired audit](docs/HM3DV2_PREAPEX_PAIRED_AUDIT.md).
 
 ## Repository layout
 
@@ -35,7 +35,6 @@ nav/                navigation and action execution
 planner/            global and PointNav planning
 zson3/runtime/      datasets, sensors and evaluator metrics
 zson3/services/     local model service clients
-zson3/target/       ApexTarget geometry and temporal fusion
 scripts/            service and evaluation entry points
 docs/               audits and implementation notes
 ```
@@ -152,43 +151,30 @@ hf download Qwen/Qwen3-VL-8B-Instruct \
 The launcher serves Qwen through an OpenAI-compatible endpoint on port 18080.
 See [Qwen runtime notes](docs/QWEN_RUNTIME.md) for validated flags.
 
-### ApexTarget detector services
+### SAM3
 
-ZSON3 reuses the lightweight model servers from
-[VLFM](https://github.com/rai-opensource/vlfm):
+SAM3 is kept in a separate environment from Habitat:
 
 ```bash
-git clone https://github.com/rai-opensource/vlfm.git .local/vlfm
-git clone https://github.com/WongKinYiu/yolov7.git .local/vlfm/yolov7
-git -C .local/vlfm/yolov7 checkout a207844b1ce82d204ab36d87d496728d3d2348e7
-git clone https://github.com/IDEA-Research/GroundingDINO.git \
-  .local/vlfm/GroundingDINO
-git -C .local/vlfm/GroundingDINO checkout eeba084341aaa454ce13cb32fa7fd9282fc73a67
+conda create --prefix "$PWD/.local/envs/sam3" python=3.12 -y
+conda activate "$PWD/.local/envs/sam3"
+python -m pip install --force-reinstall "setuptools<82"
+python -m pip install -e third_party/sam3 flask huggingface_hub
 
-conda create --prefix "$PWD/.local/envs/vlfm" python=3.9 -y
-conda activate "$PWD/.local/envs/vlfm"
-python -m pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 \
-  -f https://download.pytorch.org/whl/torch_stable.html
-python -m pip install -e .local/vlfm/GroundingDINO salesforce-lavis==1.0.2
-python -m pip install -e .local/vlfm
+hf auth login
+mkdir -p .local/models
+hf download facebook/sam3 sam3.pt --local-dir .local/models
 ```
 
-Place the detector checkpoints at:
+The launcher expects:
 
 ```text
-.local/vlfm/data/groundingdino_swint_ogc.pth
-.local/vlfm/data/yolov7-e6e.pt
-.local/vlfm/data/mobile_sam.pt
+.local/models/sam3.pt
 ```
 
-Download them from the official
-[GroundingDINO](https://github.com/IDEA-Research/GroundingDINO),
-[YOLOv7](https://github.com/WongKinYiu/yolov7), and
-[MobileSAM](https://github.com/ChaoningZhang/MobileSAM) repositories.
-
 Paths can instead be supplied through `ZSON3_PYTHON`,
-`ZSON3_QWEN_VLLM_ENV`, `ZSON3_QWEN_MODEL_PATH`, `VLFM_ROOT` and
-`VLFM_PYTHON`.
+`ZSON3_QWEN_VLLM_ENV`, `ZSON3_QWEN_MODEL_PATH`, `ZSON3_SAM3_ENV` and
+`ZSON3_SAM3_CHECKPOINT`.
 
 ## 5. Run HM3Dv1 or HM3Dv2
 
@@ -199,18 +185,20 @@ completed prefix.
 HM3Dv1 full validation (2000 episodes, primary success distance 0.1 m):
 
 ```bash
-bash scripts/run_openfrontier_apextarget_full_hm3dv1.sh
+bash scripts/run_openfrontier_full_hm3dv1.sh
 ```
 
 HM3Dv2 full validation (1000 episodes, official 1 m SR/SPL is the primary
 reported result):
 
 ```bash
-bash scripts/run_openfrontier_apextarget_full_hm3dv2.sh
+bash scripts/run_openfrontier_sam3_full_hm3dv2.sh
 ```
 
-For HM3Dv2, read `sr_at_1m` and `spl_at_1m` as the primary metrics in
-`summary.json`; the 0.1 m fields are retained only as a diagnostic reference.
+For HM3Dv2, `sr` and `spl` in `summary.json` are the official 1 m metrics;
+`sr_at_0_1m` and `spl_at_0_1m` are diagnostic references only. The checked-in
+manifest is reused by default; set `ZSON3_EPISODE_MANIFEST` to run another
+frozen selection.
 
 Useful overrides:
 
@@ -225,7 +213,7 @@ For a long remote run:
 
 ```bash
 tmux new-session -d -s zson3-full \
-  'cd /path/to/zson-exp && bash scripts/run_openfrontier_apextarget_full_hm3dv2.sh'
+  'cd /path/to/zson-exp && bash scripts/run_openfrontier_sam3_full_hm3dv2.sh'
 tmux attach -t zson3-full
 ```
 
@@ -244,11 +232,19 @@ An optional environment-only check is:
 - Qwen, detector and segmentation inference runs in localhost services.
 - Habitat semantic masks and top-down maps are evaluator diagnostics only and
   are not consumed by the navigation policy.
-- The six evaluated target categories currently route through YOLOv7; the DINO
-  adapter is available but is not part of the frozen full results.
+- SAM3 proposes target masks; legacy OpenFrontier object-frontier navigation
+  and Qwen verification decide target takeover and termination.
 - HM3Dv1 reports the frozen 0.1 m protocol. HM3Dv2 uses 1 m SR/SPL as its
   official primary result; 0.1 m is diagnostic only.
 - Checkpoints, datasets, raw logs and episode traces must remain outside Git.
+
+## ApexTarget experiment
+
+ApexTarget is not the default HM3Dv2 module. Its frozen implementation and
+logs are retained on the `apextarget-experimental` branch for research
+traceability. On the same 1000 episodes it reached 65.20% SR@1m and 0.2790
+SPL@1m, below the pre-Apex baseline; see the paired audit above. No hybrid or
+threshold changes are part of the main branch.
 
 ## Attribution
 
@@ -263,6 +259,3 @@ original OpenFrontier work when using it:
   year      = {2026}
 }
 ```
-
-The detector service runtime is derived from VLFM; please also follow its
-license and citation requirements.

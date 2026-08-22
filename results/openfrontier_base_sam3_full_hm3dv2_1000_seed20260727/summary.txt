@@ -1,0 +1,10 @@
+episodes=1000
+successes=708
+sr=0.708000
+spl=0.329913
+successes_at_0_1m=395
+sr_at_0_1m=0.395000
+spl_at_0_1m=0.182139
+elapsed_seconds=157137.207
+exceptions=0
+exit_code=0

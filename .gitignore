@@ -42,7 +42,7 @@ Release/
 __pycache__/
 
 cmake_example
-data/
+/data
 
 # logging
 *.log
@@ -50,27 +50,19 @@ data/
 /logs/
 /results/*
 !/results/README.md
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/
-/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/*
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/manifest.json
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/progress.log
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/services.json
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/summary.json
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/summary.txt
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/floor_summary.json
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv1_2000_seed20260727/floor_summary.txt
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/
-/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/*
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/manifest.json
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/progress.log
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/services.json
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/summary.json
-!/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/summary.txt
+!/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/
+/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/*
+!/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/evaluation_contract.json
+!/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/manifest.json
+!/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/progress.log
+!/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/services.json
+!/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/summary.json
+!/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/summary.txt
 
 # files
 output_*/
 output/
-model_weights/
+/model_weights
 /examples/*.glb
 
 .env
@@ -78,11 +70,11 @@ api_keys.py
 /sam3/
 lockfiles
 .runtime/
-.local/
+/.local
 artifacts/
 
-# Machine-local continuation notes and active research drafts.
-/docs/HANDOFF.md
+# One-off local smoke selection used before the frozen full run.
+/config/evaluation/hm3dv2_openfrontier_sam3_smoke1.json
 
 ovon/*
 ompl-1.7.0/*

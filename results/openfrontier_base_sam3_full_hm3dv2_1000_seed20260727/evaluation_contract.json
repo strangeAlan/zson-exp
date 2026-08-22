@@ -1,0 +1,23 @@
+{
+  "launched_at_utc": "2026-08-20T05:30:18Z",
+  "worktree": "/home/hsy/zson-exp-ofbase-hm3dv2",
+  "branch": "ofbase-sam3-hm3dv2",
+  "policy_base_commit": "a2d8d04551bad469261bd29d812594c096ded995",
+  "policy_base_tag": "pre-of-apextarget-v1-a2d8d04",
+  "target_perception": "openfrontier_legacy",
+  "detection_source": "qwen3-vl-8b-local",
+  "segmentation_source": "sam3",
+  "dataset": "HM3Dv2 val",
+  "episodes": 1000,
+  "seed": 20260727,
+  "primary_success_distance_m": 1.0,
+  "reference_success_distance_m": 0.1,
+  "source_manifest": "/home/hsy/zson-exp/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/manifest.json",
+  "source_manifest_sha256": "606ebb74a19c970e92f319f3c2be2600000c6931d7ed038906d08250215c8b62",
+  "runner_sha256": "a160bbe99bcbe81fc073633f0bc9e2986e39ed228a11d20b69d5402ce8d9fc6b",
+  "metric_adapter_sha256": "77ef8cb5e0986128b9f0bf4834ad1f96b0b7d62ee86939600c9cfc53e217c2d0",
+  "overlay_config_sha256": "1b6850504902b319df55ba174b6d039983cd42a11b88f096813cf5f29c79fae9",
+  "upstream_navigation_config_sha256": "dbbfbece5c21c6f2cad180bb3055e4eb9255bf0d10fc32c0705e57b1325d33be",
+  "apextarget_enabled": false,
+  "notes": "Only HM3Dv2 selection/evaluator support and metric reporting are overlaid on the frozen pre-Apex policy base. Runtime environment and local Qwen service are the permitted migration differences."
+}

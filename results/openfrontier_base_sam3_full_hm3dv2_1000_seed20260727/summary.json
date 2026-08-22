@@ -1,0 +1,11 @@
+{
+  "episodes": 1000,
+  "successes": 708,
+  "sr": 0.708,
+  "spl": 0.329913086201349,
+  "successes_at_0_1m": 395,
+  "sr_at_0_1m": 0.395,
+  "spl_at_0_1m": 0.18213876169071427,
+  "elapsed_seconds": 157137.2074120436,
+  "exceptions": 0
+}

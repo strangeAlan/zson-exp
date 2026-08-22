@@ -28,14 +28,10 @@ from omegaconf import OmegaConf
 
 from nav.pointnav_agent import PointnavAgent
 from utils.frontier_utils import read_config_yaml
-from zson3.runtime.datasets import build_objectnav_config
+from zson3.runtime.datasets import NavigationProtocol, build_objectnav_config
 from zson3.runtime.metrics import success_spl_at_distance
 from zson3.services.qwen import QwenClient, QwenServiceError
 from zson3.services.sam3 import Sam3Client, Sam3ServiceError
-from zson3.services.apex_target import (
-    ApexTargetServiceClient,
-    ApexTargetServiceError,
-)
 
 
 def parse_args() -> argparse.Namespace:
@@ -44,7 +40,7 @@ def parse_args() -> argparse.Namespace:
         "--dataset",
         choices=("hm3dv1", "hm3dv2"),
         default="hm3dv1",
-        help="HM3D ObjectNav dataset version (default preserves historical HM3Dv1 runs)",
+        help="HM3D ObjectNav dataset version",
     )
     parser.add_argument("--seed", type=int, default=20260727)
     parser.add_argument("--episodes", type=int, default=100)
@@ -226,20 +222,20 @@ def aggregate(results: list[dict]) -> dict:
     count = len(results)
     successes = sum(float(item["metrics"].get("success", 0.0)) for item in results)
     spl_sum = sum(float(item["metrics"].get("spl", 0.0)) for item in results)
-    successes_at_1m = sum(
-        float(item["metrics"].get("success_at_1m", 0.0)) for item in results
+    successes_at_0_1m = sum(
+        float(item["metrics"].get("success_at_0_1m", 0.0)) for item in results
     )
-    spl_at_1m_sum = sum(
-        float(item["metrics"].get("spl_at_1m", 0.0)) for item in results
+    spl_at_0_1m_sum = sum(
+        float(item["metrics"].get("spl_at_0_1m", 0.0)) for item in results
     )
     return {
         "episodes": count,
         "successes": int(successes),
         "sr": successes / count if count else 0.0,
         "spl": spl_sum / count if count else 0.0,
-        "successes_at_1m": int(successes_at_1m),
-        "sr_at_1m": successes_at_1m / count if count else 0.0,
-        "spl_at_1m": spl_at_1m_sum / count if count else 0.0,
+        "successes_at_0_1m": int(successes_at_0_1m),
+        "sr_at_0_1m": successes_at_0_1m / count if count else 0.0,
+        "spl_at_0_1m": spl_at_0_1m_sum / count if count else 0.0,
         "elapsed_seconds": sum(float(item["elapsed_seconds"]) for item in results),
         "exceptions": sum(item["status"] != "ok" for item in results),
     }
@@ -255,8 +251,8 @@ def progress_line(result: dict, summary: dict, total: int) -> str:
         f"steps={result['navigation_steps']} runtime={result['elapsed_seconds']:.1f}s "
         f"SR={summary['sr'] * 100:.2f}% ({summary['successes']}/{summary['episodes']}) "
         f"mean_SPL={summary['spl']:.4f} "
-        f"SR@1m={summary['sr_at_1m'] * 100:.2f}% "
-        f"SPL@1m={summary['spl_at_1m']:.4f}"
+        f"SR@0.1m(ref)={summary['sr_at_0_1m'] * 100:.2f}% "
+        f"SPL@0.1m(ref)={summary['spl_at_0_1m']:.4f}"
     )
 
 
@@ -272,8 +268,13 @@ def main() -> None:
 
     dataset_label = "HM3Dv1" if args.dataset == "hm3dv1" else "HM3Dv2"
     dataset_log_label = f"{dataset_label}-val"
+    protocol = (
+        NavigationProtocol(success_distance=1.0)
+        if args.dataset == "hm3dv2"
+        else None
+    )
     config = build_objectnav_config(
-        args.dataset, seed=args.seed, top_down_map=False
+        args.dataset, seed=args.seed, protocol=protocol, top_down_map=False
     )
     source_manifest = None
     if args.all_episodes:
@@ -334,16 +335,9 @@ def main() -> None:
         raise RuntimeError("Output already contains episodes; pass --resume or use a new run id")
     completed = existing_results if args.resume else {}
 
-    openfrontier_config = read_config_yaml(args.config)
-    target_perception = openfrontier_config.get(
-        "target_perception", "openfrontier_legacy"
-    )
     qwen_health = QwenClient().health()
-    service_payload = {"qwen": qwen_health}
-    if target_perception == "t1_apex_fusion":
-        service_payload["apex_target"] = ApexTargetServiceClient().health()
-    else:
-        service_payload["sam3"] = Sam3Client().health()
+    sam_health = Sam3Client().health()
+    service_payload = {"qwen": qwen_health, "sam3": sam_health}
     (args.output_dir / "services.json").write_text(
         json.dumps(service_payload, indent=2) + "\n"
     )
@@ -355,6 +349,7 @@ def main() -> None:
         flush=True,
     )
 
+    openfrontier_config = read_config_yaml(args.config)
     env = habitat.Env(config=config, dataset=dataset)
     results = [completed[index] for index in sorted(completed)]
 
@@ -374,10 +369,7 @@ def main() -> None:
             # failed preflight does not create a completed episode, so resume
             # will retry the same manifest entry after the service is restored.
             QwenClient().health()
-            if target_perception == "t1_apex_fusion":
-                ApexTargetServiceClient().health()
-            else:
-                Sam3Client().health()
+            Sam3Client().health()
 
             scene = scene_name(episode.scene_id)
             episode_dir = args.output_dir / "episode_logs" / f"{index:03d}_{scene}_{episode.episode_id}"
@@ -419,10 +411,7 @@ def main() -> None:
                     "message": str(exception),
                     "traceback": traceback.format_exc(),
                 }
-                if isinstance(
-                    exception,
-                    (QwenServiceError, Sam3ServiceError, ApexTargetServiceError),
-                ):
+                if isinstance(exception, (QwenServiceError, Sam3ServiceError)):
                     reason = "required_service_unavailable"
                     fatal_service_error = exception
                 else:
@@ -430,15 +419,17 @@ def main() -> None:
             finally:
                 elapsed = time.perf_counter() - started
                 metrics = dict(env.get_metrics())
+                reference_metrics = success_spl_at_distance(
+                    env, metrics, success_distance=0.1
+                )
                 metrics.update(
-                    success_spl_at_distance(env, metrics, success_distance=1.0)
+                    {
+                        "success_at_0_1m": reference_metrics["success"],
+                        "spl_at_0_1m": reference_metrics["spl"],
+                    }
                 )
                 if not metrics.get("success") and reason == "object_found":
-                    reason = (
-                        "object_found_at_1m_only"
-                        if metrics.get("success_at_1m")
-                        else "false_positive"
-                    )
+                    reason = "false_positive"
                 result = {
                     "index": index,
                     "status": "error" if error else "ok",
@@ -490,17 +481,17 @@ def main() -> None:
         f"successes={summary['successes']}\n"
         f"sr={summary['sr']:.6f}\n"
         f"spl={summary['spl']:.6f}\n"
-        f"successes_at_1m={summary['successes_at_1m']}\n"
-        f"sr_at_1m={summary['sr_at_1m']:.6f}\n"
-        f"spl_at_1m={summary['spl_at_1m']:.6f}\n"
+        f"successes_at_0_1m={summary['successes_at_0_1m']}\n"
+        f"sr_at_0_1m={summary['sr_at_0_1m']:.6f}\n"
+        f"spl_at_0_1m={summary['spl_at_0_1m']:.6f}\n"
         f"elapsed_seconds={summary['elapsed_seconds']:.3f}\n"
         f"exceptions={summary['exceptions']}\n"
     )
     (args.output_dir / "summary.txt").write_text(summary_text)
     print(
         f"[ZSON3 SUMMARY] episodes={summary['episodes']} SR={summary['sr'] * 100:.2f}% "
-        f"SPL={summary['spl']:.4f} SR@1m={summary['sr_at_1m'] * 100:.2f}% "
-        f"SPL@1m={summary['spl_at_1m']:.4f} exceptions={summary['exceptions']}",
+        f"SPL={summary['spl']:.4f} SR@0.1m(ref)={summary['sr_at_0_1m'] * 100:.2f}% "
+        f"SPL@0.1m(ref)={summary['spl_at_0_1m']:.4f} exceptions={summary['exceptions']}",
         flush=True,
     )
 

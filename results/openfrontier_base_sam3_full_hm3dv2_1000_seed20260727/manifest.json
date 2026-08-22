@@ -2,8 +2,8 @@
   "dataset": "HM3Dv2 val",
   "seed": 20260727,
   "episodes": 1000,
-  "selection_mode": "all",
-  "source_manifest": null,
+  "selection_mode": "explicit_manifest",
+  "source_manifest": "/home/hsy/zson-exp/results/openfrontier_apextarget_v1_deterministic_full_hm3dv2_1000_seed20260727/manifest.json",
   "source_manifest_metadata": null,
   "iterator": {
     "shuffle": true,

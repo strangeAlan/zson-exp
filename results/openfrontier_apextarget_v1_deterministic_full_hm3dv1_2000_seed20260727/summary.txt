@@ -1,9 +1,0 @@
-episodes=2000
-successes=1009
-sr=0.504500
-spl=0.229982
-successes_at_1m=1086
-sr_at_1m=0.543000
-spl_at_1m=0.247243
-elapsed_seconds=416913.348
-exceptions=3

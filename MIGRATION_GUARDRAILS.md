@@ -10,19 +10,19 @@ ZSON3 采用 OpenFrontier-derived 路线：以 OpenFrontier 的现代探索算�
 
 ## 已确认基础
 
-- 上游基准：OpenFrontier commit `a3f8b83da6135a88247651534061df2ea05850f6`，已由本仓库 tag `openfrontier-upstream-a3f8b83` 固定。
+- 上游基准：`/home/hsy/references/OpenFrontier`，commit `a3f8b83da6135a88247651534061df2ea05850f6`。
 - `zson3`：Python 3.10.20、Torch 2.5.1+cu121、Habitat-Sim 0.3.3、Habitat-Lab 0.3.3。
-- Habitat-Lab 源码：`.local/src/habitat-lab`，tag `v0.3.3`。
+- Habitat-Lab 源码：`/home/hsy/zson3-deps/habitat-lab`，tag `v0.3.3`。
 - 现有 HM3Dv1 已完成 `Env -> reset -> RGB-D/GPS/Compass -> metrics -> close` 验收。
-- HM3Dv1 数据：`data/datasets/objectnav/hm3d/v1`。
-- HM3D scenes：`data/scene_datasets`。
+- HM3Dv1 数据：`/home/hsy/vlfm/data/datasets/objectnav/hm3d/v1`。
+- HM3D scenes：`/home/hsy/datasets/scene_datasets`。
 - 数据只用软链接，不复制、不改原数据。
 
 建议后续链接：
 
 ```text
-data/datasets       -> <objectnav task dataset root>
-data/scene_datasets -> <Habitat scene dataset root>
+zson-exp/data/datasets       -> /home/hsy/vlfm/data/datasets
+zson-exp/data/scene_datasets -> /home/hsy/datasets/scene_datasets
 ```
 
 ## 必须冻结的上游行为
@@ -64,7 +64,7 @@ detect -> add/filter/gain -> VLM score
 - 不重新实现 visual frontier 或 information gain。
 - 不同时替换 Wavemap、PointNav、VLM 策略和 target pipeline。
 - 不把现有 VLFM、Qwen、detector 环境的包安装进 `zson3`。
-- 不修改外部 OpenFrontier reference checkout 和既有 VLFM 仓库。
+- 不修改 `/home/hsy/references/OpenFrontier` 和既有 VLFM 仓库。
 - 不先跑 full HM3D；顺序必须是 import smoke、组件 smoke、固定 1 episode、固定 10 episodes。
 
 ## 服务复用原则
@@ -96,10 +96,10 @@ scripts/stop_model_services.sh      # 只停止由本项目启动并记录 PID �
 Qwen server 的真实脚本为：
 
 ```text
-<external UniGoal checkout>/script/qwen_backend_server.py
+/home/hsy/references/UniGoal/script/qwen_backend_server.py
 ```
 
-历史 VLFM launcher 中旧的作者机默认路径已经过时，后续不要照搬。
+`vlfm-baseline-run/scripts/start_local_qwen_verifier.sh` 中旧的 `/home/hsy/UniGoal/...` 默认路径已经过时，后续不要照搬。
 
 OpenFrontier 原 client 与 Qwen `/generate` 协议不同；应写薄 adapter，保持 OpenFrontier prompt/parser，不修改 Qwen server。Qwen 替代 Gemini/InternVL 保持的是算法流程，不预设数值行为或论文性能等价。
 
