@@ -73,6 +73,9 @@ lockfiles
 /.local
 artifacts/
 
+# Machine-local continuation notes.
+/docs/HANDOFF.md
+
 # One-off local smoke selection used before the frozen full run.
 /config/evaluation/hm3dv2_openfrontier_sam3_smoke1.json
 
