@@ -4,8 +4,7 @@ ZSON3 is a research fork of
 [OpenFrontier](https://github.com/cvg/OpenFrontier) for zero-shot ObjectNav in
 Habitat. The main development line is called **OF-base**. Apart from the
 Habitat/runtime port and the local Qwen backend, it follows the original
-OpenFrontier method as closely as the current environment permits. In
-particular, it does not use ApexTarget. The port provides:
+OpenFrontier method as closely as the current environment permits. The port provides:
 
 - a Habitat 0.3.3 runtime for HM3Dv1 and HM3Dv2;
 - local Qwen3-VL frontier scoring and target verification;
