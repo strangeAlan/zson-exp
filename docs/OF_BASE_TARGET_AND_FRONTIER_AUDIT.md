@@ -29,6 +29,13 @@ bbox refinement 和多候选选择为这一方向提供了直接参考。
 frontier 提供语义质量，geometry frontier 提供覆盖率，解决视觉候选集合本身没有正确方向的
 情况。跨楼层应保留为次级、协议相关能力边界，不应成为当前主 idea。
 
+对 OF-base 自身 292 个 V2 失败进一步拆解后，系统级的第一瓶颈是**探索覆盖与候选召回**：
+59 个 episode 从未形成足够目标可见性，57 个已经看见目标却始终没有 SAM3 mask/candidate，合计
+116/292（39.73%）。目标管线内部的第一瓶颈则是**候选绑定与停止几何不一致**：107 个 episode
+在 Qwen 接受后显式 STOP，但不满足官方 1 m；其中 59 个验证窗口根本没有足够目标 pixels，另有
+48 个虽看到目标，却停在错误的 3D centroid 或 1 m success region 之外。原始日志中的
+`max_steps_reached` 多数只是这些上游问题的最终表现，不是可行动的根因。
+
 ## 2. OpenFrontier 已有的 benchmark 定向目标策略
 
 OF-base 的以下逻辑与 OpenFrontier 上游提交
@@ -144,7 +151,151 @@ BeliefMapNav 的参考实现采用了更明确的候选绑定方式：
 - 19 个 accepted-no-STOP 是接管后的 approach/recovery 问题；
 - 107 个 accepted-STOP-official-fail 同时混合了语义误判、候选关联、centroid 和停止距离问题。
 
-## 5. 为什么不应直接收紧 sofa
+## 5. OF-base 自身失败 case 的细粒度归因
+
+### 5.1 终止 reason 不是根因
+
+runner 最终写出的 reason 为：
+
+| Terminal reason | N | 失败占比 |
+| --- | ---: | ---: |
+| `max_steps_reached` | 172 | 58.90% |
+| `false_positive` | 107 | 36.64% |
+| `robot_stuck` | 8 | 2.74% |
+| `no_frontiers` | 5 | 1.71% |
+
+这里的 `false_positive` 只表示 agent 显式 STOP 而官方 `success=0`，并不等价于 107 次语义
+误识别；`max_steps_reached` 也只表示预算耗尽，不说明此前是没看见目标、SAM3 没提议，还是 Qwen
+拒绝。按 trace 中最后一个已通过的阶段继续拆分，才能得到下面的瓶颈。
+
+### 5.2 探索覆盖：59 个 never-visible
+
+59 个 episode 在整条轨迹中从未出现 `>=50 pixels` 的 evaluator target mask：
+
+- 52 个以 max-steps 结束，4 个 robot-stuck，3 个 no-frontiers；
+- navigation steps 的 median 为 496，45/59 跑到至少 490 steps；
+- toilet 占 28/59，plant 与 TV 各 10，bed 7，chair 与 sofa 各 2；
+- 8/59 曾产生并验证错误的 SAM3 候选，但 Qwen 均拒绝；它们仍然没有获得真正目标视角。
+
+因此这组主要不是“接管太晚”，而是接近完整使用 500-step 预算后仍未覆盖到目标。它直接支持把
+geometry frontier 用作 visual frontier 的召回补充。59 个 episode 对应 5.9 pp 的诊断上限，
+但不是可直接相加的预期 SR 增益。
+
+### 5.3 SAM3 candidate recall：57 个 visible-but-no-candidate
+
+这 57 个 episode 的所有 segmentation event 都是 `mask_count=0`，不是 mask 生成后被 3D 几何
+过滤：
+
+- 56/57 至少有一个 SAM3 六帧 batch 与 `>=50 pixels` 的 GT-visible frame 重叠；
+- 48/57 至少有一个 batch 达到 `>=500 pixels`，32/57 达到 `>=2000 pixels`；
+- 单 episode 最大 target pixels 的 median 为 2558，GT-visible frames 的 median 为 25；
+- 56/57 最终 max-steps，navigation steps 的 median 为 495；
+- plant 占 22/57，sofa 13，TV 9，toilet 7，bed 4，chair 2。
+
+所以这组不能主要解释成目标只在两次 SAM3 调用之间短暂闪现。多数 episode 给过多次、且面积不小
+的目标视图，但 SAM3 text-prompt 分割没有形成任何 mask。直接瓶颈是观察视角下的 SAM3 proposal
+recall；frontier 覆盖和类别化观察距离可能提供更好的第二视角，但不能替代这一事实。
+
+### 5.4 Qwen validation：50 个 candidate-no-accept
+
+对这 50 个 episode 继续按验证时的 GT evidence 拆分：
+
+| 子类 | N | 可支持的解释 |
+| --- | ---: | --- |
+| 验证窗口有 `>=50 pixels` GT target，但 Qwen 拒绝 | 31 | 直接的验证召回缺口 |
+| 所有被验证窗口都没有足够 GT target，Qwen 拒绝 | 17 | Qwen 拒绝与 trace 一致；上游给的是错误候选/视角 |
+| 有 candidate，但从未抵达验证 | 2 | candidate navigation/可达性问题，均为 TV |
+
+31 个 trace-supported Qwen false rejection 中，29 个验证窗口达到 `>=500 pixels`，23 个达到
+`>=2000 pixels`；41 次带 GT 的拒绝事件概率全部只有 `0.0` 或 `0.1`。类别分布为 TV 13、
+toilet 8、plant 6、chair 2、sofa 2。这里没有接近 0.7 阈值的连续概率，因此小幅调低统一阈值
+不会解决这组问题。
+
+同时，这 50 个 episode 的首次 candidate median step 为 110、首次 verification median step 为
+150，最终 navigation steps median 为 494。失败既不是普遍“最后几十步才第一次看见候选”，也
+不全是 Qwen：只有上述 31 个能由冻结 trace 直接归为验证假阴性。
+
+### 5.5 接管后无 STOP：19 个 approach/termination failures
+
+19 个 episode 已有 Qwen accepted event，却没有 `termination_event`：16 个 max-steps，3 个
+robot-stuck。它们并非主要由晚接管构成：
+
+- 首次接受的 median step 为 235，结束前剩余预算 median 为 265 steps；
+- 13/19 在 step 400 以前接管，只有 6/19 属于最后 100 steps 才接管；
+- 16/19 的验证窗口有足够 GT target；
+- 全部记录的 `approach_path_steps` 都为 1；该字段是 planner 输出的 pose 数，不等于一个 Habitat
+  action；
+- 最终 `distance_to_goal` 有 4/19 已经 `<=1 m`、9/19 已经 `<=1.5 m`，但因为没有显式 STOP，
+  官方 Success 仍为 0。
+
+这说明接管后的 pointnav/replan、centroid 距离判定与 STOP 闭环存在独立问题。尤其 4 个终点已在
+官方 1 m 区域却没有 STOP，是明确的 termination opportunity loss；其余 episode 还混有错误
+centroid 与 approach/recovery 失败。
+
+### 5.6 接受并 STOP、但官方失败：107 个失败的三分法
+
+这 107 个 episode 是最大的单一失败阶段，而且 STOP 很早：termination step 的 median 为 92、
+Q3 为 194.5。它们不是接近 500 steps 后偶然失败，而是错误承诺提前截断探索。
+
+使用 Qwen 验证前六帧是否存在 `>=50 pixels` GT target，并用 `1.5 m` 作为非官方的 near/far
+诊断边界，可以互斥拆成：
+
+| 子类 | N | 失败占比 | 解释 |
+| --- | ---: | ---: | --- |
+| 验证窗口无足够 GT target，却接受并 STOP | 59 | 20.21% | 全图验证接受了错误上下文/错误候选，是最强的 false-commitment 证据 |
+| 验证窗口有 GT，官方终距在 `(1.0, 1.5] m` | 17 | 5.82% | 1 m 边界附近的 centroid/STOP 几何失配；其中 sofa 13 |
+| 验证窗口有 GT，官方终距 `>1.5 m` | 31 | 10.62% | 看到正确类别，但锁定的 SAM3 mask、3D centroid 或 approach endpoint 没有落到正确 success region |
+| **Total** | **107** | **36.64%** | — |
+
+59 个无 GT 的错误接受按类别为 chair 16、bed 13、plant 12、TV 8、sofa 6、toilet 4。这是当前
+全图 Qwen 判断没有绑定到所选 mask/centroid 的直接风险：画面语义判断与实际接管对象之间没有可
+审计的一一对应关系。
+
+另 48 个验证窗口确有目标的失败中，17 个是 1–1.5 m near miss，31 个终距仍大于 1.5 m。后者
+不能再叫做纯语义误判；更可能是 Qwen 看见了正确类别，但 agent 接近的是同一 composition 中另一个
+SAM3 mask、物体局部 centroid，或不可对齐官方 geodesic success region 的 endpoint。这也解释了
+为什么 sofa 的主要问题不是简单收紧类别阈值。
+
+当前 STOP 条件为“规划路径耗尽 **或** 到锁定 centroid 的欧氏距离小于 1 m”。全部 810 个显式
+STOP episode 中：
+
+- path-exhausted 触发 318 个，其中 42 个官方失败，失败率 13.21%；
+- centroid-distance 触发 492 个，其中 65 个官方失败，失败率同为 13.21%。
+
+因此损失不是单独由 `path_exhausted` 这个 OR 分支造成；两种内部停止代理都没有与 evaluator 的
+1 m success region 完全对齐。需要解决的是候选绑定、目标几何表示和 STOP 判据之间的整体一致性。
+
+### 5.7 按类别看，瓶颈并不相同
+
+| Category | 失败数 | 主要构成 | 首要瓶颈 |
+| --- | ---: | --- | --- |
+| bed | 32 | 17 accepted-STOP-fail，其中 13 个验证窗口无 GT | 错误候选接受/绑定 |
+| chair | 35 | 27 accepted-STOP-fail，其中 16 个无 GT、10 个 GT-visible 但终距 >1.5 m | precision、candidate grounding 与 centroid |
+| plant | 61 | 10 never-visible + 22 no-candidate；另 19 accepted-STOP-fail | SAM3/探索召回，其次错误接受 |
+| sofa | 54 | 31 accepted-STOP-fail；其中 25 个验证窗口有 GT，13 个为 1–1.5 m near miss | 目标几何与官方 1 m 对齐，而非单纯类别阈值 |
+| toilet | 56 | 28 never-visible + 7 no-candidate + 12 candidate-no-accept | frontier 覆盖与目标召回 |
+| TV | 54 | 22 candidate-no-accept，其中 13 个为 GT-present Qwen rejection；另有 19 个 visibility/proposal failures | Qwen 验证召回与上游覆盖并存 |
+
+### 5.8 主要瓶颈排序
+
+从系统层面，当前 V2 OF-base 的瓶颈应按下面的口径表述：
+
+1. **探索覆盖 + SAM3 proposal recall：116/292（39.73%），是最大的根因族。** 其中 59 个
+   never-visible 直接指向 frontier coverage，57 个 visible-no-candidate 直接指向 SAM3/观察视角。
+2. **候选绑定 + centroid/STOP 对齐：107/292（36.64%），是最大的单一失败阶段。** 59 个是
+   无 GT 的错误承诺，48 个是看到目标后仍停错位置。
+3. **Qwen validation recall：至少 31/292（10.62%）有直接 GT evidence。** 不能把完整的 50 个
+   candidate-no-accept 都算成 Qwen 假阴性。
+4. **接管后的 approach/termination：19/292（6.51%）。** 其中多数不是接管太晚；4 个已经进入
+   官方 1 m 区域但没有 STOP。
+5. **纯 stuck/no-frontier 不是主要瓶颈。** 原始终止 reason 中两者合计只有 13/292；172 个
+   max-steps 的真正来源已经分散在上述上游阶段。
+
+这些数量是冻结轨迹的责任分层，不是互相独立的可恢复 SR，也不能当作修改某个模块后的反事实
+收益。它们给出的明确结论是：系统主线应优先提高 frontier/proposal coverage；目标子系统则应
+优先做 candidate-grounded verification 和 evaluator-aligned stopping，而不是先做类别硬阈值。
+
+## 6. 为什么不应直接收紧 sofa
 
 OF-base 的 31 个 sofa“Qwen 接受并 STOP、官方失败”中：
 
@@ -182,20 +333,20 @@ Qwen 接受概率也高度量化：
 如果进行候选级 refinement，直接证据支持的优先级是 chair，其次 bed/plant/TV，而不是首先对
 sofa 做全局收紧。
 
-## 6. 参考代码支持的低风险识别策略
+## 7. 参考代码支持的低风险识别策略
 
-### 6.1 候选绑定 refinement
+### 7.1 候选绑定 refinement
 
 把当前候选的 mask/contour 和适量上下文明确展示给 Qwen，问题从“图中是否有 sofa”改成
 “标出的候选是否是 sofa”。这直接对应 BeliefMapNav 的 `detection_refinement`，能减少“Qwen
 看见另一个正确对象，却接管错误 centroid”的关联问题。
 
-### 6.2 多候选选择而非硬拒绝
+### 7.2 多候选选择而非硬拒绝
 
 当同一帧或同一 composition 中存在多个候选时，让 Qwen 从带标记候选中选出最符合类别定义的
 一个。BeliefMapNav 已对 couch 和 chair 写了候选选择提示词。它比提高全局阈值更保留召回。
 
-### 6.3 类别化观察距离
+### 7.3 类别化观察距离
 
 BeliefMapNav 硬编码了以下 observation ranges：
 
@@ -213,21 +364,21 @@ OF-base 当前对所有 object frontier 使用统一的约 0.7 m viewpoint separ
 实验；但 BeliefMapNav 主要把这些范围用于 frontier observation belief，迁移到目标验证仍需
 paired 实验，不能预设一定提升。
 
-### 6.4 不把房间先验作为硬门槛
+### 7.4 不把房间先验作为硬门槛
 
 BeliefMapNav 为每个目标硬编码了房间、常见位置、邻近物和概率，例如 sofa 对应 living/media/
 bedroom，bed 对应 bedroom，toilet 对应 bathroom 与 sink/toilet-paper-holder 等。它们适合作为
 frontier ranking 的软先验，但不适合作为目标存在性的硬拒绝条件，因为真实布局与数据标注会有
 例外。
 
-### 6.5 “无损”只能作为设计目标
+### 7.5 “无损”只能作为设计目标
 
 任何新增 hard gate 都可能丢失当前成功 episode，不能在 full paired 实验前保证不损失 SR/SPL。
 更安全的行为是：歧义候选暂不永久删除，而是降级、保留或获取一个更合适的候选绑定视角。
 
-## 7. Geometry frontier 应成为主要研究方向
+## 8. Geometry frontier 应成为主要研究方向
 
-### 7.1 当前 OF-base 的候选缺口
+### 8.1 当前 OF-base 的候选缺口
 
 OpenFrontier 的探索候选来自当前 RGB-D 图像的 FrontierNet 预测：
 
@@ -249,7 +400,7 @@ OpenFrontier 论文的失败分析也指出：机器人可能经过目标附近�
 目标的 informative frontier，并把更可靠的 frontier detection 列为改进方向。
 [OpenFrontier 论文](https://arxiv.org/abs/2603.05377)
 
-### 7.2 VLFM/BeliefMapNav 的直接参考
+### 8.2 VLFM/BeliefMapNav 的直接参考
 
 VLFM 从深度构建 occupancy map，并在 navigable/explored boundary 上提取 geometry frontier；
 BeliefMapNav 继承了同类实现：
@@ -268,7 +419,7 @@ frontiers = detect_frontier_waypoints(
 [BeliefMapNav 官方仓库](https://github.com/ZiboKNOW/BeliefMapNav/blob/c9800d09c2e0f0203a0efbee976d421afade7456/vlfm/mapping/obstacle_map.py#L155-L170)；
 [VLFM 论文](https://arxiv.org/abs/2312.03275)。
 
-### 7.3 推荐的问题定义
+### 8.3 推荐的问题定义
 
 主研究问题可以定义为：
 
@@ -294,7 +445,7 @@ V2 的 59 个 never-visible 失败是该方向最直接的理论 headroom，对�
 frontier 不可能保证恢复全部，但能直接作用于这类覆盖缺口。它也可能通过提供第二观察视角，间接
 改善 57 个 GT-visible-but-no-SAM3-candidate episode。
 
-## 8. 跨楼层的研究定位
+## 9. 跨楼层的研究定位
 
 当前 OF-base 没有显式 floor state、stair detector、楼层拓扑或 transition planner。代码只会
 随 agent 高度更新 `nav_level`，并对 frontier 的 z 和可达性做过滤；这不构成可靠的跨楼层系统。
@@ -315,7 +466,7 @@ geometry frontier 的自然附赠能力。
 - 未来扩展：在 geometry frontier 稳定后，把楼梯建模为独立的 `transition frontier`，放在单独
   分支或附加实验中。
 
-## 9. 推荐研究顺序
+## 10. 推荐研究顺序
 
 ```text
 冻结 OF-base baseline
@@ -339,7 +490,7 @@ geometry frontier 的自然附赠能力。
 正式实现后仍遵守当前实验纪律：最多用 1 个 episode 确认可运行，随后直接启动冻结 manifest 的
 完整 paired 实验，不进行反复 smoke 或在线阈值搜索。
 
-## 10. 最终判断
+## 11. 最终判断
 
 1. OpenFrontier 已经包含类别专用和 scene-specific benchmark 策略；继续堆同类提示词的边际收益
    预计有限。
@@ -350,3 +501,5 @@ geometry frontier 的自然附赠能力。
    BeliefMapNav 参考实现三者一致，更适合作为主研究贡献。
 5. 跨楼层应作为次级、协议相关扩展；不进入当前 HM3Dv2 主线，也不应分散 frontier generation
    的研究重点。
+6. OF-base 自身 V2 失败的首要系统瓶颈是探索/候选覆盖（116/292）；目标管线的首要瓶颈是
+   candidate grounding 与 1 m STOP 几何对齐（107/292），不是单独的 sofa 阈值或 max-steps。
