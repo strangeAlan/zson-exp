@@ -1,0 +1,11 @@
+{
+  "source": "frozen HM3Dv1 OF-base 2000-episode trajectories",
+  "source_manifest_sha256": "8f57bfb1a1a72a012d2fdb7634a5290304b6797c5058e24e778e277b3855d731",
+  "source_summary_sha256": "1c24c41a7be2a371752060c250a3eeb5e4e309968d09c1cfcd2cacfcc5c4f007",
+  "episodes": 2000,
+  "successes_at_1m": 1080,
+  "sr_at_1m": 0.54,
+  "spl_at_1m": 0.27467030057327024,
+  "method": "A 1 m success requires an explicit recorded STOP and final distance_to_goal < 1.0 m. Path efficiency is preserved from SPL for existing 0.1 m successes; for newly admitted 1 m successes it is reconstructed from the episode geodesic distance and Habitat soft-SPL identity.",
+  "validation": "The reconstruction was checked against all 1000 stored OF-base strict successes and all 1086 OF-ApexTarget stored 1 m successes; maximum absolute SPL discrepancy was 2.39e-4 and 6.84e-5 respectively."
+}

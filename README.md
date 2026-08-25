@@ -21,18 +21,22 @@ OpenFrontier repository.
 
 ## Current results
 
-| Benchmark / method | Episodes | Primary SR | Primary SPL |
-| --- | ---: | ---: | ---: |
-| HM3Dv1 val / ApexTarget experiment | 2000 | 50.45% at 0.1 m | 0.2300 |
-| HM3Dv1 val / OF-base main | 2000 | running | running |
-| **HM3Dv2 val / OF-base main** | **1000** | **70.80% at 1 m** | **0.3299** |
-| HM3Dv2 val / ApexTarget experiment | 1000 | 65.20% at 1 m | 0.2790 |
+The table uses a common 1 m audit radius for the cross-version target-module
+comparison. HM3Dv1's frozen runtime protocol remains 0.1 m; those strict
+numbers are retained in the last two columns.
 
-Lightweight manifests and logs are under [results](results/README.md). Detailed
-analysis is in the
+| Benchmark / method | Episodes | SR@1m | SPL@1m | SR@0.1m | SPL@0.1m |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| HM3Dv1 val / **OF-base main** | 2000 | 54.00% | **0.2747** | 50.00% | **0.2503** |
+| HM3Dv1 val / ApexTarget experiment | 2000 | **54.30%** | 0.2472 | **50.45%** | 0.2300 |
+| HM3Dv2 val / **OF-base main** | 1000 | **70.80%** | **0.3299** | **39.50%** | **0.1821** |
+| HM3Dv2 val / ApexTarget experiment | 1000 | 65.20% | 0.2790 | 37.60% | 0.1580 |
+
+Lightweight manifests and logs are under [results](results/README.md). The
+four-run conclusion is in the
+[OF-base versus OF-ApexTarget audit](docs/OF_BASE_APEXTARGET_V1_V2_FULL_AUDIT.md),
+with the earlier detailed V2 attribution retained in the
 [HM3Dv2 paired audit](docs/HM3DV2_PREAPEX_PAIRED_AUDIT.md).
-The ongoing HM3Dv1 OF-base run will provide the common basis for comparison
-with the earlier T1 and ApexTarget results.
 
 ## Repository layout
 

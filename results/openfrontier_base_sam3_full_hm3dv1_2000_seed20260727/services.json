@@ -1,0 +1,15 @@
+{
+  "qwen": {
+    "ok": true,
+    "backend": "vllm-openai",
+    "model": "qwen3-vl-8b"
+  },
+  "sam3": {
+    "device": "cuda",
+    "image_encoding": "raw-uint8-base64-v1",
+    "mask_encoding": "packbits-base64-v1",
+    "ok": true,
+    "service": "sam3",
+    "transport": "packed-v1"
+  }
+}

@@ -58,6 +58,14 @@ cmake_example
 !/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/services.json
 !/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/summary.json
 !/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727/summary.txt
+!/results/openfrontier_base_sam3_full_hm3dv1_2000_seed20260727/
+/results/openfrontier_base_sam3_full_hm3dv1_2000_seed20260727/*
+!/results/openfrontier_base_sam3_full_hm3dv1_2000_seed20260727/audit_1m.json
+!/results/openfrontier_base_sam3_full_hm3dv1_2000_seed20260727/manifest.json
+!/results/openfrontier_base_sam3_full_hm3dv1_2000_seed20260727/progress.log
+!/results/openfrontier_base_sam3_full_hm3dv1_2000_seed20260727/services.json
+!/results/openfrontier_base_sam3_full_hm3dv1_2000_seed20260727/summary.json
+!/results/openfrontier_base_sam3_full_hm3dv1_2000_seed20260727/summary.txt
 
 # files
 output_*/
