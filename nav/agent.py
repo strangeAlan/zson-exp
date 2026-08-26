@@ -24,6 +24,7 @@ from scipy.spatial.transform import Rotation as R
 # OpenFrontier
 from frontier.detector import FrontierDetector
 from frontier.model.predict import load_model
+from frontier.model.utils.preprocess import preprocess, resize_centercrop_img
 from utils.frontier_utils import ft_pos_direct_distance, read_config_yaml
 
 # Mapping
@@ -204,6 +205,9 @@ class NavigationAgent:
         self.geometry_frontier_enabled = bool(
             self.config.get("geometry_frontier_enabled", False)
         )
+        self.geometry_frontier_mode = self.config.get(
+            "geometry_frontier_mode", "semantic_fallback_v1"
+        )
         self.geometry_completion = (
             GeometricFrontierCompletion(self.config)
             if self.geometry_frontier_enabled
@@ -221,6 +225,29 @@ class NavigationAgent:
         )
         self.attempted_visual_features = []
         self.active_visual_feature = None
+        self.geometry_keyframes = []
+        self.geometry_keyframe_limit = int(
+            self.config.get("geometry_keyframe_limit", 96)
+        )
+        self.geometry_grounding_min_distance = float(
+            self.config.get("geometry_grounding_min_distance", 0.5)
+        )
+        self.geometry_grounding_max_distance = float(
+            self.config.get("geometry_grounding_max_distance", 3.5)
+        )
+        self.geometry_grounding_min_alignment = float(
+            self.config.get("geometry_grounding_min_alignment", 0.5)
+        )
+        self.geometry_grounding_margin = float(
+            self.config.get("geometry_grounding_margin", 0.1)
+        )
+        self.geometry_grounding_depth_tolerance = float(
+            self.config.get("geometry_grounding_depth_tolerance", 0.35)
+        )
+        self.geometry_grounded_candidate_limit = int(
+            self.config.get("geometry_grounded_candidate_limit", 3)
+        )
+        self.geometry_probability_cache = {}
         self.selector_oracle_file = os.path.join(save_dir, "selector_oracle.jsonl")
         if self.geometry_frontier_enabled:
             open(self.selector_oracle_file, "w").close()
@@ -561,6 +588,11 @@ class NavigationAgent:
                 df_thr=self.config["df_thr"],
 
             )
+            if (
+                self.geometry_frontier_enabled
+                and self.geometry_frontier_mode == "grounded_unified_v2"
+            ):
+                self._store_geometry_keyframe(rgb, depth, W_T_C2)
             ft_list = self.ft_detector.anchor_fts(depth=depth, extrinsic=C2_T_W)
             ft_end = time.time()
 
@@ -1405,8 +1437,407 @@ class NavigationAgent:
             "geometry_frontier": self.geometry_diagnostics,
         }
 
+    def _store_geometry_keyframe(
+        self, rgb: np.ndarray, depth: np.ndarray, W_T_C: np.ndarray
+    ) -> None:
+        """Keep one calibrated RGB-D keyframe per normal OF visual refresh."""
+        processed_rgb = np.asarray(
+            resize_centercrop_img(
+                rgb,
+                self.ft_detector.scale_factor,
+                (self.ft_detector.img_size_model[1], self.ft_detector.img_size_model[0]),
+            )
+        ).astype(np.uint8)
+        processed_depth = preprocess(
+            depth,
+            self.ft_detector.scale_factor,
+            *self.ft_detector.img_size_model,
+            is_depth=True,
+            normalize_depth=False,
+        ).squeeze().astype(np.float32)
+        self.geometry_keyframes.append(
+            {
+                "step": int(self.navigation_steps),
+                "rgb": processed_rgb,
+                "depth": processed_depth,
+                "K": np.asarray(self.ft_detector.pro_intrin, dtype=float).copy(),
+                "W_T_C": np.asarray(W_T_C, dtype=float).copy(),
+            }
+        )
+        if len(self.geometry_keyframes) > self.geometry_keyframe_limit:
+            self.geometry_keyframes.pop(0)
+
+    @staticmethod
+    def _project_world_point(point: np.ndarray, keyframe: dict):
+        camera_point = np.linalg.inv(keyframe["W_T_C"]) @ np.append(point, 1.0)
+        if camera_point[2] <= 1e-6:
+            return None
+        intrinsic = keyframe["K"]
+        u = float(intrinsic[0, 0] * camera_point[0] / camera_point[2] + intrinsic[0, 2])
+        v = float(intrinsic[1, 1] * camera_point[1] / camera_point[2] + intrinsic[1, 2])
+        return u, v, float(camera_point[2])
+
+    def _ground_geometry_candidate(self, frontier) -> bool:
+        """Attach the best real historical RGB-D view to one geometry proposal."""
+        best = None
+        rejection_counts = {
+            "behind_camera": 0,
+            "image_margin": 0,
+            "distance": 0,
+            "alignment": 0,
+            "occluded": 0,
+        }
+        direction = np.asarray(frontier.view_direction, dtype=float)
+        direction /= max(float(np.linalg.norm(direction)), 1e-8)
+        anchor = np.asarray(frontier.evidence_anchor, dtype=float)
+        for keyframe in self.geometry_keyframes:
+            projection = self._project_world_point(anchor, keyframe)
+            if projection is None:
+                rejection_counts["behind_camera"] += 1
+                continue
+            u, v, camera_depth = projection
+            height, width = keyframe["depth"].shape
+            margin_x = self.geometry_grounding_margin * width
+            margin_y = self.geometry_grounding_margin * height
+            if not (
+                margin_x <= u < width - margin_x
+                and margin_y <= v < height - margin_y
+            ):
+                rejection_counts["image_margin"] += 1
+                continue
+            distance = float(
+                np.linalg.norm(anchor - keyframe["W_T_C"][:3, 3])
+            )
+            if not (
+                self.geometry_grounding_min_distance
+                <= distance
+                <= self.geometry_grounding_max_distance
+            ):
+                rejection_counts["distance"] += 1
+                continue
+            camera_forward = np.asarray(keyframe["W_T_C"][:3, 2], dtype=float)
+            camera_forward /= max(float(np.linalg.norm(camera_forward)), 1e-8)
+            alignment = float(np.dot(camera_forward, direction))
+            if alignment < self.geometry_grounding_min_alignment:
+                rejection_counts["alignment"] += 1
+                continue
+            pixel_u = int(round(u))
+            pixel_v = int(round(v))
+            observed_depth = float(keyframe["depth"][pixel_v, pixel_u])
+            if (
+                observed_depth > 1e-3
+                and camera_depth
+                > observed_depth + self.geometry_grounding_depth_tolerance
+            ):
+                rejection_counts["occluded"] += 1
+                continue
+            center_distance = float(
+                np.linalg.norm(
+                    np.array([u / width, v / height]) - np.array([0.5, 0.5])
+                )
+            )
+            score = alignment - 0.5 * center_distance - 0.1 * abs(distance - 1.75)
+            if best is None or score > best[0]:
+                best = (score, keyframe, (pixel_u, pixel_v))
+        if best is None:
+            frontier.grounding_rejections = rejection_counts
+            return False
+        frontier.evidence_keyframe = best[1]
+        frontier.evidence_pixel = best[2]
+        frontier.evidence_keyframe_step = int(best[1]["step"])
+        frontier.grounding_rejections = rejection_counts
+        return True
+
+    def _mark_grounded_geometry(self, frontier, label: str) -> np.ndarray:
+        image = np.asarray(frontier.evidence_keyframe["rgb"]).copy()
+        pixel = tuple(int(value) for value in frontier.evidence_pixel)
+        cv2.circle(image, pixel, 25, (255, 255, 255), 4)
+        cv2.circle(image, pixel, 21, (32, 220, 255), 3)
+        cv2.putText(
+            image,
+            label,
+            (pixel[0] - 11, pixel[1] + 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.9,
+            (255, 255, 255),
+            3,
+            cv2.LINE_AA,
+        )
+        arrow_point = np.asarray(frontier.evidence_anchor, dtype=float) + 0.75 * np.asarray(
+            frontier.view_direction, dtype=float
+        )
+        arrow_projection = self._project_world_point(
+            arrow_point, frontier.evidence_keyframe
+        )
+        if arrow_projection is not None:
+            endpoint = (int(round(arrow_projection[0])), int(round(arrow_projection[1])))
+            if 0 <= endpoint[0] < image.shape[1] and 0 <= endpoint[1] < image.shape[0]:
+                cv2.arrowedLine(
+                    image, pixel, endpoint, (32, 220, 255), 4, tipLength=0.25
+                )
+        return image
+
+    @staticmethod
+    def _compose_square_panels(images: list[np.ndarray]) -> np.ndarray:
+        if len(images) == 1:
+            return images[0]
+        height, width = images[0].shape[:2]
+        columns = 2
+        rows = int(np.ceil(len(images) / columns))
+        canvas = np.zeros((rows * height, columns * width, 3), dtype=np.uint8)
+        for index, image in enumerate(images):
+            row, column = divmod(index, columns)
+            canvas[
+                row * height : (row + 1) * height,
+                column * width : (column + 1) * width,
+            ] = image
+        return canvas
+
+    def _score_grounded_geometry(self, candidates: list) -> list:
+        accepted = []
+        missing = []
+        for candidate in candidates:
+            identity = self._geometry_identity(candidate.navigation_point)
+            cache_key = (
+                identity,
+                tuple(
+                    np.round(
+                        np.asarray(candidate.view_direction, dtype=float), 2
+                    ).tolist()
+                ),
+                int(candidate.evidence_keyframe_step),
+                self.goal,
+            )
+            candidate.geometry_identity = identity
+            candidate.probability_cache_key = cache_key
+            cached = self.geometry_probability_cache.get(cache_key)
+            if cached is None:
+                missing.append(candidate)
+            else:
+                candidate.probability, candidate.justification = cached
+                accepted.append(candidate)
+
+        if missing:
+            labels = [
+                chr(ord("G") + index) if index < 20 else str(index)
+                for index in range(len(missing))
+            ]
+            panels = []
+            for candidate, label in zip(missing, labels):
+                candidate.label = label
+                panels.append(self._mark_grounded_geometry(candidate, label))
+            evidence = self._compose_square_panels(panels)
+            start = time.time()
+            success, scores, raw_response = detect_frontier_probabilities(
+                rgb_image=evidence,
+                labels=labels,
+                target_object=self.goal,
+                vlm_model=self.probabilities_source,
+                api_key=self.get_api_key_for_model(self.probabilities_source),
+            )
+            elapsed = time.time() - start
+            self.timings["vlm_call"]["total_time"] += elapsed
+            self.timings["vlm_call"]["calls"] += 1
+            self.timings["vlm_probabilities"]["total_time"] += elapsed
+            self.timings["vlm_probabilities"]["calls"] += 1
+            self.log(
+                "info",
+                self.vlm_log_file,
+                f"Grounded geometry probabilities: {raw_response}",
+            )
+            if success:
+                for candidate, label in zip(missing, labels):
+                    score = scores.get(label)
+                    if not isinstance(score, (list, tuple)) or len(score) < 2:
+                        continue
+                    candidate.probability = float(score[0])
+                    candidate.justification = str(score[1])
+                    self.geometry_probability_cache[
+                        candidate.probability_cache_key
+                    ] = (candidate.probability, candidate.justification)
+                    accepted.append(candidate)
+        return accepted
+
+    def _refresh_grounded_geometry_pool(self, W_T_C: np.ndarray) -> None:
+        """Score grounded geometry and visual proposals in one OF utility space."""
+        self.geometry_override_candidate = None
+        if self.mapper is None or self.ft_manager.object_lockin is not None:
+            return
+        self._expire_geometry_cooldowns()
+        projection = self.mapper.get_navigation_projection(
+            nav_level=self.planner.nav_level,
+            min_height=float(
+                self.config.get("geometry_frontier_slice_min_height", 0.1)
+            ),
+            max_height=float(
+                self.config.get("geometry_frontier_slice_max_height", 1.3)
+            ),
+            height_step=float(
+                self.config.get("geometry_frontier_slice_height_step", 0.2)
+            ),
+        )
+        visual = [
+            frontier
+            for frontier in self.ft_manager.valid_frontiers
+            if frontier.source == "visual"
+            and frontier.justification != "Rotation Frontier"
+        ]
+        object_candidates = [
+            frontier
+            for frontier in self.ft_manager.valid_frontiers
+            if frontier.is_object
+        ]
+        generated = self.geometry_completion.generate(
+            projection=projection,
+            current_position=W_T_C[:3, 3],
+            nav_level=self.planner.nav_level,
+            planner=self.navmesh_planner,
+            unreachable_positions=self.ft_manager._unreachable_positions,
+            suppressed_positions=[
+                np.asarray(record["position"], dtype=float)
+                for record in self.geometry_cooldowns.values()
+            ],
+            suppression_distance=self.geometry_identity_resolution,
+            bbox=self.bbox,
+            occupancy_planner=self.planner,
+        )
+        # Compare geometry and visual proposals at the same camera-height frame.
+        # The navmesh point remains separately available for PointNav.
+        for candidate in generated:
+            candidate.navigation_point = np.asarray(
+                candidate.navigation_point, dtype=float
+            )
+            candidate.pos3d = candidate.navigation_point.copy()
+            candidate.pos3d[2] = float(W_T_C[2, 3])
+            candidate.evidence_anchor = np.asarray(
+                candidate.evidence_anchor, dtype=float
+            ).copy()
+            candidate.evidence_anchor[2] = float(W_T_C[2, 3])
+            candidate.pose6d = self.ft_manager.get_frontier_pose(candidate)
+        unmatched = self.geometry_completion.unmatched(generated, visual)
+
+        self.ft_manager.adjust_transient_frontier_gains(unmatched)
+        gain_eligible = [
+            candidate
+            for candidate in unmatched
+            if candidate.u_gain >= self.ft_manager.filter_min_gain
+        ]
+        grounded = [
+            candidate
+            for candidate in gain_eligible
+            if self._ground_geometry_candidate(candidate)
+        ]
+        for candidate in grounded:
+            candidate.probability = 1.0
+        self.ft_manager.update_transient_frontier_utilities(
+            grounded, W_T_C[:3, 3]
+        )
+        grounded.sort(key=lambda candidate: candidate.utility, reverse=True)
+        grounded = grounded[: self.geometry_grounded_candidate_limit]
+        scored = self._score_grounded_geometry(grounded)
+        self.ft_manager.update_transient_frontier_utilities(
+            scored, W_T_C[:3, 3]
+        )
+
+        best_geometry = max(
+            scored,
+            key=lambda candidate: float(candidate.utility),
+            default=None,
+        )
+        best_visual = max(
+            visual,
+            key=lambda candidate: (
+                float(candidate.utility)
+                if candidate.utility is not None and np.isfinite(candidate.utility)
+                else -np.inf
+            ),
+            default=None,
+        )
+        best_geometry_utility = (
+            float(best_geometry.utility) if best_geometry is not None else 0.0
+        )
+        best_visual_utility = (
+            float(best_visual.utility)
+            if best_visual is not None
+            and best_visual.utility is not None
+            and np.isfinite(best_visual.utility)
+            else 0.0
+        )
+        selected = (
+            best_geometry
+            if best_geometry is not None
+            and (best_visual is None or best_geometry_utility > best_visual_utility)
+            else None
+        )
+        if object_candidates or self.goal_object is not None:
+            selected = None
+        self.geometry_override_candidate = selected
+        event = {
+            "event": "grounded_unified_refresh",
+            "step": int(self.navigation_steps),
+            "visual_count": len(visual),
+            "geometric_count": len(generated),
+            "unmatched_geometric_count": len(unmatched),
+            "gain_eligible_geometric_count": len(gain_eligible),
+            "grounded_geometric_count": len(grounded),
+            "scored_geometric_count": len(scored),
+            "best_visual_utility": best_visual_utility,
+            "best_geometry_utility": best_geometry_utility,
+            "selected_source": "geometry" if selected is not None else "visual",
+            "geometry_override_position": (
+                np.asarray(selected.navigation_point, dtype=float).tolist()
+                if selected is not None
+                else None
+            ),
+            "geometry_candidates": [
+                {
+                    **candidate.to_dict(),
+                    "navigation_point": np.asarray(
+                        candidate.navigation_point, dtype=float
+                    ).tolist(),
+                    "evidence_keyframe_step": int(
+                        candidate.evidence_keyframe_step
+                    ),
+                    "evidence_pixel": list(candidate.evidence_pixel),
+                    "raw_geometry_gain": float(candidate.raw_geometry_gain),
+                    "theoretical_gain": float(candidate.theoretical_gain),
+                    "theoretical_u_gain": float(candidate.theoretical_u_gain),
+                }
+                for candidate in scored
+            ],
+            "grounding_rejections": [
+                {
+                    "navigation_point": np.asarray(
+                        candidate.navigation_point, dtype=float
+                    ).tolist(),
+                    "evidence_anchor": np.asarray(
+                        candidate.evidence_anchor, dtype=float
+                    ).tolist(),
+                    "counts": candidate.grounding_rejections,
+                }
+                for candidate in gain_eligible
+                if not hasattr(candidate, "evidence_keyframe")
+            ],
+        }
+        self.geometry_diagnostics.append(event)
+        self.log(
+            "info",
+            self.logging_file,
+            "Grounded geometry pool - "
+            f"visual={len(visual)} generated={len(generated)} "
+            f"unmatched={len(unmatched)} gain_eligible={len(gain_eligible)} "
+            f"grounded={len(grounded)} "
+            f"scored={len(scored)} visual_utility={best_visual_utility:.6f} "
+            f"geometry_utility={best_geometry_utility:.6f} "
+            f"selected_source={event['selected_source']}",
+        )
+        self._record_selector_oracle(visual + scored, visual, selected)
+
     def _refresh_geometry_completion(self, W_T_C: np.ndarray) -> None:
         """Offer one geometry fallback only after visual opportunities are exhausted."""
+        if self.geometry_frontier_mode == "grounded_unified_v2":
+            self._refresh_grounded_geometry_pool(W_T_C)
+            return
         self.geometry_override_candidate = None
         if self.mapper is None or self.ft_manager.object_lockin is not None:
             return
@@ -1951,6 +2382,8 @@ class NavigationAgent:
         self.termination_images.clear()
         self.termination_depths.clear()
         self.termination_viewpoints.clear()
+        self.geometry_keyframes.clear()
+        self.geometry_probability_cache.clear()
         self.composition_depths.clear()
         self.composition_viewpoints.clear()
         self.last_rgb = None

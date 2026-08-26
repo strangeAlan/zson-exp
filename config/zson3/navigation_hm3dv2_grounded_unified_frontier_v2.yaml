@@ -1,0 +1,54 @@
+# Grounded Unified Frontier v2. Geometric proposals must have historical RGB-D
+# evidence, receive a Qwen semantic probability, and beat visual proposals under
+# the same OpenFrontier gain/probability/distance utility. Coverage cannot select.
+extends: navigation_hm3dv1_qwen.yaml
+
+# Two bounded target-grounding correctness fixes. The approach endpoint itself
+# is intentionally unchanged in this experiment.
+target_candidate_bound_verification: true
+target_path_exhausted_recovery: true
+target_path_exhausted_max_retries: 1
+target_reassociation_distance: 1.0
+
+geometry_frontier_enabled: true
+geometry_frontier_mode: grounded_unified_v2
+
+# Wavemap -> 2D projection. Unknown is the complement of the ray-derived
+# observed mask, not the complement of sparse free/occupied samples.
+geometry_frontier_observed_ray_stride: 12
+geometry_frontier_slice_min_height: 0.1
+geometry_frontier_slice_max_height: 1.3
+geometry_frontier_slice_height_step: 0.2
+
+geometry_frontier_min_component_cells: 4
+geometry_frontier_min_robot_distance: 0.75
+geometry_frontier_blacklist_distance: 0.1
+
+# Visual/geometry association reuses FrontierManager's position/direction scale.
+geometry_frontier_match_threshold: 1.8
+geometry_frontier_match_weights: [1.0, 2.0]
+
+# Historical RGB-D grounding constraints. At most three strongest OF-gain
+# geometric proposals reach Qwen on each normal frontier refresh.
+geometry_keyframe_limit: 96
+geometry_grounding_min_distance: 0.5
+# One grid-cell allowance beyond Wavemap's 3.5 m ray limit is required because
+# evidence anchors are stored at 0.1 m cell centers.
+geometry_grounding_max_distance: 3.65
+geometry_grounding_min_alignment: 0.5
+geometry_grounding_margin: 0.1
+geometry_grounding_depth_tolerance: 0.35
+geometry_grounded_candidate_limit: 3
+
+# Fixed empirical quantile mapping (0/5/10/25/50/75/90/95/100 percentiles)
+# from geometry boundary area to visual u_gain. It was computed once from all
+# 3,284 refreshes in the already-finished frozen v1 ProbeSet (30,495 visual and
+# 19,726 geometry samples; manifest sha256 98fb1876...). No online adaptation.
+geometry_gain_source_knots: [0.01, 0.03, 0.04, 0.06, 0.10, 0.19, 0.36, 0.53, 2.00]
+geometry_gain_visual_knots: [0.500553, 0.738553, 0.867553, 1.856392, 4.376802, 9.129321, 15.224044, 18.472000, 29.580535]
+
+# A selected geometry viewpoint retains v1's consume/facing/cooldown lifecycle.
+geometry_frontier_arrival_distance: 0.5
+geometry_frontier_arrival_angle_deg: 35.0
+geometry_frontier_identity_resolution: 0.5
+geometry_frontier_cooldown_steps: 120

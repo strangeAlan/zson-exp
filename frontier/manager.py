@@ -108,6 +108,24 @@ class FrontierManager(Base):
         self.utility_g_factor = float(p.get("utility_gain_factor", 1.0))
         self.seeking_weight = float(p.get("seeking_weight", 1.0))
         self.prob_sharpness = float(p.get("prob_sharpness", 1.0))
+        self.transient_gain_source_knots = np.asarray(
+            p.get("geometry_gain_source_knots", []), dtype=float
+        )
+        self.transient_gain_target_knots = np.asarray(
+            p.get("geometry_gain_visual_knots", []), dtype=float
+        )
+        if (
+            self.transient_gain_source_knots.size
+            != self.transient_gain_target_knots.size
+        ):
+            raise ValueError(
+                "geometry gain source/visual knot arrays must have equal length"
+            )
+        if self.transient_gain_source_knots.size not in (0,) and (
+            self.transient_gain_source_knots.size < 2
+            or np.any(np.diff(self.transient_gain_source_knots) <= 0)
+        ):
+            raise ValueError("geometry_gain_source_knots must be strictly increasing")
 
         self.object_lockin: DetectedObject = None
 
@@ -946,6 +964,132 @@ class FrontierManager(Base):
             ft.utility = (blended_gain ** float(self.utility_g_factor)) / denom
 
         self.logger.debug(f"Utility updated for {len(valid)} valid frontiers.")
+
+    def adjust_transient_frontier_gains(
+        self, frontiers: list[Frontier]
+    ) -> None:
+        """Map transient geometry gain into the frozen visual-u_gain distribution."""
+        if not frontiers:
+            return
+        for frontier in frontiers:
+            frontier.pose6d = self.get_frontier_pose(frontier)
+
+        poses = np.stack([frontier.pose6d for frontier in frontiers], axis=0)
+        extrinsics = np.linalg.inv(poses)
+        depths = render_voxel_depth(
+            occ_pts=self.occ_map,
+            camera_extrinsics=extrinsics,
+            render_params={
+                "K": self.render_K,
+                "H": self.render_H,
+                "W": self.render_W,
+                "radius": self.voxel_size / 2,
+            },
+        )
+        voxel_volume = float(self.voxel_size**3)
+
+        robot_ids = self.graph.get_node_R()
+        robot_poses = (
+            np.stack([self.robot_poses[robot_id] for robot_id in robot_ids], axis=0)
+            if robot_ids
+            else None
+        )
+        for frontier, extrinsic, occupied_depth in zip(
+            frontiers, extrinsics, depths
+        ):
+            raw_proposal_gain = float(frontier.gain or 0.0)
+            _, theoretical_count = compute_visible_voxels(
+                K=self.render_K,
+                T=extrinsic,
+                img_size=(self.render_H, self.render_W),
+                voxel_size=self.voxel_size,
+                max_depth=self.render_d_range,
+                min_depth_map=occupied_depth,
+            )
+            base_gain = float(theoretical_count) * voxel_volume
+            visible_free, _ = select_visible_points(
+                self.free_map,
+                K=self.render_K,
+                T=extrinsic,
+                img_size=(self.render_H, self.render_W),
+                max_depth=self.render_d_range,
+                min_depth_map=occupied_depth,
+            )
+            free_reduction = (
+                float(visible_free.shape[0])
+                * voxel_volume
+                * float(self.render_decrease_factor)
+            )
+            history_reduction = 0.0
+            if robot_poses is not None:
+                trans_diff, rot_diff = pose_difference(
+                    frontier.pose6d.reshape(1, 4, 4), robot_poses
+                )
+                history_reduction = float(
+                    np.count_nonzero(
+                        (trans_diff < self.v_tras_thre)
+                        & (rot_diff < self.v_angl_thre)
+                    )
+                ) * self.v_gain_reduction_factor
+            theoretical_u_gain = max(
+                base_gain - history_reduction - free_reduction, 1e-4
+            )
+            frontier.raw_geometry_gain = raw_proposal_gain
+            frontier.theoretical_gain = base_gain
+            frontier.theoretical_u_gain = theoretical_u_gain
+            if self.transient_gain_source_knots.size:
+                frontier.gain, frontier.u_gain = self.normalize_transient_gain(
+                    raw_proposal_gain, base_gain, theoretical_u_gain
+                )
+            else:
+                frontier.gain = base_gain
+                frontier.u_gain = theoretical_u_gain
+
+    def normalize_transient_gain(
+        self,
+        raw_proposal_gain: float,
+        theoretical_gain: float,
+        theoretical_u_gain: float,
+    ) -> tuple[float, float]:
+        """Apply frozen quantile mapping, retaining OF history/map reduction."""
+        normalized_gain = float(
+            np.interp(
+                raw_proposal_gain,
+                self.transient_gain_source_knots,
+                self.transient_gain_target_knots,
+            )
+        )
+        retention = float(
+            np.clip(
+                theoretical_u_gain / max(theoretical_gain, 1e-4), 0.0, 1.0
+            )
+        )
+        return normalized_gain, max(normalized_gain * retention, 1e-4)
+
+    def update_transient_frontier_utilities(
+        self, frontiers: list[Frontier], current_pos: np.ndarray
+    ) -> None:
+        """Apply the exact non-object utility equation to transient proposals."""
+        position = np.asarray(current_pos, dtype=float).reshape(3)
+        for frontier in frontiers:
+            distance = max(
+                float(
+                    np.linalg.norm(
+                        np.asarray(frontier.pos3d, dtype=float) - position
+                    )
+                ),
+                1e-6,
+            )
+            gain = float(max(frontier.u_gain or frontier.gain or 0.0, 1e-4))
+            probability = float(
+                0.5 if frontier.probability is None else frontier.probability
+            )
+            scaled_probability = probability**self.prob_sharpness
+            exploration_gain = (1 - self.seeking_weight) * gain
+            seeking_gain = self.seeking_weight * scaled_probability * gain
+            frontier.utility = (
+                (exploration_gain + seeking_gain) ** self.utility_g_factor
+            ) / distance
 
     def filter_frontiers(self) -> None:
         """

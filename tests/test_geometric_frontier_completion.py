@@ -7,6 +7,7 @@ from frontier.frontier import Frontier
 from frontier.geometric_completion import GeometricFrontierCompletion
 from frontier.manager import FrontierManager
 from mapping.wavemap import WaveMapper
+from nav.agent import NavigationAgent
 
 
 class FakePlanner:
@@ -18,6 +19,13 @@ class FakePlanner:
 
     def geodesic_distance(self, start, goal):
         return float(np.linalg.norm(np.asarray(goal) - np.asarray(start)))
+
+
+class OffsetSnapPlanner(FakePlanner):
+    def snap_point(self, point):
+        snapped = np.asarray(point, dtype=float).copy()
+        snapped[0] += 0.4
+        return snapped
 
 
 class ReachedTransientPlanner:
@@ -101,6 +109,37 @@ class GeometryCompletionTests(unittest.TestCase):
                 for candidate in candidates
             )
         )
+
+    def test_grounding_anchor_is_not_displaced_by_navmesh_snap(self):
+        candidates = self.completion.generate(
+            self.projection,
+            current_position=np.array([0.5, 0.5, 0.0]),
+            nav_level=0.0,
+            planner=OffsetSnapPlanner(),
+            unreachable_positions=[],
+        )
+        self.assertTrue(candidates)
+        self.assertAlmostEqual(
+            candidates[0].navigation_point[0] - candidates[0].evidence_anchor[0],
+            0.4,
+        )
+
+    def test_direction_points_to_unknown_next_to_representative(self):
+        candidates = self.completion.generate(
+            self.projection,
+            current_position=np.array([0.5, 0.5, 0.0]),
+            nav_level=0.0,
+            planner=self.planner,
+            unreachable_positions=[],
+        )
+        self.assertTrue(candidates)
+        candidate = candidates[0]
+        forward = candidate.evidence_anchor[:2] + 0.2 * candidate.view_direction[:2]
+        forward_cell = np.floor(
+            (forward - self.projection["origin"])
+            / self.projection["resolution"]
+        ).astype(int)
+        self.assertTrue(self.projection["unknown"][tuple(forward_cell)])
 
     def test_matching_suppresses_covered_geometry(self):
         geometric = self.completion.generate(
@@ -218,6 +257,59 @@ class GeometryCompletionTests(unittest.TestCase):
             manager.last_transient_pose_error["translation_xy"], 0.5
         )
         manager.blacklist_position.assert_not_called()
+
+    def test_transient_utility_matches_of_equation(self):
+        manager = FrontierManager.__new__(FrontierManager)
+        manager.prob_sharpness = 2.0
+        manager.seeking_weight = 1.0
+        manager.utility_g_factor = 2.0
+        frontier = Frontier()
+        frontier.pos3d = np.array([2.0, 0.0, 0.0])
+        frontier.gain = 4.0
+        frontier.u_gain = 4.0
+        frontier.probability = 0.5
+        manager.update_transient_frontier_utilities(
+            [frontier], np.array([0.0, 0.0, 0.0])
+        )
+        self.assertAlmostEqual(frontier.utility, 0.5)
+
+    def test_fixed_geometry_gain_mapping_uses_visual_quantiles(self):
+        manager = FrontierManager.__new__(FrontierManager)
+        manager.transient_gain_source_knots = np.array([0.1, 0.2, 0.4])
+        manager.transient_gain_target_knots = np.array([1.0, 4.0, 9.0])
+        gain, u_gain = manager.normalize_transient_gain(0.2, 36.0, 18.0)
+        self.assertAlmostEqual(gain, 4.0)
+        self.assertAlmostEqual(u_gain, 2.0)
+
+    def test_geometry_candidate_grounds_to_aligned_visible_keyframe(self):
+        agent = NavigationAgent.__new__(NavigationAgent)
+        agent.geometry_grounding_margin = 0.1
+        agent.geometry_grounding_min_distance = 0.5
+        agent.geometry_grounding_max_distance = 3.5
+        agent.geometry_grounding_min_alignment = 0.5
+        agent.geometry_grounding_depth_tolerance = 0.35
+
+        candidate = Frontier()
+        candidate.pos3d = np.array([2.0, 0.0, 1.0])
+        candidate.evidence_anchor = candidate.pos3d.copy()
+        candidate.view_direction = np.array([1.0, 0.0, 0.0])
+        keyframe_pose = FrontierManager.get_frontier_pose(candidate)
+        keyframe_pose[:3, 3] = np.array([0.0, 0.0, 1.0])
+        agent.geometry_keyframes = [
+            {
+                "step": 7,
+                "rgb": np.zeros((320, 320, 3), dtype=np.uint8),
+                "depth": np.full((320, 320), 3.0, dtype=np.float32),
+                "K": np.array(
+                    [[100.0, 0.0, 160.0], [0.0, 100.0, 160.0], [0, 0, 1]]
+                ),
+                "W_T_C": keyframe_pose,
+            }
+        ]
+        self.assertTrue(agent._ground_geometry_candidate(candidate))
+        self.assertEqual(candidate.evidence_keyframe_step, 7)
+        self.assertLess(abs(candidate.evidence_pixel[0] - 160), 2)
+        self.assertLess(abs(candidate.evidence_pixel[1] - 160), 2)
 
 
 if __name__ == "__main__":

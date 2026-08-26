@@ -100,8 +100,18 @@ class GeometricFrontierCompletion:
             representative = world_cells[representative_index]
 
             component_mask = labels == label_id
-            adjacent_unknown = unknown & ndimage.binary_dilation(
+            component_adjacent_unknown = unknown & ndimage.binary_dilation(
                 component_mask, structure=structure
+            )
+
+            # Direction is local to the chosen representative. A long connected
+            # boundary can wrap around an observed region; averaging unknown
+            # cells along the whole component can point sideways or backwards.
+            representative_cell = cells[representative_index]
+            representative_mask = np.zeros_like(boundary, dtype=bool)
+            representative_mask[tuple(representative_cell)] = True
+            adjacent_unknown = unknown & ndimage.binary_dilation(
+                representative_mask, structure=structure
             )
             unknown_cells = np.argwhere(adjacent_unknown)
             if len(unknown_cells) == 0:
@@ -129,7 +139,7 @@ class GeometricFrontierCompletion:
             if np.linalg.norm(snapped[:2] - current[:2]) < self.min_robot_distance:
                 continue
             if any(
-                np.linalg.norm(snapped - position) < self.blacklist_distance
+                np.linalg.norm(snapped[:2] - position[:2]) < self.blacklist_distance
                 for position in blocked
             ):
                 continue
@@ -147,13 +157,17 @@ class GeometricFrontierCompletion:
 
             frontier = Frontier()
             frontier.source = "geometry"
+            frontier.navigation_point = snapped.copy()
             frontier.pos3d = snapped
+            # Preserve the actual free/unknown boundary for image grounding.
+            # The snapped PointNav viewpoint may move away from the observed ray.
+            frontier.evidence_anchor = raw_position.copy()
             frontier.view_direction = np.array(
                 [direction_xy[0], direction_xy[1], 0.0], dtype=float
             )
             frontier.direct_angle = float(np.arctan2(direction_xy[1], direction_xy[0]))
             frontier.pixel_pos = np.array([-1.0, -1.0])
-            frontier.gain = float(len(unknown_cells)) * float(
+            frontier.gain = float(np.count_nonzero(component_adjacent_unknown)) * float(
                 projection["resolution"]
             ) ** 2
             frontier.u_gain = frontier.gain
