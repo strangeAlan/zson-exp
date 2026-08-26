@@ -43,6 +43,27 @@ class HabitatPlanner(PlannerBase):
         point_out = from_habitat_position(snapped)
         return np.array(point_out, dtype=float)
 
+    def geodesic_distance(
+        self, start: Sequence[float], goal: Sequence[float], *, snap: bool = True
+    ) -> float:
+        """Read-only navmesh distance in OpenFrontier world coordinates."""
+        start_hab = to_habitat_position(start)
+        goal_hab = to_habitat_position(goal)
+        if snap:
+            start_hab = self.pathfinder.snap_point(start_hab)
+            goal_hab = self.pathfinder.snap_point(goal_hab)
+        if not (
+            self.pathfinder.is_navigable(start_hab)
+            and self.pathfinder.is_navigable(goal_hab)
+        ):
+            return float("inf")
+        query = ShortestPath()
+        query.requested_start = start_hab
+        query.requested_end = goal_hab
+        if not self.pathfinder.find_path(query):
+            return float("inf")
+        return float(query.geodesic_distance)
+
     def get_bounds(self) -> Dict[str, float]:
         return {
             "low_x": self.bounds[0],

@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import logging
 import argparse
@@ -29,6 +30,7 @@ from mapping.wavemap import WaveMapper
 
 # Frontier Manager
 from frontier.manager import FrontierManager
+from frontier.geometric_completion import GeometricFrontierCompletion
 from nav.detected_object import DetectedObject
 
 np.set_printoptions(precision=3, suppress=True)
@@ -181,6 +183,19 @@ class NavigationAgent:
             "visibility_events": [],
             "termination_event": None,
         }
+        self.geometry_frontier_enabled = bool(
+            self.config.get("geometry_frontier_enabled", False)
+        )
+        self.geometry_completion = (
+            GeometricFrontierCompletion(self.config)
+            if self.geometry_frontier_enabled
+            else None
+        )
+        self.geometry_override_candidate = None
+        self.geometry_diagnostics = []
+        self.selector_oracle_file = os.path.join(save_dir, "selector_oracle.jsonl")
+        if self.geometry_frontier_enabled:
+            open(self.selector_oracle_file, "w").close()
 
         self.optimal_path_length = float("inf")
 
@@ -310,6 +325,7 @@ class NavigationAgent:
         mapping_time = 0.0
         full_frontier_time = 0.0
         som_time = 0.0
+        full_frontier_refresh = False
         
         self.timings["frontier_detection_global"]["calls"] += 1
         
@@ -320,6 +336,8 @@ class NavigationAgent:
 
         self.planner.nav_level = W_T_C2[2, 3] - self.C_T_R[2, 3]
         self.ft_manager.planner.nav_level = W_T_C2[2, 3] - self.C_T_R[2, 3]
+        if hasattr(self, "navmesh_planner"):
+            self.navmesh_planner.nav_level = self.planner.nav_level
 
         if self.fix_view_level:
             self.ft_detector.fix_view_level(W_T_C2[2, 3])
@@ -486,6 +504,7 @@ class NavigationAgent:
             or self.ft_manager.object_lockin is None
             and (no_more_frontier or reach_next_update)
         ):
+            full_frontier_refresh = True
             full_frontier_start = time.time()
             self.log("info", self.logging_file, "Updating frontiers.")
 
@@ -664,10 +683,13 @@ class NavigationAgent:
         self.timings["frontier_manager_update"]["total_time"] += (end_ft_manager - start_ft_manager)
         self.timings["frontier_manager_update"]["calls"] += 1
 
+        if full_frontier_refresh and self.geometry_frontier_enabled:
+            self._refresh_geometry_completion(W_T_C2)
+
         if (
             self.ft_manager.valid_frontiers is None
             or len(self.ft_manager.valid_frontiers) == 0
-        ):
+        ) and self.geometry_override_candidate is None:
             self.log(
                 "info", self.logging_file, "No frontiers, adding rotation frontiers..."
             )
@@ -714,9 +736,58 @@ class NavigationAgent:
             logging.debug(f"Replanning (interval={self.plan_interval}).")
 
             pointnav_start = time.time()
-            self.path_to_go = (
-                self.ft_manager.plan_path_to_goal(W_T_C2, depth=depth, use_graph=False)
-                or []
+            object_candidates = [
+                ft for ft in self.ft_manager.valid_frontiers if ft.is_object
+            ]
+            use_geometry = (
+                self.geometry_override_candidate is not None
+                and self.ft_manager.object_lockin is None
+                and self.goal_object is None
+                and not object_candidates
+            )
+            if use_geometry:
+                selected_frontier = self.geometry_override_candidate
+                self.path_to_go = (
+                    self.ft_manager.plan_path_to_frontier(
+                        W_T_C2, selected_frontier, depth=depth
+                    )
+                    or []
+                )
+                selected_source = "geometry"
+                if not self.path_to_go:
+                    self.geometry_override_candidate = None
+            else:
+                self.geometry_override_candidate = None
+                self.path_to_go = (
+                    self.ft_manager.plan_path_to_goal(
+                        W_T_C2, depth=depth, use_graph=False
+                    )
+                    or []
+                )
+                selected_frontier = (
+                    self.ft_manager.get_frontier(
+                        self.ft_manager.current_goal_ft_id
+                    )
+                    if self.ft_manager.current_goal_ft_id is not None
+                    else None
+                )
+                selected_source = (
+                    selected_frontier.source
+                    if selected_frontier is not None
+                    else "object"
+                    if self.ft_manager.object_lockin is not None
+                    else "visual"
+                )
+            selected_position = (
+                np.asarray(selected_frontier.pos3d, dtype=float).tolist()
+                if selected_frontier is not None
+                else None
+            )
+            self.log(
+                "info",
+                self.logging_file,
+                "Frontier selection - "
+                f"source={selected_source} position={selected_position}",
             )
             pointnav_end = time.time()
             self.timings["pointnav_planning"]["total_time"] += (pointnav_end - pointnav_start)
@@ -868,6 +939,7 @@ class NavigationAgent:
                             f"Object found with probability {probability}. Approaching object.",
                         )
                         self.ft_manager.lock_into_object(self.goal_object)
+                        self.geometry_override_candidate = None
                         self.path_to_go = (
                             self.ft_manager.plan_path_to_goal(
                                 W_T_C2, depth=depth, use_graph=False
@@ -991,7 +1063,130 @@ class NavigationAgent:
         return {
             **self.target_diagnostics,
             "final_object_tracks": [obj.to_dict() for obj in self.detected_objects],
+            "geometry_frontier": self.geometry_diagnostics,
         }
+
+    def _refresh_geometry_completion(self, W_T_C: np.ndarray) -> None:
+        """Recompute transient completion proposals after a normal OF refresh."""
+        self.geometry_override_candidate = None
+        if self.mapper is None or self.ft_manager.object_lockin is not None:
+            return
+
+        projection = self.mapper.get_navigation_projection(
+            nav_level=self.planner.nav_level,
+            min_height=float(
+                self.config.get("geometry_frontier_slice_min_height", 0.1)
+            ),
+            max_height=float(
+                self.config.get("geometry_frontier_slice_max_height", 1.3)
+            ),
+            height_step=float(
+                self.config.get("geometry_frontier_slice_height_step", 0.2)
+            ),
+        )
+        visual = [
+            ft
+            for ft in self.ft_manager.valid_frontiers
+            if not ft.is_object and ft.justification != "Rotation Frontier"
+        ]
+        object_candidates = [
+            ft for ft in self.ft_manager.valid_frontiers if ft.is_object
+        ]
+        geometric = self.geometry_completion.generate(
+            projection=projection,
+            current_position=W_T_C[:3, 3],
+            nav_level=self.planner.nav_level,
+            planner=self.navmesh_planner,
+            unreachable_positions=self.ft_manager._unreachable_positions,
+            bbox=self.bbox,
+            occupancy_planner=self.planner,
+        )
+        override, stats = self.geometry_completion.select_completion(
+            geometric=geometric,
+            visual=visual,
+            projection=projection,
+            current_position=W_T_C[:3, 3],
+            planner=self.navmesh_planner,
+        )
+        if object_candidates or self.goal_object is not None:
+            override = None
+        self.geometry_override_candidate = override
+        event = {
+            "step": int(self.navigation_steps),
+            "visual_count": len(visual),
+            "geometric_count": stats.geometric_count,
+            "unmatched_geometric_count": stats.unmatched_count,
+            "best_visual_coverage": stats.best_visual_coverage,
+            "best_geometry_coverage": stats.best_geometry_coverage,
+            "selected_source": "geometry" if override is not None else "visual",
+            "geometry_override_position": (
+                np.asarray(override.pos3d, dtype=float).tolist()
+                if override is not None
+                else None
+            ),
+            "frontiers": [ft.to_dict() for ft in visual + geometric],
+        }
+        self.geometry_diagnostics.append(event)
+        self.log(
+            "info",
+            self.logging_file,
+            "Geometry completion - "
+            f"visual={len(visual)} geometry={stats.geometric_count} "
+            f"unmatched={stats.unmatched_count} "
+            f"best_visual_coverage={stats.best_visual_coverage:.4f} "
+            f"best_geometry_coverage={stats.best_geometry_coverage:.4f} "
+            f"selected_source={event['selected_source']} "
+            f"override_position={event['geometry_override_position']}",
+        )
+        self._record_selector_oracle(visual + geometric, visual, override)
+
+    def _record_selector_oracle(
+        self, candidates: list, visual: list, override
+    ) -> None:
+        """Log the navmesh-best candidate to GT; never feed it back to policy."""
+        goal_points = getattr(self, "oracle_goal_points", [])
+        if not goal_points or not candidates:
+            return
+        records = []
+        for frontier in candidates:
+            distances = [
+                self.navmesh_planner.geodesic_distance(frontier.pos3d, goal_point)
+                for goal_point in goal_points
+            ]
+            records.append(
+                {
+                    "source": frontier.source,
+                    "id": int(frontier.id),
+                    "position": np.asarray(frontier.pos3d, dtype=float).tolist(),
+                    "coverage": frontier.coverage,
+                    "distance_to_gt": min(distances, default=float("inf")),
+                }
+            )
+        finite = [item for item in records if np.isfinite(item["distance_to_gt"])]
+        oracle = min(finite, key=lambda item: item["distance_to_gt"], default=None)
+        qwen_choice = max(
+            visual,
+            key=lambda ft: (
+                float(ft.utility) if np.isfinite(ft.utility) else -np.inf,
+                float(ft.u_gain) if ft.u_gain is not None else -np.inf,
+                -int(ft.id),
+            ),
+            default=None,
+        )
+        payload = {
+            "step": int(self.navigation_steps),
+            "oracle_definition": "minimum candidate-to-GT-viewpoint navmesh distance",
+            "oracle": oracle,
+            "qwen_visual_choice_id": int(qwen_choice.id) if qwen_choice else None,
+            "geometry_override_position": (
+                np.asarray(override.pos3d, dtype=float).tolist()
+                if override is not None
+                else None
+            ),
+            "candidates": records,
+        }
+        with open(self.selector_oracle_file, "a") as stream:
+            stream.write(json.dumps(payload, allow_nan=True) + "\n")
 
     def move(self, steps: int) -> None:
         """
@@ -1445,6 +1640,9 @@ class NavigationAgent:
                 else 3.5
             ),
             "resolution": self.VOX_SIZE,
+            "observed_ray_stride": int(
+                self.config.get("geometry_frontier_observed_ray_stride", 12)
+            ),
         }
 
         # save intrinsics for later

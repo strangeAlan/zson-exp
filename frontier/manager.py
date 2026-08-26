@@ -374,6 +374,7 @@ class FrontierManager(Base):
             frontier.pos3d = viewpoint[:3, 3]
             frontier.pose6d = viewpoint
             frontier.is_object = True
+            frontier.source = "object"
             frontier.linked_object = obj
 
             frontier.view_direction = viewpoint[:3, 2]  # +Z axis
@@ -705,6 +706,7 @@ class FrontierManager(Base):
                     _ft.view_direction = cls_vd / np.linalg.norm(cls_vd) + 1e-6
                     _ft.set_valid()
                     _ft.is_object = True
+                    _ft.source = "object"
                     _ft.linked_object = _fts[
                         0
                     ].linked_object  # keep the first object's info
@@ -1020,6 +1022,18 @@ class FrontierManager(Base):
         # Purge all marked
         self.remove_invalid_frontiers()
 
+    def is_unreachable_position(self, position: np.ndarray, threshold: float = 0.1) -> bool:
+        """Read-only check shared by transient geometric proposals."""
+        point = np.asarray(position, dtype=float)
+        return any(
+            np.linalg.norm(point - np.asarray(blocked, dtype=float)) < threshold
+            for blocked in self._unreachable_positions
+        )
+
+    def blacklist_position(self, position: np.ndarray) -> None:
+        """Record a planning failure without requiring a persistent frontier ID."""
+        self._unreachable_positions.append(np.asarray(position, dtype=float).copy())
+
     def next_emergency_rotation(self) -> bool:
         self._current_emergency_rotation += 1
         self.filter_min_gain /= 2.0  # relax gain threshold
@@ -1280,6 +1294,52 @@ class FrontierManager(Base):
                 self.current_goal_ft_id = None
             self.current_goal_pose = None
             self.logger.debug("Dropped goal frontier due to planning failure.")
+            return None
+
+    def plan_path_to_frontier(
+        self,
+        current_pose: np.ndarray,
+        frontier: Frontier,
+        interpolate_solution: bool = True,
+        depth: np.ndarray = None,
+    ) -> list[np.ndarray]:
+        """Plan to an ephemeral proposal without inserting it into FrontierManager."""
+        goal_pose = self.get_frontier_pose(frontier)
+        self.current_goal_ft_id = None
+        self.current_goal_pose = goal_pose
+        if not self.planner.update_start_goal(start=current_pose, goal=goal_pose):
+            self.blacklist_position(frontier.pos3d)
+            self.current_goal_pose = None
+            return None
+
+        try:
+            if not self.planner.solve(
+                time_limit=self.max_planning_time,
+                method=self.planning_algo,
+                depth=depth,
+            ):
+                self.blacklist_position(frontier.pos3d)
+                self.current_goal_pose = None
+                self.log(
+                    "error",
+                    self.logging_file,
+                    "Planning failed for transient geometry frontier; blacklisting position.",
+                )
+                return None
+            if interpolate_solution:
+                self.planner.interpolate_path()
+            if len(self.planner.solution) == 0:
+                self.current_goal_pose = None
+                return None
+            return self.planner.get_solution_path(return_type="mat")
+        except Exception as error:
+            self.blacklist_position(frontier.pos3d)
+            self.current_goal_pose = None
+            self.log(
+                "error",
+                self.logging_file,
+                f"Geometry frontier path planning failed: {error}",
+            )
             return None
 
     def get_optimal_path_length(

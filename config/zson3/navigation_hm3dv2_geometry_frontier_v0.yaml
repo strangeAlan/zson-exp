@@ -1,0 +1,26 @@
+# OF-base HM3Dv2 with one isolated research change: transient geometric
+# completion of visual frontier proposal gaps. Target, Qwen, FrontierNet,
+# FrontierManager utility and PointNav settings are inherited unchanged.
+extends: navigation_hm3dv1_qwen.yaml
+
+geometry_frontier_enabled: true
+
+# Wavemap -> 2D projection. Unknown is the complement of an RGB-D ray-derived
+# observed mask, never the complement of free/occupied point samples.
+geometry_frontier_observed_ray_stride: 12
+geometry_frontier_slice_min_height: 0.1
+geometry_frontier_slice_max_height: 1.3
+geometry_frontier_slice_height_step: 0.2
+
+# One candidate per known-free/unknown boundary component.
+geometry_frontier_min_component_cells: 4
+geometry_frontier_min_robot_distance: 0.75
+geometry_frontier_blacklist_distance: 0.1
+
+# Reuse FrontierManager's position/direction metric and clustering scale.
+geometry_frontier_match_threshold: 1.8
+geometry_frontier_match_weights: [1.0, 2.0]
+
+# Common visual/geometry coverage sector; radius reuses render_d_range=3.5 m.
+geometry_frontier_coverage_radius: 3.5
+geometry_frontier_coverage_half_angle_deg: 45.0

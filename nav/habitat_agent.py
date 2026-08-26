@@ -43,6 +43,9 @@ class HabitatAgent(NavigationAgent):
         ]
 
         self.planner = HabitatPlanner(sim=habitat_env.sim, params=openfrontier_config)
+        # PointnavAgent later replaces self.planner with the learned controller.
+        # Keep this read-only navmesh handle for snapping/geodesics/diagnostics.
+        self.navmesh_planner = self.planner
 
         self.habitat_env = habitat_env
         self.target_semantic_ids = {
@@ -104,6 +107,21 @@ class HabitatAgent(NavigationAgent):
             cam_to_agent=cam_to_agent,
             fix_view_level=fix_view_level,
         )
+
+        # Shadow selector oracle only: these GT navmesh viewpoints are logged
+        # for post-hoc ranking and never influence navigation decisions.
+        oracle_goal_points = []
+        for goal in episode.goals:
+            for view_point in getattr(goal, "view_points", []) or []:
+                state = getattr(view_point, "agent_state", None)
+                position = getattr(state, "position", None)
+                if position is not None:
+                    oracle_goal_points.append(from_habitat_position(position))
+            if not oracle_goal_points and getattr(goal, "position", None) is not None:
+                oracle_goal_points.append(from_habitat_position(goal.position))
+        self.oracle_goal_points = [
+            np.asarray(position, dtype=float) for position in oracle_goal_points
+        ]
 
         self.video_frames = []
 

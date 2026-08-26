@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "name": "hm3dv2_ofbase_geometry_frontier_smoke1",
+    "parent_probe": "config/evaluation/hm3dv2_ofbase_geometry_frontier_probe_v0.json",
+    "parent_source_index": 139,
+    "purpose": "Single end-to-end runnability check only"
+  },
+  "selection": [
+    {
+      "scene_id": "BAbdmeyTvMZ",
+      "episode_id": "27",
+      "source_target": "toilet"
+    }
+  ]
+}

@@ -25,6 +25,8 @@ class Frontier:
             "6d_pose": None,  # placeholder for future 6D pose.
             "is_object": False,
             "linked_object": None,
+            "source": "visual",
+            "coverage": None,
         }
 
         if frontier_feature is not None:
@@ -204,6 +206,24 @@ class Frontier:
     def linked_object(self, val: Any):
         self.features["linked_object"] = val
 
+    @property
+    def source(self) -> str:
+        return self.features.get("source", "visual")
+
+    @source.setter
+    def source(self, val: str):
+        if val not in {"visual", "geometry", "object"}:
+            raise ValueError(f"Unsupported frontier source: {val}")
+        self.features["source"] = val
+
+    @property
+    def coverage(self) -> Optional[float]:
+        return self.features.get("coverage", None)
+
+    @coverage.setter
+    def coverage(self, val: Optional[float]):
+        self.features["coverage"] = None if val is None else float(val)
+
     @parent_ids.setter
     def parent_ids(self, val: list):
         if not isinstance(val, list):
@@ -267,6 +287,8 @@ class Frontier:
                 if hasattr(self.linked_object, "to_dict")
                 else self.linked_object
             ),
+            "source": self.source,
+            "coverage": self.coverage,
         }
 
     def from_dict(self, data: Dict[str, Any]):
@@ -285,6 +307,8 @@ class Frontier:
         self.probability = data.get("probability", 0.5)
         self.justification = data.get("justification", "Not analysed")
         self.is_object = data.get("is_object", False)
+        self.source = data.get("source", "object" if self.is_object else "visual")
+        self.coverage = data.get("coverage", None)
 
     def __repr__(self):
         return (
