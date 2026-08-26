@@ -10,6 +10,7 @@ import torch
 import open3d as o3d
 import cv2
 from vlm.utils import (
+    detect_bound_target_candidates,
     detect_frontier_probabilities,
     segment_target_object,
     detect_target_object,
@@ -180,9 +181,14 @@ class NavigationAgent:
         self.target_diagnostics = {
             "segmentation_events": [],
             "verification_events": [],
+            "path_exhausted_recovery_events": [],
             "visibility_events": [],
             "termination_event": None,
         }
+        self.target_candidate_bound_verification = bool(
+            self.config.get("target_candidate_bound_verification", False)
+        )
+        self.candidate_verification_cache = {}
         self.geometry_frontier_enabled = bool(
             self.config.get("geometry_frontier_enabled", False)
         )
@@ -424,6 +430,9 @@ class NavigationAgent:
             else:
                 masks, image = response
                 self.segmentation_image = np.array(image)
+                evidence_image, evidence_labels = self._build_candidate_evidence(
+                    masks, self.composition_images
+                )
                 if save_images:
                     segmentation_path = os.path.join(
                         self.segmentation_dir,
@@ -433,7 +442,7 @@ class NavigationAgent:
 
                 depth_compositions = {}
 
-                for mask in masks:
+                for mask_index, mask in enumerate(masks):
                     image_index = mask["image_index"]
                     mask_depth = self.composition_depths[image_index]
                     viewpoint = self.composition_viewpoints[image_index]
@@ -444,6 +453,10 @@ class NavigationAgent:
                         viewpoint=viewpoint,
                         intrinsic_mat=self.cam_intrinsic.intrinsic_matrix,
                         step=self.navigation_steps,
+                        rgb=self.composition_images[image_index],
+                        evidence_image=evidence_image,
+                        evidence_label=evidence_labels[mask_index],
+                        evidence_labels=evidence_labels,
                     )
 
                     self.detected_objects.append(obj)
@@ -894,15 +907,75 @@ class NavigationAgent:
                     self.save_rgb_image(termination, termination_path)
 
                 attempts = 0
+                binding = {
+                    "candidate_bound": False,
+                    "candidate_label": None,
+                    "evidence_step": None,
+                }
                 while attempts < 10:
                     try:
                         detect_start = time.time()
-                        success, response, raw_response = detect_target_object(
-                            rgb=termination,
-                            target_object=self.goal,
-                            vlm_model=self.detection_source,
-                            api_key=self.get_api_key_for_model(self.detection_source),
-                        )
+                        evidence = self.goal_object.best_evidence()
+                        if self.target_candidate_bound_verification:
+                            if evidence is None:
+                                success = True
+                                response = {
+                                    "probability": 0.0,
+                                    "reason": "Selected candidate has no bound SAM evidence.",
+                                }
+                                raw_response = json.dumps(response)
+                            else:
+                                cache_key = (
+                                    int(evidence.get("step") or -1),
+                                    tuple(evidence.get("labels", [])),
+                                    self.goal,
+                                )
+                                cached = self.candidate_verification_cache.get(cache_key)
+                                if cached is None:
+                                    success, candidate_scores, raw_response = (
+                                        detect_bound_target_candidates(
+                                            rgb_image=evidence["image"],
+                                            labels=evidence.get("labels", []),
+                                            target_object=self.goal,
+                                            vlm_model=self.detection_source,
+                                            api_key=self.get_api_key_for_model(
+                                                self.detection_source
+                                            ),
+                                        )
+                                    )
+                                    if success:
+                                        self.candidate_verification_cache[cache_key] = (
+                                            candidate_scores,
+                                            raw_response,
+                                        )
+                                else:
+                                    candidate_scores, raw_response = cached
+                                    success = True
+                                if success:
+                                    selected_score = candidate_scores.get(
+                                        evidence["label"],
+                                        [0.0, "Candidate label missing."],
+                                    )
+                                    response = {
+                                        "probability": float(selected_score[0]),
+                                        "reason": str(selected_score[1]),
+                                    }
+                                    binding = {
+                                        "candidate_bound": True,
+                                        "candidate_label": evidence["label"],
+                                        "evidence_step": evidence.get("step"),
+                                    }
+                                else:
+                                    response = None
+                        else:
+                            success, response, raw_response = detect_target_object(
+                                rgb=termination,
+                                target_object=self.goal,
+                                vlm_model=self.detection_source,
+                                api_key=self.get_api_key_for_model(
+                                    self.detection_source
+                                ),
+                            )
                         detect_end = time.time()
                         self.timings["vlm_call"]["total_time"] += (
                             detect_end - detect_start
@@ -918,6 +991,7 @@ class NavigationAgent:
 
                         else:
                             response = None
+                            attempts += 1
                             self.log(
                                 "info",
                                 self.logging_file,
@@ -961,6 +1035,7 @@ class NavigationAgent:
                                 probability >= self.termination_threshold
                             ),
                             "reason": reason,
+                            **binding,
                         }
                     )
                     self.log(
@@ -1687,6 +1762,41 @@ class NavigationAgent:
             )
         return canvas
 
+    def _build_candidate_evidence(
+        self, masks: list[dict], image_array: list[np.ndarray]
+    ) -> tuple[np.ndarray, list[str]]:
+        """Render stable SoM labels on the exact SAM masks that created objects."""
+        marked = [np.asarray(image).copy() for image in image_array]
+        labels = [chr(65 + index) if index < 26 else str(index) for index in range(len(masks))]
+        for label, mask_data in zip(labels, masks):
+            image_index = int(mask_data.get("image_index", 0))
+            if not 0 <= image_index < len(marked):
+                continue
+            mask = np.asarray(mask_data.get("mask"), dtype=bool)
+            image = marked[image_index]
+            if mask.shape != image.shape[:2] or not np.any(mask):
+                continue
+            overlay_color = np.array([255, 32, 32], dtype=np.float32)
+            image[mask] = (
+                0.55 * image[mask].astype(np.float32) + 0.45 * overlay_color
+            ).astype(np.uint8)
+            ys, xs = np.nonzero(mask)
+            center = (int(np.median(xs)), int(np.median(ys)))
+            radius = 24
+            cv2.circle(image, center, radius, (255, 255, 255), 4)
+            cv2.circle(image, center, radius - 4, (255, 32, 32), 3)
+            cv2.putText(
+                image,
+                label,
+                (center[0] - 10, center[1] + 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.9,
+                (255, 255, 255),
+                3,
+                cv2.LINE_AA,
+            )
+        return self.compose_images(marked), labels
+
     def merge_objects(self, distance_threshold: float = 0.5) -> None:
         """
         Merge detected objects that are close to each other with DBSCAN
@@ -1724,6 +1834,7 @@ class NavigationAgent:
             detection_scores = []
             first_seen_steps = []
             last_seen_steps = []
+            evidence_observations = []
             for idx in cluster_indices:
                 obj = self.detected_objects[idx]
                 if obj.centroid is not None:
@@ -1737,6 +1848,9 @@ class NavigationAgent:
                     first_seen_steps.append(int(obj.first_seen_step))
                 if getattr(obj, "last_seen_step", None) is not None:
                     last_seen_steps.append(int(obj.last_seen_step))
+                evidence_observations.extend(
+                    list(getattr(obj, "evidence_observations", []))
+                )
 
                 # All objects must be valid to keep the merged one valid
                 merged_obj.is_valid = merged_obj.is_valid and obj.is_valid
@@ -1762,6 +1876,13 @@ class NavigationAgent:
                 merged_obj.first_seen_step = min(first_seen_steps)
             if last_seen_steps:
                 merged_obj.last_seen_step = max(last_seen_steps)
+            merged_obj.evidence_observations = evidence_observations
+            best_evidence = merged_obj.best_evidence()
+            if best_evidence is not None:
+                merged_obj.evidence_image = best_evidence["image"]
+                merged_obj.evidence_label = best_evidence["label"]
+                merged_obj.evidence_labels = list(best_evidence.get("labels", []))
+                merged_obj.evidence_step = best_evidence.get("step")
 
             merged_objects.append(merged_obj)
 

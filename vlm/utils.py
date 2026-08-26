@@ -127,6 +127,55 @@ def detect_frontier_probabilities(
     return parse_frontier_probability_response(response_text)
 
 
+def detect_bound_target_candidates(
+    rgb_image: np.ndarray,
+    labels: list[str],
+    target_object: str,
+    vlm_model: VLMModel,
+    api_key: str = None,
+) -> Tuple[bool, dict, str]:
+    """Verify the marked SAM candidates themselves, never the global image."""
+    image = PIL.Image.fromarray(np.asarray(rgb_image).astype(np.uint8))
+    if isinstance(vlm_model, str):
+        vlm_model = VLMModel(vlm_model)
+
+    prompt = (
+        f"The image contains SAM candidate masks marked {labels}. "
+        f"For each label, estimate the probability that the object inside that "
+        f"specific marked mask is a {target_object}. Judge only the marked object "
+        "for that label: an unmarked target elsewhere in the image must not make "
+        "a candidate positive. Reject reflections, pictures, severe occlusions, "
+        "and a different nearby object. Return only a JSON list containing one "
+        "dictionary. Each key must be a supplied label and each value must be "
+        "[probability, short reason]. Example: "
+        f'{{"{labels[0] if labels else "A"}": [0.9, "reason"]}}. '
+        f"Cover exactly labels {labels}."
+    )
+
+    if is_google_api(vlm_model):
+        if api_key is None:
+            raise ValueError("API key must be provided for Gemini models.")
+        client = genai.Client(api_key=api_key)
+        model_name = vlm_model.value.replace("-api", "")
+        if is_gemma_api(vlm_model):
+            response = client.models.generate_content(
+                model=model_name, contents=[prompt, image]
+            )
+        else:
+            response = client.models.generate_content(
+                model=model_name, contents=[prompt, image], config=GEMINI_CONFIG
+            )
+        response_text = response.text
+    elif is_qwen_local(vlm_model):
+        response_text = QwenClient().generate(prompt=prompt, image=rgb_image)
+    else:
+        client = VLMClient("vlm", port=12185)
+        response = client.send_request(image=rgb_image, prompt=prompt)
+        response_text = response.get("response", "")
+
+    return parse_frontier_probability_response(response_text)
+
+
 def segment_target_object(
     rgb_composition: np.ndarray,
     target_object: str,

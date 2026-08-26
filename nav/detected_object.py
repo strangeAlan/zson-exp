@@ -14,6 +14,12 @@ class DetectedObject:
         DetectedObject._next_id += 1
         self.label = ""
         self.mask = None
+        self.rgb = None
+        self.evidence_image = None
+        self.evidence_label = None
+        self.evidence_labels = []
+        self.evidence_step = None
+        self.evidence_observations = []
         self.image_index = 0
         self.depth = None
         self.viewpoint = None
@@ -35,6 +41,10 @@ class DetectedObject:
         viewpoint: np.ndarray,
         intrinsic_mat: np.ndarray,
         step: int | None = None,
+        rgb: np.ndarray | None = None,
+        evidence_image: np.ndarray | None = None,
+        evidence_label: str | None = None,
+        evidence_labels: list[str] | None = None,
     ):
         obj = cls()
         obj.label = mask.get("label", "")
@@ -43,14 +53,54 @@ class DetectedObject:
         obj.box_2d = mask.get("box_2d")
         obj.first_seen_step = step
         obj.last_seen_step = step
+        obj.evidence_step = step
 
         mask_array = np.array(mask["mask"])
+        obj.mask = mask_array.astype(bool)
+        obj.rgb = None if rgb is None else np.asarray(rgb).copy()
+        obj.evidence_image = evidence_image
+        obj.evidence_label = evidence_label
+        obj.evidence_labels = list(evidence_labels or [])
         mask_depth = mask_array * depth
 
         obj.depth = depth
         obj.viewpoint = viewpoint
         obj.centroid = cls.get_object_location(mask_depth, viewpoint, intrinsic_mat)
+        obj.evidence_observations = [
+            {
+                "image": evidence_image,
+                "label": evidence_label,
+                "labels": list(evidence_labels or []),
+                "mask": obj.mask,
+                "rgb": obj.rgb,
+                "viewpoint": np.asarray(viewpoint, dtype=float).copy(),
+                "centroid": (
+                    None
+                    if obj.centroid is None
+                    else np.asarray(obj.centroid, dtype=float).copy()
+                ),
+                "score": obj.detection_score,
+                "step": step,
+            }
+        ]
         return obj
+
+    def best_evidence(self) -> dict | None:
+        usable = [
+            observation
+            for observation in self.evidence_observations
+            if observation.get("image") is not None
+            and observation.get("label") is not None
+        ]
+        if not usable:
+            return None
+        return max(
+            usable,
+            key=lambda observation: (
+                float(observation.get("score") or 0.0),
+                int(observation.get("step") or -1),
+            ),
+        )
 
     @classmethod
     def get_object_location(
@@ -110,6 +160,9 @@ class DetectedObject:
             "observation_count": self.observation_count,
             "first_seen_step": self.first_seen_step,
             "last_seen_step": self.last_seen_step,
+            "evidence_label": self.evidence_label,
+            "evidence_step": self.evidence_step,
+            "evidence_observation_count": len(self.evidence_observations),
             "frontier_id": (
                 None if self.frontier is None else getattr(self.frontier, "id", None)
             ),
