@@ -173,6 +173,8 @@ class NavigationAgent:
         self.segmentation_image = None
         self.composition_images = []
         self.termination_images = []
+        self.termination_depths = []
+        self.termination_viewpoints = []
         self.composition_depths = []
         self.composition_viewpoints = []
         self.detected_objects = []
@@ -189,6 +191,16 @@ class NavigationAgent:
             self.config.get("target_candidate_bound_verification", False)
         )
         self.candidate_verification_cache = {}
+        self.target_path_exhausted_recovery = bool(
+            self.config.get("target_path_exhausted_recovery", False)
+        )
+        self.target_path_exhausted_max_retries = int(
+            self.config.get("target_path_exhausted_max_retries", 1)
+        )
+        self.target_reassociation_distance = float(
+            self.config.get("target_reassociation_distance", 1.0)
+        )
+        self.path_exhausted_recovery_attempts = 0
         self.geometry_frontier_enabled = bool(
             self.config.get("geometry_frontier_enabled", False)
         )
@@ -372,9 +384,13 @@ class NavigationAgent:
         # Always keep the latest n_images for termination
         if len(self.termination_images) == self.n_images:
             self.termination_images.pop(0)
+            self.termination_depths.pop(0)
+            self.termination_viewpoints.pop(0)
 
         self.composition_images.append(rgb)
         self.termination_images.append(rgb)
+        self.termination_depths.append(depth)
+        self.termination_viewpoints.append(W_T_C2.copy())
         self.composition_depths.append(depth)
         self.composition_viewpoints.append(W_T_C2.copy())
 
@@ -1052,6 +1068,7 @@ class NavigationAgent:
                             f"Object found with probability {probability}. Approaching object.",
                         )
                         self.ft_manager.lock_into_object(self.goal_object)
+                        self.path_exhausted_recovery_attempts = 0
                         self.geometry_override_candidate = None
                         self.path_to_go = (
                             self.ft_manager.plan_path_to_goal(
@@ -1099,7 +1116,26 @@ class NavigationAgent:
                 f"Approaching locked-in object. Distance to object center: {dist:.2f} m",
             )
 
-            if len(self.path_to_go) == 0 or dist < self.success_threshold:
+            stop_trigger = None
+            if dist < self.success_threshold:
+                stop_trigger = "centroid_distance"
+            elif len(self.path_to_go) == 0:
+                if self.target_path_exhausted_recovery:
+                    recovery = self._recover_path_exhausted_object(
+                        W_T_C=W_T_C2,
+                        depth=depth,
+                    )
+                    if recovery == "stop":
+                        object_pos = self.ft_manager.object_lockin.centroid
+                        dist = np.linalg.norm(object_pos - W_T_C2[:3, 3])
+                        stop_trigger = "distance_after_bound_reobservation"
+                    elif recovery == "released":
+                        reach_next_update = True
+                        self.move_enough = True
+                else:
+                    stop_trigger = "path_exhausted_legacy"
+
+            if stop_trigger is not None:
                 self.target_diagnostics["termination_event"] = {
                     "step": self.navigation_steps,
                     "object_id": self.ft_manager.object_lockin.id,
@@ -1107,6 +1143,10 @@ class NavigationAgent:
                     "agent_position": W_T_C2[:3, 3].astype(float).tolist(),
                     "distance_to_object": float(dist),
                     "path_exhausted": len(self.path_to_go) == 0,
+                    "stop_trigger": stop_trigger,
+                    "path_exhausted_recovery_attempts": int(
+                        self.path_exhausted_recovery_attempts
+                    ),
                     "success_threshold": self.success_threshold,
                 }
                 self.log(
@@ -1169,6 +1209,192 @@ class NavigationAgent:
             )
         
         return True, "continue_navigation"
+
+    def _recover_path_exhausted_object(
+        self, W_T_C: np.ndarray, depth: np.ndarray
+    ) -> str:
+        """Re-observe a locked candidate; path exhaustion itself never authorizes STOP."""
+        locked = self.ft_manager.object_lockin
+        if locked is None:
+            return "released"
+        event = {
+            "step": int(self.navigation_steps),
+            "object_id": int(locked.id),
+            "old_centroid": np.asarray(locked.centroid, dtype=float).tolist(),
+            "attempt": int(self.path_exhausted_recovery_attempts + 1),
+            "outcome": None,
+        }
+        if (
+            self.path_exhausted_recovery_attempts
+            >= self.target_path_exhausted_max_retries
+        ):
+            event["outcome"] = "released_retry_limit"
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            self._release_locked_object("path_exhausted_retry_limit")
+            return "released"
+
+        self.path_exhausted_recovery_attempts += 1
+        if not self.termination_images:
+            event["outcome"] = "released_no_observation"
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            self._release_locked_object("path_exhausted_no_observation")
+            return "released"
+
+        composition = self.compose_images(self.termination_images)
+        start_sam = time.time()
+        try:
+            response = segment_target_object(
+                rgb_composition=composition,
+                n_images=self.n_images,
+                target_object=self.goal,
+                segmentation_model=self.segmentation_source,
+                api_key=self.get_api_key_for_model(self.segmentation_source),
+            )
+        except (QwenServiceError, Sam3ServiceError):
+            raise
+        except Exception as error:
+            event["outcome"] = "released_reobservation_error"
+            event["error"] = f"{type(error).__name__}: {error}"
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            self._release_locked_object("path_exhausted_reobservation_error")
+            return "released"
+        self.timings["sam"]["total_time"] += time.time() - start_sam
+        self.timings["sam"]["calls"] += 1
+        if response is None or len(response) != 2 or not response[0]:
+            event["outcome"] = "released_no_mask"
+            event["mask_count"] = 0
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            self._release_locked_object("path_exhausted_no_mask")
+            return "released"
+
+        masks, _ = response
+        evidence_image, labels = self._build_candidate_evidence(
+            masks, self.termination_images
+        )
+        candidates = []
+        for index, mask in enumerate(masks):
+            image_index = int(mask.get("image_index", -1))
+            if not 0 <= image_index < len(self.termination_depths):
+                continue
+            candidate = DetectedObject.from_mask(
+                mask=mask,
+                depth=self.termination_depths[image_index],
+                viewpoint=self.termination_viewpoints[image_index],
+                intrinsic_mat=self.cam_intrinsic.intrinsic_matrix,
+                step=self.navigation_steps,
+                rgb=self.termination_images[image_index],
+                evidence_image=evidence_image,
+                evidence_label=labels[index],
+                evidence_labels=labels,
+            )
+            if candidate.centroid is not None:
+                candidates.append(candidate)
+
+        event["mask_count"] = len(candidates)
+        if not candidates:
+            event["outcome"] = "released_no_3d_candidate"
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            self._release_locked_object("path_exhausted_no_3d_candidate")
+            return "released"
+
+        distances = [
+            float(np.linalg.norm(candidate.centroid - locked.centroid))
+            for candidate in candidates
+        ]
+        selected_index = int(np.argmin(distances))
+        candidate = candidates[selected_index]
+        association_distance = distances[selected_index]
+        event["association_distance"] = association_distance
+        event["candidate_label"] = candidate.evidence_label
+        if association_distance > self.target_reassociation_distance:
+            event["outcome"] = "released_no_bound_candidate"
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            self._release_locked_object("path_exhausted_no_bound_candidate")
+            return "released"
+
+        start_vlm = time.time()
+        try:
+            success, scores, raw_response = detect_bound_target_candidates(
+                rgb_image=evidence_image,
+                labels=labels,
+                target_object=self.goal,
+                vlm_model=self.detection_source,
+                api_key=self.get_api_key_for_model(self.detection_source),
+            )
+        except (QwenServiceError, Sam3ServiceError):
+            raise
+        except Exception as error:
+            event["outcome"] = "released_verification_error"
+            event["error"] = f"{type(error).__name__}: {error}"
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            self._release_locked_object("path_exhausted_verification_error")
+            return "released"
+        self.timings["vlm_call"]["total_time"] += time.time() - start_vlm
+        self.timings["vlm_call"]["calls"] += 1
+        self.log(
+            "info",
+            self.vlm_log_file,
+            f"Path-exhausted bound target recovery: {raw_response}",
+        )
+        selected_score = scores.get(
+            candidate.evidence_label, [0.0, "Candidate label missing."]
+        )
+        probability = float(selected_score[0]) if success else 0.0
+        event["probability"] = probability
+        event["reason"] = str(selected_score[1])
+        if probability < self.termination_threshold:
+            event["outcome"] = "released_candidate_rejected"
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            self._release_locked_object("path_exhausted_candidate_rejected")
+            return "released"
+
+        locked.centroid = np.asarray(candidate.centroid, dtype=float)
+        locked.viewpoint = np.asarray(candidate.viewpoint, dtype=float)
+        locked.last_seen_step = self.navigation_steps
+        locked.evidence_observations.extend(candidate.evidence_observations)
+        event["new_centroid"] = locked.centroid.tolist()
+        distance = float(np.linalg.norm(locked.centroid - W_T_C[:3, 3]))
+        event["updated_distance_to_object"] = distance
+        if distance < self.success_threshold:
+            event["outcome"] = "stop_after_bound_reobservation"
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            return "stop"
+
+        self.path_to_go = (
+            self.ft_manager.plan_path_to_goal(
+                W_T_C, depth=depth, use_graph=False
+            )
+            or []
+        )
+        if self.path_to_go:
+            event["outcome"] = "replanned"
+            event["replanned_path_steps"] = len(self.path_to_go)
+            self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+            return "replanned"
+
+        event["outcome"] = "released_no_replan_progress"
+        self.target_diagnostics["path_exhausted_recovery_events"].append(event)
+        self._release_locked_object("path_exhausted_no_replan_progress")
+        return "released"
+
+    def _release_locked_object(self, reason: str) -> None:
+        locked = self.ft_manager.object_lockin
+        if locked is not None:
+            locked.is_valid = False
+            locked.verification_status = reason
+            if locked.frontier is not None:
+                locked.frontier.set_invalid()
+        self.ft_manager.object_lockin = None
+        self.goal_object = None
+        self.path_to_go = []
+        self.ft_manager.current_goal_pose = None
+        self.ft_manager.current_goal_ft_id = None
+        self.ft_manager.filter_frontiers()
+        self.log(
+            "info",
+            self.logging_file,
+            f"Released locked target after path exhaustion: {reason}",
+        )
 
     def get_target_diagnostics(self) -> dict:
         """Return episode-level target evidence without changing policy state."""
@@ -1723,6 +1949,8 @@ class NavigationAgent:
     def close(self) -> None:
         self.composition_images.clear()
         self.termination_images.clear()
+        self.termination_depths.clear()
+        self.termination_viewpoints.clear()
         self.composition_depths.clear()
         self.composition_viewpoints.clear()
         self.last_rgb = None

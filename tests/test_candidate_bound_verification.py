@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 import numpy as np
+from types import SimpleNamespace
 
 from nav.agent import NavigationAgent
 from nav.detected_object import DetectedObject
@@ -69,6 +70,44 @@ class CandidateBoundVerificationTests(unittest.TestCase):
         prompt = generate.call_args.kwargs["prompt"]
         self.assertIn("specific marked mask", prompt)
         self.assertIn("unmarked target elsewhere", prompt)
+
+    def test_path_exhaustion_without_observation_releases_instead_of_stopping(self):
+        locked = SimpleNamespace(
+            id=7,
+            centroid=np.array([2.0, 0.0, 0.0]),
+            frontier=None,
+            is_valid=True,
+            verification_status="true_positive",
+        )
+        manager = SimpleNamespace(
+            object_lockin=locked,
+            current_goal_pose=np.eye(4),
+            current_goal_ft_id=4,
+            filter_frontiers=mock.Mock(),
+        )
+        agent = NavigationAgent.__new__(NavigationAgent)
+        agent.ft_manager = manager
+        agent.navigation_steps = 20
+        agent.path_exhausted_recovery_attempts = 0
+        agent.target_path_exhausted_max_retries = 1
+        agent.termination_images = []
+        agent.target_diagnostics = {"path_exhausted_recovery_events": []}
+        agent.goal_object = None
+        agent.path_to_go = []
+        agent.log = mock.Mock()
+        agent.logging_file = "unused"
+
+        outcome = agent._recover_path_exhausted_object(
+            W_T_C=np.eye(4), depth=np.ones((2, 2), dtype=np.float32)
+        )
+        self.assertEqual(outcome, "released")
+        self.assertIsNone(manager.object_lockin)
+        self.assertEqual(
+            agent.target_diagnostics["path_exhausted_recovery_events"][0][
+                "outcome"
+            ],
+            "released_no_observation",
+        )
 
 
 if __name__ == "__main__":
