@@ -23,7 +23,7 @@ from scipy.spatial.transform import Rotation as R
 # OpenFrontier
 from frontier.detector import FrontierDetector
 from frontier.model.predict import load_model
-from utils.frontier_utils import read_config_yaml
+from utils.frontier_utils import ft_pos_direct_distance, read_config_yaml
 
 # Mapping
 from mapping.wavemap import WaveMapper
@@ -193,6 +193,16 @@ class NavigationAgent:
         )
         self.geometry_override_candidate = None
         self.geometry_diagnostics = []
+        self.geometry_force_refresh = False
+        self.geometry_cooldowns = {}
+        self.geometry_cooldown_steps = int(
+            self.config.get("geometry_frontier_cooldown_steps", 120)
+        )
+        self.geometry_identity_resolution = float(
+            self.config.get("geometry_frontier_identity_resolution", 0.5)
+        )
+        self.attempted_visual_features = []
+        self.active_visual_feature = None
         self.selector_oracle_file = os.path.join(save_dir, "selector_oracle.jsonl")
         if self.geometry_frontier_enabled:
             open(self.selector_oracle_file, "w").close()
@@ -499,11 +509,16 @@ class NavigationAgent:
         )
         
 
-        if (
-            self.emergency_rotation  # When doing lifesaving rotation, check on every step
-            or self.ft_manager.object_lockin is None
-            and (no_more_frontier or reach_next_update)
+        geometry_in_progress = self.geometry_override_candidate is not None
+        if self.geometry_force_refresh or (
+            not geometry_in_progress
+            and (
+                self.emergency_rotation
+                or self.ft_manager.object_lockin is None
+                and (no_more_frontier or reach_next_update)
+            )
         ):
+            self.geometry_force_refresh = False
             full_frontier_refresh = True
             full_frontier_start = time.time()
             self.log("info", self.logging_file, "Updating frontiers.")
@@ -755,7 +770,15 @@ class NavigationAgent:
                 )
                 selected_source = "geometry"
                 if not self.path_to_go:
-                    self.geometry_override_candidate = None
+                    transient_status = self.ft_manager.last_transient_plan_status
+                    if transient_status == "reached":
+                        self._consume_geometry_frontier(
+                            selected_frontier, depth, W_T_C2
+                        )
+                    else:
+                        self._finish_geometry_frontier(
+                            selected_frontier, transient_status
+                        )
             else:
                 self.geometry_override_candidate = None
                 self.path_to_go = (
@@ -778,6 +801,21 @@ class NavigationAgent:
                     if self.ft_manager.object_lockin is not None
                     else "visual"
                 )
+                if (
+                    selected_frontier is not None
+                    and selected_frontier.source == "visual"
+                    and self.path_to_go
+                ):
+                    feature = self._frontier_feature(selected_frontier)
+                    self.active_visual_feature = feature
+                    if not self._feature_matches_any(
+                        feature, self.attempted_visual_features
+                    ):
+                        self.attempted_visual_features.append(feature)
+                elif selected_frontier is None or selected_frontier.source != "visual":
+                    self.active_visual_feature = None
+                elif not self.path_to_go:
+                    self.active_visual_feature = None
             selected_position = (
                 np.asarray(selected_frontier.pos3d, dtype=float).tolist()
                 if selected_frontier is not None
@@ -1067,10 +1105,12 @@ class NavigationAgent:
         }
 
     def _refresh_geometry_completion(self, W_T_C: np.ndarray) -> None:
-        """Recompute transient completion proposals after a normal OF refresh."""
+        """Offer one geometry fallback only after visual opportunities are exhausted."""
         self.geometry_override_candidate = None
         if self.mapper is None or self.ft_manager.object_lockin is not None:
             return
+
+        self._expire_geometry_cooldowns()
 
         projection = self.mapper.get_navigation_projection(
             nav_level=self.planner.nav_level,
@@ -1092,36 +1132,69 @@ class NavigationAgent:
         object_candidates = [
             ft for ft in self.ft_manager.valid_frontiers if ft.is_object
         ]
+        fresh_visual = [
+            ft
+            for ft in visual
+            if not self._feature_matches_any(
+                self._frontier_feature(ft), self.attempted_visual_features
+            )
+        ]
+        active_visual = bool(
+            self.active_visual_feature is not None
+            and any(
+                self._features_match(
+                    self._frontier_feature(ft), self.active_visual_feature
+                )
+                for ft in visual
+            )
+        )
         geometric = self.geometry_completion.generate(
             projection=projection,
             current_position=W_T_C[:3, 3],
             nav_level=self.planner.nav_level,
             planner=self.navmesh_planner,
             unreachable_positions=self.ft_manager._unreachable_positions,
+            suppressed_positions=[
+                np.asarray(item["position"], dtype=float)
+                for item in self.geometry_cooldowns.values()
+            ],
+            suppression_distance=self.geometry_identity_resolution,
             bbox=self.bbox,
             occupancy_planner=self.planner,
         )
-        override, stats = self.geometry_completion.select_completion(
+        best_geometry, stats = self.geometry_completion.select_completion(
             geometric=geometric,
             visual=visual,
             projection=projection,
             current_position=W_T_C[:3, 3],
             planner=self.navmesh_planner,
         )
+        eligibility_reason = None
+        if not visual:
+            eligibility_reason = "no_visual_frontier"
+        elif not fresh_visual and not active_visual:
+            eligibility_reason = "all_visual_frontiers_attempted"
+
+        completion = best_geometry if eligibility_reason is not None else None
         if object_candidates or self.goal_object is not None:
-            override = None
-        self.geometry_override_candidate = override
+            completion = None
+            eligibility_reason = "object_priority"
+        self.geometry_override_candidate = completion
         event = {
+            "event": "refresh",
             "step": int(self.navigation_steps),
             "visual_count": len(visual),
+            "fresh_visual_count": len(fresh_visual),
+            "active_visual_in_progress": active_visual,
             "geometric_count": stats.geometric_count,
             "unmatched_geometric_count": stats.unmatched_count,
             "best_visual_coverage": stats.best_visual_coverage,
             "best_geometry_coverage": stats.best_geometry_coverage,
-            "selected_source": "geometry" if override is not None else "visual",
+            "geometry_eligibility_reason": eligibility_reason,
+            "selected_source": "geometry" if completion is not None else "visual",
             "geometry_override_position": (
-                np.asarray(override.pos3d, dtype=float).tolist()
-                if override is not None
+                np.asarray(completion.pos3d, dtype=float).tolist()
+                if completion is not None
                 else None
             ),
             "frontiers": [ft.to_dict() for ft in visual + geometric],
@@ -1131,14 +1204,89 @@ class NavigationAgent:
             "info",
             self.logging_file,
             "Geometry completion - "
-            f"visual={len(visual)} geometry={stats.geometric_count} "
+            f"visual={len(visual)} fresh_visual={len(fresh_visual)} "
+            f"active_visual={active_visual} geometry={stats.geometric_count} "
             f"unmatched={stats.unmatched_count} "
             f"best_visual_coverage={stats.best_visual_coverage:.4f} "
             f"best_geometry_coverage={stats.best_geometry_coverage:.4f} "
+            f"eligibility={eligibility_reason} "
             f"selected_source={event['selected_source']} "
             f"override_position={event['geometry_override_position']}",
         )
-        self._record_selector_oracle(visual + geometric, visual, override)
+        self._record_selector_oracle(visual + geometric, visual, completion)
+
+    def _frontier_feature(self, frontier) -> np.ndarray:
+        return np.concatenate(
+            (
+                np.asarray(frontier.pos3d, dtype=float),
+                np.asarray(frontier.view_direction, dtype=float),
+            )
+        )
+
+    def _features_match(self, first: np.ndarray, second: np.ndarray) -> bool:
+        return ft_pos_direct_distance(
+            first,
+            second,
+            weights=list(self.geometry_completion.match_weights),
+        ) <= self.geometry_completion.match_threshold
+
+    def _feature_matches_any(self, feature: np.ndarray, features: list) -> bool:
+        return any(self._features_match(feature, item) for item in features)
+
+    def _geometry_identity(self, position: np.ndarray) -> tuple:
+        resolution = max(self.geometry_identity_resolution, 1e-6)
+        return tuple(
+            np.round(np.asarray(position, dtype=float)[:2] / resolution).astype(int)
+        )
+
+    def _expire_geometry_cooldowns(self) -> None:
+        self.geometry_cooldowns = {
+            identity: record
+            for identity, record in self.geometry_cooldowns.items()
+            if int(record["until_step"]) > self.navigation_steps
+        }
+
+    def _finish_geometry_frontier(self, frontier, status: str) -> None:
+        identity = self._geometry_identity(frontier.pos3d)
+        self.geometry_cooldowns[identity] = {
+            "position": np.asarray(frontier.pos3d, dtype=float).tolist(),
+            "until_step": int(self.navigation_steps + self.geometry_cooldown_steps),
+        }
+        self.geometry_diagnostics.append(
+            {
+                "event": "completed" if status == "reached" else "failed",
+                "step": int(self.navigation_steps),
+                "status": status,
+                "position": np.asarray(frontier.pos3d, dtype=float).tolist(),
+                "heading_to_unknown": np.asarray(
+                    frontier.view_direction, dtype=float
+                ).tolist(),
+                "pose_error": self.ft_manager.last_transient_pose_error,
+                "cooldown_until_step": int(
+                    self.navigation_steps + self.geometry_cooldown_steps
+                ),
+            }
+        )
+        self.geometry_override_candidate = None
+        self.path_to_go = []
+
+    def _consume_geometry_frontier(
+        self, frontier, depth: np.ndarray, W_T_C: np.ndarray
+    ) -> None:
+        """Consume a viewpoint only after PointNav has faced its unknown side."""
+        self._finish_geometry_frontier(frontier, "reached")
+        if self.use_map:
+            self.mapper.insert_depth_to_buffer(depth=depth, transform=W_T_C)
+            self.mapper.integrate_from_buffer()
+            self.mapper.interpolate_occupancy_grid()
+            occupancy = self.mapper.get_occupancy_grid()
+            self.ft_manager.update_map(
+                free_map=occupancy["free"], occ_map=occupancy["occupied"]
+            )
+            self.map_loop = 0
+        # The next loop runs the untouched FrontierNet + Qwen refresh from the
+        # just-aligned camera view before geometry can become eligible again.
+        self.geometry_force_refresh = True
 
     def _record_selector_oracle(
         self, candidates: list, visual: list, override

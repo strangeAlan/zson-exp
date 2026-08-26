@@ -69,6 +69,8 @@ class FrontierManager(Base):
         self.current_goal_pose: Optional[np.ndarray] = None
         self.current_goal_ft_id: Optional[int] = None
         self._unreachable_positions = []
+        self.last_transient_plan_status = "idle"
+        self.last_transient_pose_error = None
 
         # IDs
         self._current_frontier_id: int = self.graph.type_range["F"][0]
@@ -1304,12 +1306,15 @@ class FrontierManager(Base):
         depth: np.ndarray = None,
     ) -> list[np.ndarray]:
         """Plan to an ephemeral proposal without inserting it into FrontierManager."""
+        self.last_transient_plan_status = "planning"
+        self.last_transient_pose_error = None
         goal_pose = self.get_frontier_pose(frontier)
         self.current_goal_ft_id = None
         self.current_goal_pose = goal_pose
         if not self.planner.update_start_goal(start=current_pose, goal=goal_pose):
             self.blacklist_position(frontier.pos3d)
             self.current_goal_pose = None
+            self.last_transient_plan_status = "failed"
             return None
 
         try:
@@ -1320,6 +1325,7 @@ class FrontierManager(Base):
             ):
                 self.blacklist_position(frontier.pos3d)
                 self.current_goal_pose = None
+                self.last_transient_plan_status = "failed"
                 self.log(
                     "error",
                     self.logging_file,
@@ -1329,12 +1335,39 @@ class FrontierManager(Base):
             if interpolate_solution:
                 self.planner.interpolate_path()
             if len(self.planner.solution) == 0:
+                _, rot_diff = pose_difference(
+                    goal_pose.reshape(1, 4, 4), current_pose.reshape(1, 4, 4)
+                )
+                # The snapped navmesh point is on the floor while W_T_C is at
+                # camera height. PointNav is planar as well, so only XY can
+                # define arrival at this observation viewpoint.
+                trans_error = float(
+                    np.linalg.norm(goal_pose[:2, 3] - current_pose[:2, 3])
+                )
+                rot_error = float(rot_diff[0, 0])
+                self.last_transient_pose_error = {
+                    "translation_xy": trans_error,
+                    "rotation": rot_error,
+                }
+                arrival_distance = float(
+                    self.params.get("geometry_frontier_arrival_distance", 0.5)
+                )
+                arrival_angle = np.deg2rad(
+                    float(self.params.get("geometry_frontier_arrival_angle_deg", 35.0))
+                )
                 self.current_goal_pose = None
+                if trans_error <= arrival_distance and rot_error <= arrival_angle:
+                    self.last_transient_plan_status = "reached"
+                else:
+                    self.last_transient_plan_status = "failed"
+                    self.blacklist_position(frontier.pos3d)
                 return None
+            self.last_transient_plan_status = "moving"
             return self.planner.get_solution_path(return_type="mat")
         except Exception as error:
             self.blacklist_position(frontier.pos3d)
             self.current_goal_pose = None
+            self.last_transient_plan_status = "failed"
             self.log(
                 "error",
                 self.logging_file,

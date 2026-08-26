@@ -26,7 +26,7 @@ class CompletionStats:
 
 
 class GeometricFrontierCompletion:
-    """Generate and compare geometric frontiers without changing OF semantics."""
+    """Generate and rank geometric completion proposals without changing OF semantics."""
 
     def __init__(self, params: dict):
         self.min_component_cells = int(
@@ -67,6 +67,8 @@ class GeometricFrontierCompletion:
         nav_level: float,
         planner,
         unreachable_positions: Iterable[Sequence[float]],
+        suppressed_positions: Iterable[Sequence[float]] = (),
+        suppression_distance: float = 0.5,
         bbox: Sequence[float] | None = None,
         occupancy_planner=None,
     ) -> list[Frontier]:
@@ -83,6 +85,7 @@ class GeometricFrontierCompletion:
         labels, count = ndimage.label(boundary, structure=structure)
         current = np.asarray(current_position, dtype=float)
         blocked = [np.asarray(item, dtype=float) for item in unreachable_positions]
+        suppressed = [np.asarray(item, dtype=float) for item in suppressed_positions]
         candidates: list[Frontier] = []
 
         for label_id in range(1, count + 1):
@@ -128,6 +131,11 @@ class GeometricFrontierCompletion:
             if any(
                 np.linalg.norm(snapped - position) < self.blacklist_distance
                 for position in blocked
+            ):
+                continue
+            if any(
+                np.linalg.norm(snapped[:2] - position[:2]) < suppression_distance
+                for position in suppressed
             ):
                 continue
             occupancy = occupancy_planner or planner
@@ -244,11 +252,10 @@ class GeometricFrontierCompletion:
         best_geometry_coverage = (
             float(best_geometry.coverage) if best_geometry is not None else 0.0
         )
-        override = best_geometry if (
-            best_geometry is not None
-            and (not visual or best_geometry_coverage > best_visual_coverage)
-        ) else None
-        return override, CompletionStats(
+        # Coverage only ranks unmatched geometric proposals. Whether geometry is
+        # allowed to run is a semantic-first lifecycle decision owned by the
+        # navigation agent; it is never compared against visual coverage here.
+        return best_geometry, CompletionStats(
             geometric_count=len(geometric),
             unmatched_count=len(unmatched),
             best_visual_coverage=best_visual_coverage,
