@@ -43,6 +43,9 @@ class HabitatAgent(NavigationAgent):
         ]
 
         self.planner = HabitatPlanner(sim=habitat_env.sim, params=openfrontier_config)
+        # PointnavAgent replaces self.planner after construction.  Keep the
+        # Habitat navmesh for safe-v1's post-acceptance local reachability checks.
+        self.navmesh_planner = self.planner
 
         self.habitat_env = habitat_env
         self.target_semantic_ids = {
@@ -341,10 +344,16 @@ class HabitatAgent(NavigationAgent):
         depth = obs["depth"]
 
         semantic = obs.get("semantic")
-        if semantic is not None and hasattr(self, "target_diagnostics"):
+        if semantic is not None:
             semantic = np.asarray(semantic).squeeze()
+            self.current_target_semantic_mask = np.isin(
+                semantic, tuple(self.target_semantic_ids)
+            )
+        else:
+            self.current_target_semantic_mask = None
+        if semantic is not None and hasattr(self, "target_diagnostics"):
             target_pixels = int(
-                np.isin(semantic, tuple(self.target_semantic_ids)).sum()
+                self.current_target_semantic_mask.sum()
             )
             event = {
                 "step": self.navigation_steps,

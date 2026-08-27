@@ -43,6 +43,21 @@ class HabitatPlanner(PlannerBase):
         point_out = from_habitat_position(snapped)
         return np.array(point_out, dtype=float)
 
+    def geodesic_distance(
+        self, start: Sequence[float], goal: Sequence[float]
+    ) -> float:
+        """Read-only navmesh distance used by late-stage local closure sampling."""
+        query = ShortestPath()
+        query.requested_start = self.pathfinder.snap_point(
+            to_habitat_position(start)
+        )
+        query.requested_end = self.pathfinder.snap_point(
+            to_habitat_position(goal)
+        )
+        if not self.pathfinder.find_path(query):
+            return float("inf")
+        return float(query.geodesic_distance)
+
     def get_bounds(self) -> Dict[str, float]:
         return {
             "low_x": self.bounds[0],

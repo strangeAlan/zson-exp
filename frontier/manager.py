@@ -67,6 +67,8 @@ class FrontierManager(Base):
         # Planner
         self.planner: PlannerBase = planner
         self.current_goal_pose: Optional[np.ndarray] = None
+        # Safe-v1 sets this only after OF-base has globally accepted a target.
+        self.object_closure_pose: Optional[np.ndarray] = None
         self.current_goal_ft_id: Optional[int] = None
         self._unreachable_positions = []
 
@@ -1173,11 +1175,14 @@ class FrontierManager(Base):
         self, current_pose: np.ndarray, use_graph: bool = True
     ) -> np.ndarray:
         if self.object_lockin is not None:
-            goal_pose = np.eye(4)
-            goal_pose[:3, 3] = self.get_object_free_point(
-                current_pose, self.object_lockin.centroid
-            )
-            goal_pose[:3, :3] = current_pose[:3, :3]  # keep current orientation
+            if self.object_closure_pose is not None:
+                goal_pose = self.object_closure_pose.copy()
+            else:
+                goal_pose = np.eye(4)
+                goal_pose[:3, 3] = self.get_object_free_point(
+                    current_pose, self.object_lockin.centroid
+                )
+                goal_pose[:3, :3] = current_pose[:3, :3]  # keep current orientation
             goal_ft = None
             self.current_goal_ft_id = None
             self.current_goal_pose = None
@@ -1323,6 +1328,7 @@ class FrontierManager(Base):
             obj: Detected object dictionary with 'centroid' key.
         """
         self.object_lockin = obj
+        self.object_closure_pose = None
         self.logger.debug(f"Locked into object: {obj.label} at {obj.centroid}")
 
     def get_graph_vis(self):

@@ -1,0 +1,14 @@
+# OF-base plus late-stage, behavior-preserving target closure.
+# Exploration, proposals, merging, global target acceptance, and legacy
+# path_exhausted -> STOP are inherited unchanged.
+extends: navigation_hm3dv1_qwen.yaml
+
+target_closure_safe_enabled: true
+
+# No threshold search: bounded, deliberately local post-acceptance refinement.
+target_closure_max_interventions: 2
+target_closure_max_orientation_attempts: 2
+target_closure_arrival_radius: 0.45
+target_closure_arrival_cycles: 2
+target_closure_max_correction: 0.45
+target_closure_reassociation_distance: 1.25

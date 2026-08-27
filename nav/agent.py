@@ -12,6 +12,7 @@ from vlm.utils import (
     detect_frontier_probabilities,
     segment_target_object,
     detect_target_object,
+    detect_bound_target_candidates,
     COMPOSITIONS,
     COMPRESSION,
 )
@@ -30,6 +31,11 @@ from mapping.wavemap import WaveMapper
 # Frontier Manager
 from frontier.manager import FrontierManager
 from nav.detected_object import DetectedObject
+from nav.target_closure import (
+    SafeClosureState,
+    local_refinement_candidates,
+    robust_target_observation,
+)
 
 np.set_printoptions(precision=3, suppress=True)
 
@@ -170,6 +176,9 @@ class NavigationAgent:
         self.segmentation_image = None
         self.composition_images = []
         self.termination_images = []
+        self.termination_depths = []
+        self.termination_viewpoints = []
+        self.termination_semantics = []
         self.composition_depths = []
         self.composition_viewpoints = []
         self.detected_objects = []
@@ -180,7 +189,35 @@ class NavigationAgent:
             "verification_events": [],
             "visibility_events": [],
             "termination_event": None,
+            "safe_closure_events": [],
+            "centroid_interventions": [],
+            "translation_arrival_events": [],
+            "reobservation_events": [],
+            "candidate_bound_events": [],
         }
+        self.target_closure_safe_enabled = bool(
+            self.config.get("target_closure_safe_enabled", False)
+        )
+        self.target_closure_max_interventions = int(
+            self.config.get("target_closure_max_interventions", 2)
+        )
+        self.target_closure_max_orientation_attempts = int(
+            self.config.get("target_closure_max_orientation_attempts", 2)
+        )
+        self.target_closure_arrival_radius = float(
+            self.config.get("target_closure_arrival_radius", 0.45)
+        )
+        self.target_closure_arrival_cycles = int(
+            self.config.get("target_closure_arrival_cycles", 2)
+        )
+        self.target_closure_max_correction = float(
+            self.config.get("target_closure_max_correction", 0.45)
+        )
+        self.target_closure_reassociation_distance = float(
+            self.config.get("target_closure_reassociation_distance", 1.25)
+        )
+        self.safe_closure_state = None
+        self.candidate_verification_cache = {}
 
         self.optimal_path_length = float("inf")
 
@@ -338,9 +375,18 @@ class NavigationAgent:
         # Always keep the latest n_images for termination
         if len(self.termination_images) == self.n_images:
             self.termination_images.pop(0)
+            self.termination_depths.pop(0)
+            self.termination_viewpoints.pop(0)
+            self.termination_semantics.pop(0)
 
         self.composition_images.append(rgb)
         self.termination_images.append(rgb)
+        self.termination_depths.append(depth)
+        self.termination_viewpoints.append(W_T_C2.copy())
+        semantic_mask = getattr(self, "current_target_semantic_mask", None)
+        self.termination_semantics.append(
+            None if semantic_mask is None else semantic_mask.copy()
+        )
         self.composition_depths.append(depth)
         self.composition_viewpoints.append(W_T_C2.copy())
 
@@ -874,6 +920,29 @@ class NavigationAgent:
                             )
                             or []
                         )
+                        if self.target_closure_safe_enabled:
+                            legacy_goal = getattr(self.planner, "goal_pose", None)
+                            if legacy_goal is None:
+                                legacy_goal = np.eye(4)
+                                legacy_goal[:3, 3] = (
+                                    self.ft_manager.get_object_free_point(
+                                        W_T_C2,
+                                        np.asarray(
+                                            self.goal_object.centroid, dtype=float
+                                        ),
+                                    )
+                                )
+                                legacy_goal[:3, :3] = W_T_C2[:3, :3]
+                            self.safe_closure_state = SafeClosureState(
+                                object_id=int(self.goal_object.id),
+                                accepted_step=int(self.navigation_steps),
+                                raw_centroid=np.asarray(
+                                    self.goal_object.centroid, dtype=float
+                                ).copy(),
+                                legacy_endpoint_pose=np.asarray(
+                                    legacy_goal, dtype=float
+                                ).copy(),
+                            )
                         verification_event = self.target_diagnostics[
                             "verification_events"
                         ][-1]
@@ -914,7 +983,15 @@ class NavigationAgent:
                 f"Approaching locked-in object. Distance to object center: {dist:.2f} m",
             )
 
-            if len(self.path_to_go) == 0 or dist < self.success_threshold:
+            if self.target_closure_safe_enabled:
+                closure = self._advance_safe_target_closure(
+                    current_pose=W_T_C2,
+                    depth=depth,
+                    raw_centroid_distance=float(dist),
+                )
+                if closure == "stop":
+                    return False, "object_found"
+            elif len(self.path_to_go) == 0 or dist < self.success_threshold:
                 self.target_diagnostics["termination_event"] = {
                     "step": self.navigation_steps,
                     "object_id": self.ft_manager.object_lockin.id,
@@ -984,6 +1061,304 @@ class NavigationAgent:
             )
         
         return True, "continue_navigation"
+
+    def _build_safe_candidate_evidence(
+        self, masks: list[dict]
+    ) -> tuple[np.ndarray, list[str]]:
+        """Mark post-lock SAM masks for diagnostic candidate-bound Qwen."""
+        marked = [np.asarray(image).copy() for image in self.termination_images]
+        labels = [chr(65 + index) if index < 26 else str(index) for index in range(len(masks))]
+        for label, mask_data in zip(labels, masks):
+            image_index = int(mask_data.get("image_index", -1))
+            if not 0 <= image_index < len(marked):
+                continue
+            mask = np.asarray(mask_data.get("mask"), dtype=bool)
+            image = marked[image_index]
+            if mask.shape != image.shape[:2] or not np.any(mask):
+                continue
+            image[mask] = (
+                0.55 * image[mask].astype(np.float32)
+                + 0.45 * np.array([255, 32, 32], dtype=np.float32)
+            ).astype(np.uint8)
+            ys, xs = np.nonzero(mask)
+            center = (int(np.median(xs)), int(np.median(ys)))
+            cv2.circle(image, center, 24, (255, 255, 255), 4)
+            cv2.circle(image, center, 20, (255, 32, 32), 3)
+            cv2.putText(image, label, (center[0] - 10, center[1] + 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 3,
+                        cv2.LINE_AA)
+        return self.compose_images(marked), labels
+
+    def _diagnose_bound_candidates(
+        self, evidence_image: np.ndarray, labels: list[str]
+    ) -> dict:
+        """Run candidate-bound Qwen for audit only; never gate policy."""
+        cache_key = (int(self.navigation_steps), tuple(labels), self.goal)
+        if cache_key in self.candidate_verification_cache:
+            return self.candidate_verification_cache[cache_key]
+        event = {"step": int(self.navigation_steps), "labels": list(labels),
+                 "scores": {}, "raw_response": None, "diagnostic_only": True}
+        try:
+            started = time.time()
+            success, scores, raw_response = detect_bound_target_candidates(
+                rgb_image=evidence_image, labels=labels, target_object=self.goal,
+                vlm_model=self.detection_source,
+                api_key=self.get_api_key_for_model(self.detection_source),
+            )
+            self.timings["vlm_call"]["total_time"] += time.time() - started
+            self.timings["vlm_call"]["calls"] += 1
+            event["scores"] = scores if success and isinstance(scores, dict) else {}
+            event["raw_response"] = raw_response
+            self.log("info", self.vlm_log_file,
+                     f"Candidate-bound diagnostic (non-gating): {raw_response}")
+        except Exception as error:
+            event["error"] = repr(error)
+            self.log("info", self.logging_file,
+                     f"Candidate-bound diagnostic failed without affecting target lock: {error}")
+        self.target_diagnostics["candidate_bound_events"].append(event)
+        self.candidate_verification_cache[cache_key] = event
+        return event
+
+    def _reobserve_safe_target(self, trigger: str):
+        """Re-run SAM after lock and associate geometry to the raw OF centroid."""
+        state = self.safe_closure_state
+        event = {"step": int(self.navigation_steps), "trigger": trigger,
+                 "object_id": None if state is None else int(state.object_id),
+                 "mask_count": 0, "candidate_count": 0,
+                 "selected_label": None, "association_distance": None,
+                 "outcome": None}
+        if state is None or len(self.termination_images) != self.n_images:
+            event["outcome"] = "insufficient_observation_buffer"
+            self.target_diagnostics["reobservation_events"].append(event)
+            return None, event
+        try:
+            composition = self.compose_images(self.termination_images)
+            started = time.time()
+            response = segment_target_object(
+                rgb_composition=composition, n_images=self.n_images,
+                target_object=self.goal, segmentation_model=self.segmentation_source,
+                api_key=self.get_api_key_for_model(self.segmentation_source),
+            )
+            self.timings["sam"]["total_time"] += time.time() - started
+            self.timings["sam"]["calls"] += 1
+        except Exception as error:
+            event["outcome"] = "segmentation_error"
+            event["error"] = repr(error)
+            self.target_diagnostics["reobservation_events"].append(event)
+            return None, event
+        if response is None or len(response) != 2 or not response[0]:
+            event["outcome"] = "no_mask"
+            self.target_diagnostics["reobservation_events"].append(event)
+            return None, event
+
+        masks, _ = response
+        event["mask_count"] = len(masks)
+        evidence_image, labels = self._build_safe_candidate_evidence(masks)
+        bound_event = self._diagnose_bound_candidates(evidence_image, labels)
+        candidates = []
+        for index, mask_data in enumerate(masks):
+            image_index = int(mask_data.get("image_index", -1))
+            if not 0 <= image_index < len(self.termination_depths):
+                continue
+            candidate = robust_target_observation(
+                mask_data=mask_data, depth=self.termination_depths[image_index],
+                viewpoint=self.termination_viewpoints[image_index],
+                intrinsic_mat=self.cam_intrinsic.intrinsic_matrix,
+                evidence_image=evidence_image, evidence_label=labels[index],
+                evidence_labels=labels,
+                target_semantic_mask=self.termination_semantics[image_index],
+            )
+            if candidate is None:
+                continue
+            distance = float(np.linalg.norm(
+                candidate.robust_position[:2] - state.raw_centroid[:2]))
+            candidates.append((distance, candidate))
+        event["candidate_count"] = len(candidates)
+        event["candidates"] = [
+            {"label": candidate.evidence_label, "association_distance": distance,
+             "robust_position": candidate.robust_position.tolist(),
+             "raw_centroid": candidate.raw_centroid.tolist(),
+             "gt_overlap": candidate.gt_overlap,
+             "bound_score": bound_event.get("scores", {}).get(candidate.evidence_label)}
+            for distance, candidate in candidates
+        ]
+        if not candidates:
+            event["outcome"] = "no_associated_candidate"
+            self.target_diagnostics["reobservation_events"].append(event)
+            return None, event
+        # The raw OF centroid can itself be biased by mask-edge/background
+        # depth—the exact condition robust surface refinement addresses.  Keep
+        # nearest-centroid association conservative, but do not turn the nominal
+        # radius (or the diagnostic Qwen score) into another hard gate.
+        distance, selected = min(candidates, key=lambda item: item[0])
+        event.update({"selected_label": selected.evidence_label,
+                      "association_distance": distance,
+                      "outside_nominal_association_radius": bool(
+                          distance > self.target_closure_reassociation_distance),
+                      "selected_gt_overlap": selected.gt_overlap,
+                      "selected_bound_score": bound_event.get("scores", {}).get(
+                          selected.evidence_label), "outcome": "associated"})
+        self.target_diagnostics["reobservation_events"].append(event)
+        return selected, event
+
+    def _safe_closure_stop(
+        self, current_pose: np.ndarray, raw_centroid_distance: float,
+        trigger: str, reobservation=None,
+    ) -> str:
+        state = self.safe_closure_state
+        self.target_diagnostics["termination_event"] = {
+            "step": int(self.navigation_steps),
+            "object_id": int(self.ft_manager.object_lockin.id),
+            "object_centroid": np.asarray(
+                self.ft_manager.object_lockin.centroid, dtype=float).tolist(),
+            "agent_position": current_pose[:3, 3].astype(float).tolist(),
+            "distance_to_object": float(raw_centroid_distance),
+            "path_exhausted": len(self.path_to_go) == 0,
+            "success_threshold": self.success_threshold,
+            "stop_trigger": trigger,
+            "safe_closure_mode": None if state is None else state.mode,
+            "intervention_attempts": 0 if state is None else int(state.intervention_attempts),
+            "orientation_attempts": 0 if state is None else int(state.orientation_attempts),
+            "reobservation_outcome": None if reobservation is None else reobservation.get("outcome"),
+        }
+        self.log("info", self.logging_file, f"Safe target closure STOP: {trigger}.")
+        return "stop"
+
+    def _finish_translation_arrival(
+        self, current_pose: np.ndarray, raw_centroid_distance: float, trigger: str,
+    ) -> str:
+        state = self.safe_closure_state
+        observation, event = self._reobserve_safe_target(trigger)
+        if observation is not None:
+            state.robust_observation = observation
+            return self._safe_closure_stop(
+                current_pose, raw_centroid_distance, f"{trigger}_reobserved", event)
+        if state.orientation_attempts < self.target_closure_max_orientation_attempts:
+            state.orientation_attempts += 1
+            self.target_diagnostics["safe_closure_events"].append(
+                {"step": int(self.navigation_steps),
+                 "event": "bounded_orientation_retry", "trigger": trigger,
+                 "attempt": int(state.orientation_attempts),
+                 "reobservation_outcome": event.get("outcome")})
+            # If PointNav still has a live action, let its existing bounded
+            # orientation behavior execute below.  Only an exhausted refinement
+            # path needs one explicit observation-changing turn here.
+            if not self.path_to_go:
+                self.rotate()
+            return "continue"
+        return self._safe_closure_stop(
+            current_pose, raw_centroid_distance,
+            f"{trigger}_retry_budget_fallback", event)
+
+    def _advance_safe_target_closure(
+        self, current_pose: np.ndarray, depth: np.ndarray,
+        raw_centroid_distance: float,
+    ) -> str:
+        """Late-stage safe-v1 control; called only after OF-base target lock."""
+        state = self.safe_closure_state
+        if state is None:
+            legacy_goal = getattr(self.planner, "goal_pose", current_pose)
+            state = SafeClosureState(
+                object_id=int(self.ft_manager.object_lockin.id),
+                accepted_step=int(self.navigation_steps),
+                raw_centroid=np.asarray(
+                    self.ft_manager.object_lockin.centroid, dtype=float).copy(),
+                legacy_endpoint_pose=np.asarray(legacy_goal, dtype=float).copy())
+            self.safe_closure_state = state
+
+        # A refinement path is consumed by re-observation. Untouched OF-base
+        # paths retain path_exhausted -> STOP exactly.
+        if not self.path_to_go:
+            if state.mode == "refining":
+                return self._finish_translation_arrival(
+                    current_pose, raw_centroid_distance,
+                    "refinement_path_exhausted")
+            return self._safe_closure_stop(
+                current_pose, raw_centroid_distance,
+                "path_exhausted_legacy_compat")
+
+        active_endpoint = (state.refinement_pose
+                           if state.mode == "refining" and state.refinement_pose is not None
+                           else state.legacy_endpoint_pose)
+        endpoint_distance = float(np.linalg.norm(
+            current_pose[:2, 3] - active_endpoint[:2, 3]))
+        if endpoint_distance <= self.target_closure_arrival_radius:
+            state.translation_arrival_cycles += 1
+        else:
+            state.translation_arrival_cycles = 0
+        if state.translation_arrival_cycles >= self.target_closure_arrival_cycles:
+            self.target_diagnostics["translation_arrival_events"].append(
+                {"step": int(self.navigation_steps), "mode": state.mode,
+                 "endpoint_distance": endpoint_distance,
+                 "cycles": int(state.translation_arrival_cycles),
+                 "path_still_active": True})
+            return self._finish_translation_arrival(
+                current_pose, raw_centroid_distance,
+                f"translation_arrival_{state.mode}")
+
+        if state.mode == "refining" or raw_centroid_distance >= self.success_threshold:
+            return "continue"
+
+        state.intervention_attempts += 1
+        state.intervention_step = int(self.navigation_steps)
+        observation, event = self._reobserve_safe_target("centroid_risky_stop")
+        intervention = {
+            "step": int(self.navigation_steps), "attempt": int(state.intervention_attempts),
+            "raw_centroid_distance": float(raw_centroid_distance),
+            "legacy_endpoint": state.legacy_endpoint_pose[:3, 3].tolist(),
+            "reobservation_outcome": event.get("outcome"), "selected": None,
+            "outcome": None}
+        self.target_diagnostics["centroid_interventions"].append(intervention)
+        if observation is None:
+            intervention["outcome"] = "retry_original_approach"
+            if state.intervention_attempts >= self.target_closure_max_interventions:
+                intervention["outcome"] = "legacy_stop_after_retry_budget"
+                return self._safe_closure_stop(
+                    current_pose, raw_centroid_distance,
+                    "centroid_no_surface_retry_budget_fallback", event)
+            return "continue"
+
+        state.robust_observation = observation
+        candidates = local_refinement_candidates(
+            legacy_endpoint=state.legacy_endpoint_pose[:3, 3],
+            observation=observation, current_pose=current_pose,
+            navmesh=self.navmesh_planner,
+            max_correction=self.target_closure_max_correction)
+        if not candidates:
+            intervention["outcome"] = "no_reachable_local_correction"
+            if state.intervention_attempts >= self.target_closure_max_interventions:
+                return self._safe_closure_stop(
+                    current_pose, raw_centroid_distance,
+                    "centroid_no_local_point_retry_budget_fallback", event)
+            return "continue"
+
+        selected = candidates[0]
+        intervention["selected"] = {
+            key: value for key, value in selected.items() if key != "pose"}
+        state.refinement_pose = np.asarray(selected["pose"], dtype=float).copy()
+        self.ft_manager.object_closure_pose = state.refinement_pose.copy()
+        state.mode = "refining"
+        state.translation_arrival_cycles = 0
+        state.orientation_attempts = 0
+        self.path_to_go = (self.ft_manager.plan_path_to_goal(
+            current_pose, depth=depth, use_graph=False) or [])
+        intervention["path_steps"] = len(self.path_to_go)
+        if self.path_to_go:
+            intervention["outcome"] = "local_refinement_planned"
+            return "continue"
+        selected_distance = float(np.linalg.norm(
+            current_pose[:2, 3] - state.refinement_pose[:2, 3]))
+        if selected_distance <= self.target_closure_arrival_radius:
+            intervention["outcome"] = "already_at_local_refinement"
+            return self._safe_closure_stop(
+                current_pose, raw_centroid_distance,
+                "centroid_local_refinement_already_arrived", event)
+        intervention["outcome"] = "local_planning_failed_legacy_fallback"
+        self.ft_manager.object_closure_pose = None
+        state.mode = "legacy_approach"
+        return self._safe_closure_stop(
+            current_pose, raw_centroid_distance,
+            "centroid_local_planning_failed_fallback", event)
 
     def get_target_diagnostics(self) -> dict:
         """Return episode-level target evidence without changing policy state."""
@@ -1305,6 +1680,9 @@ class NavigationAgent:
     def close(self) -> None:
         self.composition_images.clear()
         self.termination_images.clear()
+        self.termination_depths.clear()
+        self.termination_viewpoints.clear()
+        self.termination_semantics.clear()
         self.composition_depths.clear()
         self.composition_viewpoints.clear()
         self.last_rgb = None
