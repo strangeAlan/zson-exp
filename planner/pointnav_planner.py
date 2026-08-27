@@ -53,6 +53,17 @@ class PointnavPlanner(PlannerBase):
         self.close_enough: bool = False
         self.minimum_rho: float = float("inf")
 
+    def reset_tracking(self) -> None:
+        """Reset pursuit memory when a bounded recovery changes endpoint."""
+        self.pointnav_policy.reset()
+        self.is_first_step = True
+        self.action = []
+        self.minimum_rho = float("inf")
+        self.close_enough = False
+        self.forward_failure_heat = 0
+        self.rotation_heat = 0
+        self.last_goal = None
+
     def get_bounds(self) -> Dict[str, float]:
         return {
             "low_x": self.bounds[0],

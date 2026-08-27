@@ -108,6 +108,10 @@ class FrontierManager(Base):
         self.prob_sharpness = float(p.get("prob_sharpness", 1.0))
 
         self.object_lockin: DetectedObject = None
+        # Set only after the unchanged OF target acceptance path has completed.
+        # A fixed pose prevents PointNav from chasing a goal regenerated from
+        # the current camera pose on every control cycle.
+        self.object_approach_pose: np.ndarray = None
 
         self.goal_frontier = None
 
@@ -1173,11 +1177,14 @@ class FrontierManager(Base):
         self, current_pose: np.ndarray, use_graph: bool = True
     ) -> np.ndarray:
         if self.object_lockin is not None:
-            goal_pose = np.eye(4)
-            goal_pose[:3, 3] = self.get_object_free_point(
-                current_pose, self.object_lockin.centroid
-            )
-            goal_pose[:3, :3] = current_pose[:3, :3]  # keep current orientation
+            if self.object_approach_pose is not None:
+                goal_pose = self.object_approach_pose.copy()
+            else:
+                goal_pose = np.eye(4)
+                goal_pose[:3, 3] = self.get_object_free_point(
+                    current_pose, self.object_lockin.centroid
+                )
+                goal_pose[:3, :3] = current_pose[:3, :3]  # keep current orientation
             goal_ft = None
             self.current_goal_ft_id = None
             self.current_goal_pose = None
@@ -1323,6 +1330,7 @@ class FrontierManager(Base):
             obj: Detected object dictionary with 'centroid' key.
         """
         self.object_lockin = obj
+        self.object_approach_pose = None
         self.logger.debug(f"Locked into object: {obj.label} at {obj.centroid}")
 
     def get_graph_vis(self):

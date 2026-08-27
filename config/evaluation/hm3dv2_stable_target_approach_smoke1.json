@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "name": "hm3dv2_stable_target_approach_smoke1",
+    "source_probe": "hm3dv2_target_closure_probe64",
+    "source_probe_index": 26
+  },
+  "selection": [
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "25",
+      "target": "bed",
+      "source_target": "bed",
+      "source_index": 835,
+      "probe_cohort": "failure_accepted_no_stop",
+      "baseline_success": false,
+      "baseline_reason": "target_closure_failure",
+      "baseline_navigation_steps": 244,
+      "baseline_distance_to_goal": 1.3764662742614746,
+      "baseline_target_pixels_in_verification_window": 26165,
+      "baseline_centroid_distance_at_stop": null
+    }
+  ]
+}

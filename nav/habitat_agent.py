@@ -43,6 +43,9 @@ class HabitatAgent(NavigationAgent):
         ]
 
         self.planner = HabitatPlanner(sim=habitat_env.sim, params=openfrontier_config)
+        # PointnavAgent replaces ``self.planner`` after construction.  Retain
+        # Habitat's pathfinder for post-acceptance approach-goal validation.
+        self.navmesh_planner = self.planner
 
         self.habitat_env = habitat_env
         self.target_semantic_ids = {

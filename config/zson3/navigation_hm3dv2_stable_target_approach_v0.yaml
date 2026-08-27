@@ -1,0 +1,12 @@
+# Stable Target Approach v0.  All pre-acceptance OF-base behavior remains
+# inherited unchanged; these keys affect only a globally accepted target lock.
+extends: ../navigation.yaml
+
+probabilities_source: qwen3-vl-8b-local
+detection_source: qwen3-vl-8b-local
+segmentation_source: sam3
+pointnav_weights_path: model_weights/pointnav_weights.pth
+
+stable_target_approach_enabled: true
+stable_approach_max_recoveries: 2
+stable_approach_arrival_radius: 0.45

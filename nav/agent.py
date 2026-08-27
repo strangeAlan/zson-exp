@@ -30,6 +30,10 @@ from mapping.wavemap import WaveMapper
 # Frontier Manager
 from frontier.manager import FrontierManager
 from nav.detected_object import DetectedObject
+from nav.stable_target_approach import (
+    StableApproachState,
+    build_approach_candidates,
+)
 
 np.set_printoptions(precision=3, suppress=True)
 
@@ -170,6 +174,8 @@ class NavigationAgent:
         self.segmentation_image = None
         self.composition_images = []
         self.termination_images = []
+        self.termination_depths = []
+        self.termination_viewpoints = []
         self.composition_depths = []
         self.composition_viewpoints = []
         self.detected_objects = []
@@ -180,7 +186,23 @@ class NavigationAgent:
             "verification_events": [],
             "visibility_events": [],
             "termination_event": None,
+            "stable_approach_events": [],
+            "approach_endpoint_events": [],
+            "pursuit_progress_events": [],
+            "stagnation_events": [],
+            "approach_reobservation_events": [],
+            "target_release_events": [],
         }
+        self.stable_target_approach_enabled = bool(
+            self.config.get("stable_target_approach_enabled", False)
+        )
+        self.stable_approach_max_recoveries = int(
+            self.config.get("stable_approach_max_recoveries", 2)
+        )
+        self.stable_approach_arrival_radius = float(
+            self.config.get("stable_approach_arrival_radius", 0.45)
+        )
+        self.stable_approach_state = None
 
         self.optimal_path_length = float("inf")
 
@@ -325,6 +347,20 @@ class NavigationAgent:
             self.ft_detector.fix_view_level(W_T_C2[2, 3])
 
         if self.navigation_steps >= self.max_steps:
+            if self.stable_approach_state is not None:
+                self.target_diagnostics["stable_approach_events"].append(
+                    {
+                        "step": int(self.navigation_steps),
+                        "event": "pursuit_finished",
+                        "outcome": "max_steps_reached",
+                        "recoveries": int(
+                            self.stable_approach_state.recovery_count
+                        ),
+                        "endpoint_changes": int(
+                            self.stable_approach_state.endpoint_changes
+                        ),
+                    }
+                )
             self.log(
                 "info", self.logging_file, "Maximum steps reached, navigation finished."
             )
@@ -338,9 +374,13 @@ class NavigationAgent:
         # Always keep the latest n_images for termination
         if len(self.termination_images) == self.n_images:
             self.termination_images.pop(0)
+            self.termination_depths.pop(0)
+            self.termination_viewpoints.pop(0)
 
         self.composition_images.append(rgb)
         self.termination_images.append(rgb)
+        self.termination_depths.append(depth)
+        self.termination_viewpoints.append(W_T_C2.copy())
         self.composition_depths.append(depth)
         self.composition_viewpoints.append(W_T_C2.copy())
 
@@ -885,6 +925,12 @@ class NavigationAgent:
                             if self.path_to_go
                             else None
                         )
+                        if self.stable_target_approach_enabled:
+                            self._start_stable_target_approach(
+                                current_pose=W_T_C2,
+                                depth=depth,
+                                verification_event=verification_event,
+                            )
                     else:
                         self.goal_object.is_valid = False
                         self.goal_object.verification_status = "false_positive"
@@ -914,7 +960,18 @@ class NavigationAgent:
                 f"Approaching locked-in object. Distance to object center: {dist:.2f} m",
             )
 
-            if len(self.path_to_go) == 0 or dist < self.success_threshold:
+            if (
+                self.stable_target_approach_enabled
+                and self.stable_approach_state is not None
+            ):
+                pursuit_outcome = self._advance_stable_target_approach(
+                    current_pose=W_T_C2,
+                    depth=depth,
+                    raw_centroid_distance=float(dist),
+                )
+                if pursuit_outcome == "stop":
+                    return False, "object_found"
+            elif len(self.path_to_go) == 0 or dist < self.success_threshold:
                 self.target_diagnostics["termination_event"] = {
                     "step": self.navigation_steps,
                     "object_id": self.ft_manager.object_lockin.id,
@@ -940,6 +997,20 @@ class NavigationAgent:
             self.stuck_counter += 1
 
             if self.stuck_counter == 200:
+                if self.stable_approach_state is not None:
+                    self.target_diagnostics["stable_approach_events"].append(
+                        {
+                            "step": int(self.navigation_steps),
+                            "event": "pursuit_finished",
+                            "outcome": "robot_stuck",
+                            "recoveries": int(
+                                self.stable_approach_state.recovery_count
+                            ),
+                            "endpoint_changes": int(
+                                self.stable_approach_state.endpoint_changes
+                            ),
+                        }
+                    )
                 self.log(
                     "info",
                     self.logging_file,
@@ -984,6 +1055,390 @@ class NavigationAgent:
             )
         
         return True, "continue_navigation"
+
+    def _start_stable_target_approach(
+        self,
+        current_pose: np.ndarray,
+        depth: np.ndarray,
+        verification_event: dict,
+    ) -> None:
+        """Freeze one reachable approach goal after unchanged OF acceptance."""
+        locked = self.ft_manager.object_lockin
+        legacy_pose = getattr(self.planner, "goal_pose", None)
+        if legacy_pose is None:
+            legacy_pose = np.eye(4)
+            legacy_pose[:3, 3] = self.ft_manager.get_object_free_point(
+                current_pose, locked.centroid
+            )
+            legacy_pose[:3, :3] = current_pose[:3, :3]
+
+        candidates, rejected = build_approach_candidates(
+            legacy_pose=np.asarray(legacy_pose, dtype=float),
+            target_position=np.asarray(locked.centroid, dtype=float),
+            current_pose=current_pose,
+            navmesh=self.navmesh_planner,
+        )
+        event = {
+            "step": int(self.navigation_steps),
+            "event": "target_accepted",
+            "object_id": int(locked.id),
+            "target_position": np.asarray(locked.centroid, dtype=float).tolist(),
+            "legacy_endpoint": np.asarray(legacy_pose, dtype=float)[:3, 3].tolist(),
+            "candidates": [candidate.to_dict() for candidate in candidates],
+            "rejected_candidates": rejected,
+        }
+        self.target_diagnostics["stable_approach_events"].append(event)
+        if not candidates:
+            event["outcome"] = "no_reachable_candidate_ofbase_fallback"
+            verification_event["stable_approach_enabled"] = False
+            self.log(
+                "info",
+                self.logging_file,
+                "Stable approach found no reachable endpoint; preserving OF-base pursuit.",
+            )
+            return
+
+        self.stable_approach_state = StableApproachState(
+            object_id=int(locked.id),
+            accepted_step=int(self.navigation_steps),
+            target_position=np.asarray(locked.centroid, dtype=float).copy(),
+            candidates=candidates,
+        )
+        active = self.stable_approach_state.active
+        self.ft_manager.object_approach_pose = active.pose.copy()
+        if hasattr(self.planner, "reset_tracking"):
+            self.planner.reset_tracking()
+        self.path_to_go = (
+            self.ft_manager.plan_path_to_goal(
+                current_pose, depth=depth, use_graph=False
+            )
+            or []
+        )
+        event.update(
+            {
+                "outcome": "stable_endpoint_activated",
+                "selected": active.to_dict(),
+                "path_steps": len(self.path_to_go),
+            }
+        )
+        verification_event.update(
+            {
+                "stable_approach_enabled": True,
+                "stable_approach_endpoint": active.pose[:3, 3].tolist(),
+                "stable_approach_source": active.source,
+                "stable_approach_path_steps": len(self.path_to_go),
+            }
+        )
+        self.target_diagnostics["approach_endpoint_events"].append(
+            {
+                "step": int(self.navigation_steps),
+                "reason": "target_accepted",
+                "endpoint_index": 0,
+                "endpoint": active.to_dict(),
+                "path_steps": len(self.path_to_go),
+            }
+        )
+        self.log(
+            "info",
+            self.logging_file,
+            f"Stable approach endpoint fixed: {active.source} at "
+            f"{active.pose[:3, 3].tolist()}.",
+        )
+
+    def _record_stable_stop(
+        self,
+        current_pose: np.ndarray,
+        raw_centroid_distance: float,
+        trigger: str,
+    ) -> str:
+        state = self.stable_approach_state
+        active = None if state is None else state.active
+        self.target_diagnostics["termination_event"] = {
+            "step": int(self.navigation_steps),
+            "object_id": int(self.ft_manager.object_lockin.id),
+            "object_centroid": np.asarray(
+                self.ft_manager.object_lockin.centroid, dtype=float
+            ).tolist(),
+            "agent_position": current_pose[:3, 3].astype(float).tolist(),
+            "distance_to_object": float(raw_centroid_distance),
+            "path_exhausted": len(self.path_to_go) == 0,
+            "success_threshold": self.success_threshold,
+            "stop_trigger": trigger,
+            "active_endpoint": (
+                None if active is None else active.pose[:3, 3].tolist()
+            ),
+            "endpoint_changes": 0 if state is None else int(state.endpoint_changes),
+            "recoveries": 0 if state is None else int(state.recovery_count),
+        }
+        self.log(
+            "info", self.logging_file, f"Stable target approach STOP: {trigger}."
+        )
+        return "stop"
+
+    def _reobserve_stable_target(self, trigger: str) -> dict:
+        """Re-run the unchanged SAM proposal at a recovery boundary only."""
+        state = self.stable_approach_state
+        event = {
+            "step": int(self.navigation_steps),
+            "trigger": trigger,
+            "mask_count": 0,
+            "associated": False,
+            "geometry_updated": False,
+        }
+        if len(self.termination_images) != self.n_images:
+            event["outcome"] = "insufficient_buffer"
+            self.target_diagnostics["approach_reobservation_events"].append(event)
+            return event
+        try:
+            started = time.time()
+            response = segment_target_object(
+                rgb_composition=self.compose_images(self.termination_images),
+                n_images=self.n_images,
+                target_object=self.goal,
+                segmentation_model=self.segmentation_source,
+                api_key=self.get_api_key_for_model(self.segmentation_source),
+            )
+            elapsed = time.time() - started
+            self.timings["sam"]["total_time"] += elapsed
+            self.timings["sam"]["calls"] += 1
+        except (QwenServiceError, Sam3ServiceError):
+            raise
+        except Exception as error:
+            event.update({"outcome": "segmentation_error", "error": repr(error)})
+            self.target_diagnostics["approach_reobservation_events"].append(event)
+            return event
+
+        if response is None or len(response) != 2 or not response[0]:
+            event["outcome"] = "no_mask_lock_retained"
+            self.target_diagnostics["approach_reobservation_events"].append(event)
+            return event
+
+        masks, _ = response
+        event["mask_count"] = len(masks)
+        observations = []
+        for mask in masks:
+            image_index = int(mask.get("image_index", -1))
+            if not 0 <= image_index < len(self.termination_depths):
+                continue
+            observed = DetectedObject.from_mask(
+                mask=mask,
+                depth=self.termination_depths[image_index],
+                viewpoint=self.termination_viewpoints[image_index],
+                intrinsic_mat=self.cam_intrinsic.intrinsic_matrix,
+                step=self.navigation_steps,
+            )
+            if observed.centroid is None:
+                continue
+            association_distance = float(
+                np.linalg.norm(
+                    np.asarray(observed.centroid)[:2] - state.target_position[:2]
+                )
+            )
+            observations.append((association_distance, observed))
+        event["candidates"] = [
+            {
+                "association_distance": distance,
+                "centroid": np.asarray(observed.centroid).tolist(),
+                "detection_score": observed.detection_score,
+            }
+            for distance, observed in observations
+        ]
+        if not observations:
+            event["outcome"] = "no_3d_candidate_lock_retained"
+        else:
+            distance, observed = min(observations, key=lambda item: item[0])
+            event["nearest_association_distance"] = distance
+            if distance <= 1.25:
+                event["associated"] = True
+                # Hysteresis: geometry can move only at a recovery boundary and
+                # only slightly toward a spatially associated observation.
+                updated = 0.8 * state.target_position + 0.2 * np.asarray(
+                    observed.centroid, dtype=float
+                )
+                event["previous_target_position"] = state.target_position.tolist()
+                event["updated_target_position"] = updated.tolist()
+                state.target_position = updated
+                event["geometry_updated"] = True
+                event["outcome"] = "associated_lock_retained"
+            else:
+                event["outcome"] = "association_too_far_lock_retained"
+        self.target_diagnostics["approach_reobservation_events"].append(event)
+        return event
+
+    def _release_stable_target(self, reason: str, progress: dict) -> str:
+        state = self.stable_approach_state
+        locked = self.ft_manager.object_lockin
+        event = {
+            "step": int(self.navigation_steps),
+            "reason": reason,
+            "object_id": None if locked is None else int(locked.id),
+            "recoveries": 0 if state is None else int(state.recovery_count),
+            "endpoint_changes": 0 if state is None else int(state.endpoint_changes),
+            "progress": progress,
+        }
+        self.target_diagnostics["target_release_events"].append(event)
+        if state is not None:
+            state.release_reason = reason
+        if locked is not None:
+            locked.is_valid = False
+        self.ft_manager.object_lockin = None
+        self.ft_manager.object_approach_pose = None
+        self.ft_manager.current_goal_ft_id = None
+        self.ft_manager.current_goal_pose = None
+        self.path_to_go = []
+        self.move_enough = True
+        self.stuck_counter = 0
+        self.frozen_counter = 0
+        if hasattr(self.planner, "reset_tracking"):
+            self.planner.reset_tracking()
+        self.ft_manager.filter_frontiers()
+        self.stable_approach_state = None
+        self.log(
+            "info",
+            self.logging_file,
+            f"Stable approach released target after bounded recovery: {reason}.",
+        )
+        return "released"
+
+    def _recover_stable_target(
+        self,
+        *,
+        current_pose: np.ndarray,
+        depth: np.ndarray,
+        trigger: str,
+        progress: dict,
+    ) -> str:
+        state = self.stable_approach_state
+        self._reobserve_stable_target(trigger)
+        if state.recovery_count >= self.stable_approach_max_recoveries:
+            return self._release_stable_target(
+                f"{trigger}_recovery_budget_exhausted", progress
+            )
+        candidate = state.advance_candidate()
+        if candidate is None:
+            return self._release_stable_target(
+                f"{trigger}_no_alternate_endpoint", progress
+            )
+        self.ft_manager.object_approach_pose = candidate.pose.copy()
+        if hasattr(self.planner, "reset_tracking"):
+            self.planner.reset_tracking()
+        self.path_to_go = (
+            self.ft_manager.plan_path_to_goal(
+                current_pose, depth=depth, use_graph=False
+            )
+            or []
+        )
+        event = {
+            "step": int(self.navigation_steps),
+            "reason": trigger,
+            "endpoint_index": int(state.active_index),
+            "recovery": int(state.recovery_count),
+            "endpoint": candidate.to_dict(),
+            "path_steps": len(self.path_to_go),
+            "progress": progress,
+        }
+        self.target_diagnostics["approach_endpoint_events"].append(event)
+        self.log(
+            "info",
+            self.logging_file,
+            f"Stable approach recovery {state.recovery_count}: fixed endpoint "
+            f"{candidate.source} at {candidate.pose[:3, 3].tolist()}.",
+        )
+        return "continue"
+
+    def _advance_stable_target_approach(
+        self,
+        *,
+        current_pose: np.ndarray,
+        depth: np.ndarray,
+        raw_centroid_distance: float,
+    ) -> str:
+        """Monitor a fixed post-acceptance endpoint and recover only on stall."""
+        state = self.stable_approach_state
+        active = state.active
+        if active is None:
+            return self._release_stable_target("missing_active_endpoint", {})
+
+        endpoint_distance = float(
+            np.linalg.norm(current_pose[:2, 3] - active.pose[:2, 3])
+        )
+        # Preserve OF-base's already-working centroid STOP semantics.
+        if raw_centroid_distance < self.success_threshold:
+            return self._record_stable_stop(
+                current_pose, raw_centroid_distance, "centroid_legacy_compat"
+            )
+
+        rho = float(getattr(self.planner, "rho", endpoint_distance))
+        action = getattr(self.planner, "action", None)
+        navmesh_path_distance = float(
+            self.navmesh_planner.geodesic_distance(
+                current_pose[:3, 3], active.pose[:3, 3]
+            )
+        )
+        progress = state.record(
+            step=self.navigation_steps,
+            position=current_pose[:3, 3],
+            rho=rho,
+            endpoint_distance=endpoint_distance,
+            action=action,
+        )
+        self.target_diagnostics["pursuit_progress_events"].append(
+            {
+                "step": int(self.navigation_steps),
+                "object_id": int(state.object_id),
+                "endpoint_index": int(state.active_index),
+                "endpoint": active.pose[:3, 3].tolist(),
+                "rho": rho,
+                "navmesh_path_distance": (
+                    navmesh_path_distance
+                    if np.isfinite(navmesh_path_distance)
+                    else None
+                ),
+                "endpoint_distance": endpoint_distance,
+                "action": action,
+                "path_active": bool(self.path_to_go),
+                "progress": progress,
+            }
+        )
+
+        if not self.path_to_go:
+            if endpoint_distance <= self.stable_approach_arrival_radius:
+                return self._record_stable_stop(
+                    current_pose,
+                    raw_centroid_distance,
+                    "path_exhausted_at_stable_endpoint",
+                )
+            self.target_diagnostics["stagnation_events"].append(
+                {
+                    "step": int(self.navigation_steps),
+                    "trigger": "path_exhausted_far_from_endpoint",
+                    "endpoint_distance": endpoint_distance,
+                    "progress": progress,
+                }
+            )
+            return self._recover_stable_target(
+                current_pose=current_pose,
+                depth=depth,
+                trigger="path_exhausted_far_from_endpoint",
+                progress=progress,
+            )
+
+        if progress.get("stagnant", False):
+            self.target_diagnostics["stagnation_events"].append(
+                {
+                    "step": int(self.navigation_steps),
+                    "trigger": "progress_window_stagnation",
+                    "endpoint_distance": endpoint_distance,
+                    "progress": progress,
+                }
+            )
+            return self._recover_stable_target(
+                current_pose=current_pose,
+                depth=depth,
+                trigger="progress_window_stagnation",
+                progress=progress,
+            )
+        return "continue"
 
     def get_target_diagnostics(self) -> dict:
         """Return episode-level target evidence without changing policy state."""
@@ -1305,6 +1760,8 @@ class NavigationAgent:
     def close(self) -> None:
         self.composition_images.clear()
         self.termination_images.clear()
+        self.termination_depths.clear()
+        self.termination_viewpoints.clear()
         self.composition_depths.clear()
         self.composition_viewpoints.clear()
         self.last_rgb = None
