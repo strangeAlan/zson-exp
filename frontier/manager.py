@@ -66,6 +66,7 @@ class FrontierManager(Base):
 
         # Planner
         self.planner: PlannerBase = planner
+        self.navmesh_planner = None
         self.current_goal_pose: Optional[np.ndarray] = None
         self.current_goal_ft_id: Optional[int] = None
         self._unreachable_positions = []
@@ -108,6 +109,7 @@ class FrontierManager(Base):
         self.prob_sharpness = float(p.get("prob_sharpness", 1.0))
 
         self.object_lockin: DetectedObject = None
+        self.object_approach_pose: Optional[np.ndarray] = None
 
         self.goal_frontier = None
 
@@ -422,6 +424,91 @@ class FrontierManager(Base):
         viewpoint_pose[:3, 3] = viewpoint_pos
 
         return viewpoint_pose
+
+    @staticmethod
+    def _pose_facing(position: np.ndarray, target: np.ndarray) -> np.ndarray:
+        """Construct a camera-convention pose at position looking at target."""
+        forward = np.asarray(target, dtype=float) - np.asarray(position, dtype=float)
+        if np.linalg.norm(forward) < 1e-6:
+            forward = np.array([1.0, 0.0, 0.0])
+        forward /= np.linalg.norm(forward)
+        up_hint = np.array([0.0, 0.0, -1.0])
+        right = np.cross(up_hint, forward)
+        if np.linalg.norm(right) < 1e-6:
+            right = np.array([1.0, 0.0, 0.0])
+        right /= np.linalg.norm(right)
+        up = np.cross(forward, right)
+        up /= max(np.linalg.norm(up), 1e-6)
+        pose = np.eye(4)
+        pose[:3, 0] = right
+        pose[:3, 1] = up
+        pose[:3, 2] = forward
+        pose[:3, 3] = position
+        return pose
+
+    def generate_object_approach_viewpoints(
+        self,
+        obj: DetectedObject,
+        current_pose: np.ndarray,
+        separation: float = 0.7,
+    ) -> list[dict]:
+        """Generate a small reachable free-side set around the visible surface."""
+        target = getattr(obj, "robust_position", None)
+        if target is None:
+            target = obj.centroid
+        if target is None:
+            return []
+        target = np.asarray(target, dtype=float)
+        source_pose = obj.viewpoint if obj.viewpoint is not None else current_pose
+        source = np.asarray(source_pose[:3, 3], dtype=float)
+        base = target[:2] - source[:2]
+        if np.linalg.norm(base) < 1e-6:
+            base = target[:2] - current_pose[:2, 3]
+        if np.linalg.norm(base) < 1e-6:
+            base = np.array([1.0, 0.0])
+        base /= np.linalg.norm(base)
+
+        candidates = []
+        navmesh = self.navmesh_planner or self.planner
+        for angle_degrees in (0.0, -25.0, 25.0, -45.0, 45.0):
+            angle = np.deg2rad(angle_degrees)
+            rotation = np.array(
+                [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
+            )
+            direction = rotation @ base
+            requested = target.copy()
+            requested[:2] = target[:2] - separation * direction
+            requested[2] = current_pose[2, 3]
+            snapped = np.asarray(navmesh.snap_point(requested), dtype=float)
+            snap_displacement = float(np.linalg.norm(snapped[:2] - requested[:2]))
+            if not np.all(np.isfinite(snapped)) or snap_displacement > 0.75:
+                continue
+            snapped[2] = current_pose[2, 3]
+            path_distance = float(
+                navmesh.geodesic_distance(current_pose[:3, 3], snapped)
+            )
+            if not np.isfinite(path_distance):
+                continue
+            key = tuple(np.round(snapped[:2] / 0.25).astype(int).tolist())
+            pose = self._pose_facing(snapped, target)
+            candidates.append(
+                {
+                    "pose": pose,
+                    "key": key,
+                    "angle_degrees": angle_degrees,
+                    "requested_position": requested.tolist(),
+                    "snapped_position": snapped.tolist(),
+                    "snap_displacement": snap_displacement,
+                    "path_distance": path_distance,
+                    "score": path_distance + snap_displacement + 0.003 * abs(angle_degrees),
+                }
+            )
+        deduplicated = {}
+        for candidate in candidates:
+            key = candidate["key"]
+            if key not in deduplicated or candidate["score"] < deduplicated[key]["score"]:
+                deduplicated[key] = candidate
+        return sorted(deduplicated.values(), key=lambda candidate: candidate["score"])
 
     def move_outside_occupied_space(self, position: np.ndarray) -> np.ndarray:
         if self.occ_map is None or self.free_map is None or len(self.free_map) == 0:
@@ -1173,11 +1260,14 @@ class FrontierManager(Base):
         self, current_pose: np.ndarray, use_graph: bool = True
     ) -> np.ndarray:
         if self.object_lockin is not None:
-            goal_pose = np.eye(4)
-            goal_pose[:3, 3] = self.get_object_free_point(
-                current_pose, self.object_lockin.centroid
-            )
-            goal_pose[:3, :3] = current_pose[:3, :3]  # keep current orientation
+            if self.object_approach_pose is not None:
+                goal_pose = np.asarray(self.object_approach_pose, dtype=float).copy()
+            else:
+                goal_pose = np.eye(4)
+                goal_pose[:3, 3] = self.get_object_free_point(
+                    current_pose, self.object_lockin.centroid
+                )
+                goal_pose[:3, :3] = current_pose[:3, :3]
             goal_ft = None
             self.current_goal_ft_id = None
             self.current_goal_pose = None
@@ -1323,6 +1413,7 @@ class FrontierManager(Base):
             obj: Detected object dictionary with 'centroid' key.
         """
         self.object_lockin = obj
+        self.object_approach_pose = getattr(obj, "active_approach_pose", None)
         self.logger.debug(f"Locked into object: {obj.label} at {obj.centroid}")
 
     def get_graph_vis(self):

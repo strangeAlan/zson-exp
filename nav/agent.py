@@ -9,6 +9,7 @@ import torch
 import open3d as o3d
 import cv2
 from vlm.utils import (
+    detect_bound_target_candidates,
     detect_frontier_probabilities,
     segment_target_object,
     detect_target_object,
@@ -170,17 +171,47 @@ class NavigationAgent:
         self.segmentation_image = None
         self.composition_images = []
         self.termination_images = []
+        self.termination_depths = []
+        self.termination_viewpoints = []
+        self.termination_semantics = []
         self.composition_depths = []
         self.composition_viewpoints = []
+        self.composition_semantics = []
         self.detected_objects = []
         self.goal_object = None
         self.appoaching_object = False
         self.target_diagnostics = {
             "segmentation_events": [],
             "verification_events": [],
+            "pursuit_events": [],
+            "approach_events": [],
+            "reobservation_events": [],
+            "stop_gate_events": [],
             "visibility_events": [],
             "termination_event": None,
         }
+        self.target_closure_enabled = bool(
+            self.config.get("target_closure_enabled", False)
+        )
+        self.target_pursuit_threshold = float(
+            self.config.get("target_pursuit_threshold", 0.35)
+        )
+        self.target_stop_threshold = float(
+            self.config.get("target_stop_threshold", self.termination_threshold)
+        )
+        self.target_surface_stop_distance = float(
+            self.config.get("target_surface_stop_distance", 1.0)
+        )
+        self.target_reassociation_distance = float(
+            self.config.get("target_reassociation_distance", 1.25)
+        )
+        self.target_max_reobserve_cycles = int(
+            self.config.get("target_max_reobserve_cycles", 2)
+        )
+        self.target_max_pursuit_steps = int(
+            self.config.get("target_max_pursuit_steps", 120)
+        )
+        self.candidate_verification_cache = {}
 
         self.optimal_path_length = float("inf")
 
@@ -338,11 +369,20 @@ class NavigationAgent:
         # Always keep the latest n_images for termination
         if len(self.termination_images) == self.n_images:
             self.termination_images.pop(0)
+            self.termination_depths.pop(0)
+            self.termination_viewpoints.pop(0)
+            self.termination_semantics.pop(0)
 
         self.composition_images.append(rgb)
         self.termination_images.append(rgb)
+        self.termination_depths.append(depth)
+        self.termination_viewpoints.append(W_T_C2.copy())
+        semantic_mask = getattr(self, "current_target_semantic_mask", None)
+        semantic_copy = None if semantic_mask is None else semantic_mask.copy()
+        self.termination_semantics.append(semantic_copy)
         self.composition_depths.append(depth)
         self.composition_viewpoints.append(W_T_C2.copy())
+        self.composition_semantics.append(semantic_copy)
 
         if (
             len(self.composition_images) == self.n_images
@@ -396,6 +436,9 @@ class NavigationAgent:
             else:
                 masks, image = response
                 self.segmentation_image = np.array(image)
+                evidence_image, evidence_labels = self._build_candidate_evidence(
+                    masks, self.composition_images
+                )
                 if save_images:
                     segmentation_path = os.path.join(
                         self.segmentation_dir,
@@ -405,7 +448,7 @@ class NavigationAgent:
 
                 depth_compositions = {}
 
-                for mask in masks:
+                for mask_index, mask in enumerate(masks):
                     image_index = mask["image_index"]
                     mask_depth = self.composition_depths[image_index]
                     viewpoint = self.composition_viewpoints[image_index]
@@ -416,6 +459,11 @@ class NavigationAgent:
                         viewpoint=viewpoint,
                         intrinsic_mat=self.cam_intrinsic.intrinsic_matrix,
                         step=self.navigation_steps,
+                        rgb=self.composition_images[image_index],
+                        evidence_image=evidence_image,
+                        evidence_label=evidence_labels[mask_index],
+                        evidence_labels=evidence_labels,
+                        target_semantic_mask=self.composition_semantics[image_index],
                     )
 
                     self.detected_objects.append(obj)
@@ -464,6 +512,7 @@ class NavigationAgent:
             self.composition_images = []
             self.composition_depths = []
             self.composition_viewpoints = []
+            self.composition_semantics = []
             end_segm = time.time()
             self.timings["total_segmentation"]["total_time"] += (end_segm - start_segm)
             self.timings["total_segmentation"]["calls"] += 1
@@ -838,6 +887,15 @@ class NavigationAgent:
                 else:
                     probability = response.get("probability", 0.0)
                     reason = response.get("reason", "")
+                    bound_probability = None
+                    bound_reason = None
+                    bound_label = None
+                    if self.target_closure_enabled:
+                        (
+                            bound_probability,
+                            bound_reason,
+                            bound_label,
+                        ) = self._score_bound_object(self.goal_object)
                     self.target_diagnostics["verification_events"].append(
                         {
                             "step": self.navigation_steps,
@@ -852,6 +910,10 @@ class NavigationAgent:
                                 probability >= self.termination_threshold
                             ),
                             "reason": reason,
+                            "candidate_bound_probability": bound_probability,
+                            "candidate_bound_reason": bound_reason,
+                            "candidate_bound_label": bound_label,
+                            "candidate_gt_overlap": self.goal_object.gt_overlap,
                         }
                     )
                     self.log(
@@ -867,13 +929,22 @@ class NavigationAgent:
                             self.logging_file,
                             f"Object found with probability {probability}. Approaching object.",
                         )
-                        self.ft_manager.lock_into_object(self.goal_object)
-                        self.path_to_go = (
-                            self.ft_manager.plan_path_to_goal(
-                                W_T_C2, depth=depth, use_graph=False
+                        if self.target_closure_enabled:
+                            self._start_target_pursuit(
+                                self.goal_object,
+                                W_T_C2,
+                                depth,
+                                bound_probability,
+                                bound_reason,
                             )
-                            or []
-                        )
+                        else:
+                            self.ft_manager.lock_into_object(self.goal_object)
+                            self.path_to_go = (
+                                self.ft_manager.plan_path_to_goal(
+                                    W_T_C2, depth=depth, use_graph=False
+                                )
+                                or []
+                            )
                         verification_event = self.target_diagnostics[
                             "verification_events"
                         ][-1]
@@ -914,7 +985,14 @@ class NavigationAgent:
                 f"Approaching locked-in object. Distance to object center: {dist:.2f} m",
             )
 
-            if len(self.path_to_go) == 0 or dist < self.success_threshold:
+            if self.target_closure_enabled:
+                closure = self._advance_target_closure(W_T_C2, depth)
+                if closure == "stop":
+                    return False, "object_found"
+                if closure == "released":
+                    reach_next_update = True
+                    self.move_enough = True
+            elif len(self.path_to_go) == 0 or dist < self.success_threshold:
                 self.target_diagnostics["termination_event"] = {
                     "step": self.navigation_steps,
                     "object_id": self.ft_manager.object_lockin.id,
@@ -984,6 +1062,418 @@ class NavigationAgent:
             )
         
         return True, "continue_navigation"
+
+    def _score_bound_evidence(self, evidence: dict) -> tuple[dict, str]:
+        labels = list(evidence.get("labels", []))
+        cache_key = (
+            int(evidence.get("step") or -1),
+            tuple(labels),
+            self.goal,
+        )
+        cached = self.candidate_verification_cache.get(cache_key)
+        if cached is not None:
+            return cached
+        started = time.time()
+        success, scores, raw_response = detect_bound_target_candidates(
+            rgb_image=evidence["image"],
+            labels=labels,
+            target_object=self.goal,
+            vlm_model=self.detection_source,
+            api_key=self.get_api_key_for_model(self.detection_source),
+        )
+        self.timings["vlm_call"]["total_time"] += time.time() - started
+        self.timings["vlm_call"]["calls"] += 1
+        self.log(
+            "info",
+            self.vlm_log_file,
+            f"Candidate-bound target detection: {raw_response}",
+        )
+        parsed = scores if success and isinstance(scores, dict) else {}
+        result = (parsed, raw_response)
+        self.candidate_verification_cache[cache_key] = result
+        return result
+
+    def _score_bound_object(
+        self, obj: DetectedObject
+    ) -> tuple[float, str, str | None]:
+        evidence = obj.best_evidence()
+        if evidence is None:
+            return 0.0, "Candidate has no bound SAM evidence.", None
+        scores, _ = self._score_bound_evidence(evidence)
+        label = evidence.get("label")
+        value = scores.get(label, [0.0, "Candidate label missing from response."])
+        try:
+            probability = float(value[0])
+            reason = str(value[1])
+        except (TypeError, ValueError, IndexError):
+            probability = 0.0
+            reason = "Malformed candidate-bound score."
+        return probability, reason, label
+
+    @staticmethod
+    def _approach_event(candidate: dict) -> dict:
+        return {
+            key: value
+            for key, value in candidate.items()
+            if key != "pose"
+        }
+
+    def _select_next_approach(
+        self, obj: DetectedObject, current_pose: np.ndarray, depth: np.ndarray
+    ) -> bool:
+        candidates = self.ft_manager.generate_object_approach_viewpoints(
+            obj, current_pose, separation=0.7
+        )
+        obj.approach_viewpoints = [
+            self._approach_event(candidate) for candidate in candidates
+        ]
+        remaining = [
+            candidate
+            for candidate in candidates
+            if candidate["key"] not in obj.attempted_approach_keys
+        ]
+        event = {
+            "step": int(self.navigation_steps),
+            "object_id": int(obj.id),
+            "raw_centroid": (
+                None
+                if obj.raw_centroid is None
+                else np.asarray(obj.raw_centroid, dtype=float).tolist()
+            ),
+            "robust_position": (
+                None
+                if obj.robust_position is None
+                else np.asarray(obj.robust_position, dtype=float).tolist()
+            ),
+            "legacy_raw_centroid_endpoint": (
+                None
+                if obj.raw_centroid is None
+                else np.asarray(
+                    self.ft_manager.get_object_free_point(
+                        current_pose, np.asarray(obj.raw_centroid, dtype=float)
+                    ),
+                    dtype=float,
+                ).tolist()
+            ),
+            "generated": [self._approach_event(candidate) for candidate in candidates],
+            "selected": None,
+            "path_steps": 0,
+        }
+        if not remaining:
+            event["outcome"] = "no_untried_reachable_viewpoint"
+            self.target_diagnostics["approach_events"].append(event)
+            return False
+
+        selected = remaining[0]
+        obj.attempted_approach_keys.add(selected["key"])
+        obj.active_approach_pose = np.asarray(selected["pose"], dtype=float).copy()
+        obj.pursuit_state = "approach"
+        self.ft_manager.object_approach_pose = obj.active_approach_pose.copy()
+        self.path_to_go = (
+            self.ft_manager.plan_path_to_goal(
+                current_pose, depth=depth, use_graph=False
+            )
+            or []
+        )
+        event["selected"] = self._approach_event(selected)
+        event["path_steps"] = len(self.path_to_go)
+        event["path_endpoint"] = (
+            self.path_to_go[-1][:3, 3].astype(float).tolist()
+            if self.path_to_go
+            else None
+        )
+        event["outcome"] = "planned" if self.path_to_go else "already_at_or_no_path"
+        self.target_diagnostics["approach_events"].append(event)
+        return True
+
+    def _start_target_pursuit(
+        self,
+        obj: DetectedObject,
+        current_pose: np.ndarray,
+        depth: np.ndarray,
+        bound_probability: float | None,
+        bound_reason: str | None,
+    ) -> None:
+        obj.bound_probability = float(bound_probability or 0.0)
+        obj.bound_reason = bound_reason
+        obj.last_bound_step = self.navigation_steps
+        obj.pursuit_start_step = self.navigation_steps
+        obj.pursuit_state = "approach"
+        self.ft_manager.lock_into_object(obj)
+        planned = self._select_next_approach(obj, current_pose, depth)
+        if not planned:
+            obj.pursuit_state = "reobserve"
+        self.target_diagnostics["pursuit_events"].append(
+            {
+                "step": int(self.navigation_steps),
+                "event": "lock",
+                "object_id": int(obj.id),
+                "global_gate": "accepted",
+                "candidate_bound_probability": obj.bound_probability,
+                "candidate_bound_reason": obj.bound_reason,
+                "candidate_bound_status": (
+                    "confirmed"
+                    if obj.bound_probability >= self.target_stop_threshold
+                    else "uncertain_pursue_for_better_view"
+                ),
+            }
+        )
+
+    def _facing_target(
+        self, current_pose: np.ndarray, target_position: np.ndarray
+    ) -> tuple[bool, float]:
+        forward = np.asarray(current_pose[:3, 2], dtype=float)
+        direction = np.asarray(target_position, dtype=float) - current_pose[:3, 3]
+        forward[2] = 0.0
+        direction[2] = 0.0
+        if np.linalg.norm(forward) < 1e-6 or np.linalg.norm(direction) < 1e-6:
+            return True, 0.0
+        cosine = float(
+            np.clip(
+                np.dot(forward, direction)
+                / (np.linalg.norm(forward) * np.linalg.norm(direction)),
+                -1.0,
+                1.0,
+            )
+        )
+        angle = float(np.degrees(np.arccos(cosine)))
+        return angle <= 60.0, angle
+
+    def _reobserve_target(self, locked: DetectedObject) -> tuple[DetectedObject | None, dict]:
+        event = {
+            "step": int(self.navigation_steps),
+            "object_id": int(locked.id),
+            "trigger": "path_exhausted",
+            "mask_count": 0,
+            "candidates": [],
+            "selected_label": None,
+            "association_distance": None,
+            "bound_probability": 0.0,
+            "outcome": None,
+        }
+        if len(self.termination_images) != self.n_images:
+            event["outcome"] = "insufficient_observation_buffer"
+            return None, event
+        composition = self.compose_images(self.termination_images)
+        started = time.time()
+        response = segment_target_object(
+            rgb_composition=composition,
+            n_images=self.n_images,
+            target_object=self.goal,
+            segmentation_model=self.segmentation_source,
+            api_key=self.get_api_key_for_model(self.segmentation_source),
+        )
+        self.timings["sam"]["total_time"] += time.time() - started
+        self.timings["sam"]["calls"] += 1
+        if response is None or len(response) != 2 or not response[0]:
+            event["outcome"] = "no_mask"
+            return None, event
+
+        masks, _ = response
+        evidence_image, labels = self._build_candidate_evidence(
+            masks, self.termination_images
+        )
+        candidates = []
+        for index, mask in enumerate(masks):
+            image_index = int(mask.get("image_index", -1))
+            if not 0 <= image_index < len(self.termination_depths):
+                continue
+            candidate = DetectedObject.from_mask(
+                mask=mask,
+                depth=self.termination_depths[image_index],
+                viewpoint=self.termination_viewpoints[image_index],
+                intrinsic_mat=self.cam_intrinsic.intrinsic_matrix,
+                step=self.navigation_steps,
+                rgb=self.termination_images[image_index],
+                evidence_image=evidence_image,
+                evidence_label=labels[index],
+                evidence_labels=labels,
+                target_semantic_mask=self.termination_semantics[image_index],
+            )
+            if candidate.robust_position is not None:
+                candidates.append(candidate)
+        event["mask_count"] = len(candidates)
+        event["candidates"] = [candidate.to_dict() for candidate in candidates]
+        if not candidates:
+            event["outcome"] = "no_3d_candidate"
+            return None, event
+
+        evidence = candidates[0].best_evidence()
+        scores, raw_response = self._score_bound_evidence(evidence)
+        self.log(
+            "info", self.vlm_log_file, f"Target reobservation binding: {raw_response}"
+        )
+        ranked = []
+        origin = np.asarray(
+            locked.robust_position if locked.robust_position is not None else locked.centroid,
+            dtype=float,
+        )
+        for candidate in candidates:
+            distance = float(np.linalg.norm(candidate.robust_position[:2] - origin[:2]))
+            value = scores.get(candidate.evidence_label, [0.0, "Missing label."])
+            try:
+                probability = float(value[0])
+                reason = str(value[1])
+            except (TypeError, ValueError, IndexError):
+                probability, reason = 0.0, "Malformed candidate-bound score."
+            if distance <= self.target_reassociation_distance:
+                ranked.append((probability - 0.15 * distance, probability, distance, reason, candidate))
+        if not ranked:
+            event["outcome"] = "no_associated_candidate"
+            return None, event
+        _, probability, distance, reason, selected = max(ranked, key=lambda item: item[0])
+        selected.bound_probability = probability
+        selected.bound_reason = reason
+        selected.last_bound_step = self.navigation_steps
+        event.update(
+            {
+                "selected_label": selected.evidence_label,
+                "association_distance": distance,
+                "bound_probability": probability,
+                "bound_reason": reason,
+                "selected_gt_overlap": selected.gt_overlap,
+                "outcome": (
+                    "confirmed"
+                    if probability >= self.target_stop_threshold
+                    else "uncertain_or_rejected"
+                ),
+            }
+        )
+        return selected, event
+
+    def _release_target(self, reason: str) -> None:
+        locked = self.ft_manager.object_lockin
+        if locked is not None:
+            locked.is_valid = False
+            locked.verification_status = reason
+            locked.pursuit_state = "released"
+            if locked.frontier is not None:
+                locked.frontier.set_invalid()
+            self.target_diagnostics["pursuit_events"].append(
+                {
+                    "step": int(self.navigation_steps),
+                    "event": "release",
+                    "object_id": int(locked.id),
+                    "reason": reason,
+                    "reobserve_cycles": int(locked.reobserve_cycles),
+                }
+            )
+        self.ft_manager.object_lockin = None
+        self.ft_manager.object_approach_pose = None
+        self.ft_manager.current_goal_pose = None
+        self.ft_manager.current_goal_ft_id = None
+        self.goal_object = None
+        self.path_to_go = []
+        self.ft_manager.filter_frontiers()
+
+    def _advance_target_closure(
+        self, current_pose: np.ndarray, depth: np.ndarray
+    ) -> str:
+        locked = self.ft_manager.object_lockin
+        if locked is None:
+            return "released"
+        if (
+            locked.pursuit_start_step is not None
+            and self.navigation_steps - locked.pursuit_start_step
+            > self.target_max_pursuit_steps
+        ):
+            self._release_target("pursuit_budget_exhausted")
+            return "released"
+        if self.path_to_go:
+            return "approaching"
+
+        locked.pursuit_state = "reobserve"
+        selected, event = self._reobserve_target(locked)
+        locked.reobserve_cycles += 1
+        event["reobserve_cycle"] = int(locked.reobserve_cycles)
+        self.target_diagnostics["reobservation_events"].append(event)
+
+        if selected is not None and selected.bound_probability >= self.target_pursuit_threshold:
+            locked.update_geometry(selected)
+            locked.bound_probability = selected.bound_probability
+            locked.bound_reason = selected.bound_reason
+            locked.last_bound_step = self.navigation_steps
+            surface_distance = locked.surface_distance(current_pose[:3, 3])
+            facing, facing_angle = self._facing_target(
+                current_pose, locked.robust_position
+            )
+            gate = {
+                "step": int(self.navigation_steps),
+                "object_id": int(locked.id),
+                "active_hypothesis": True,
+                "recent_bound_candidate": locked.last_bound_step == self.navigation_steps,
+                "bound_probability": float(locked.bound_probability),
+                "bound_threshold": self.target_stop_threshold,
+                "approach_completed": True,
+                "surface_distance": surface_distance,
+                "surface_distance_threshold": self.target_surface_stop_distance,
+                "facing_target": facing,
+                "facing_angle_degrees": facing_angle,
+            }
+            gate["passed"] = bool(
+                gate["recent_bound_candidate"]
+                and locked.bound_probability >= self.target_stop_threshold
+                and surface_distance < self.target_surface_stop_distance
+                and facing
+            )
+            self.target_diagnostics["stop_gate_events"].append(gate)
+            if gate["passed"]:
+                locked.pursuit_state = "stop"
+                self.target_diagnostics["termination_event"] = {
+                    "step": int(self.navigation_steps),
+                    "object_id": int(locked.id),
+                    "object_centroid": np.asarray(locked.centroid, dtype=float).tolist(),
+                    "raw_centroid": (
+                        None
+                        if locked.raw_centroid is None
+                        else np.asarray(locked.raw_centroid, dtype=float).tolist()
+                    ),
+                    "robust_position": np.asarray(
+                        locked.robust_position, dtype=float
+                    ).tolist(),
+                    "agent_position": current_pose[:3, 3].astype(float).tolist(),
+                    "distance_to_object": float(
+                        np.linalg.norm(locked.centroid - current_pose[:3, 3])
+                    ),
+                    "surface_distance": surface_distance,
+                    "path_exhausted": True,
+                    "stop_trigger": "candidate_bound_surface_closure",
+                    "bound_probability": float(locked.bound_probability),
+                    "reobserve_cycles": int(locked.reobserve_cycles),
+                }
+                self.log(
+                    "info",
+                    self.logging_file,
+                    "Target closure verified; issuing ObjectNav STOP.",
+                )
+                return "stop"
+            if self._select_next_approach(locked, current_pose, depth):
+                return "replanned"
+
+        elif selected is not None:
+            self.target_diagnostics["stop_gate_events"].append(
+                {
+                    "step": int(self.navigation_steps),
+                    "object_id": int(locked.id),
+                    "active_hypothesis": True,
+                    "recent_bound_candidate": True,
+                    "bound_probability": float(selected.bound_probability),
+                    "bound_threshold": self.target_stop_threshold,
+                    "approach_completed": True,
+                    "passed": False,
+                    "failure": "candidate_bound_below_pursuit_threshold",
+                }
+            )
+
+        if locked.reobserve_cycles < self.target_max_reobserve_cycles:
+            if self._select_next_approach(locked, current_pose, depth):
+                return "replanned"
+            locked.pursuit_state = "reobserve"
+            self.rotate()
+            return "reobserve"
+
+        self._release_target("reobservation_budget_exhausted")
+        return "released"
 
     def get_target_diagnostics(self) -> dict:
         """Return episode-level target evidence without changing policy state."""
@@ -1305,8 +1795,12 @@ class NavigationAgent:
     def close(self) -> None:
         self.composition_images.clear()
         self.termination_images.clear()
+        self.termination_depths.clear()
+        self.termination_viewpoints.clear()
+        self.termination_semantics.clear()
         self.composition_depths.clear()
         self.composition_viewpoints.clear()
+        self.composition_semantics.clear()
         self.last_rgb = None
         self.last_som_img = None
         self.segmentation_image = None
@@ -1344,82 +1838,88 @@ class NavigationAgent:
             )
         return canvas
 
+    def _build_candidate_evidence(
+        self, masks: list[dict], image_array: list[np.ndarray]
+    ) -> tuple[np.ndarray, list[str]]:
+        """Render stable labels on the exact SAM masks that created candidates."""
+        marked = [np.asarray(image).copy() for image in image_array]
+        labels = [
+            chr(65 + index) if index < 26 else str(index)
+            for index in range(len(masks))
+        ]
+        for label, mask_data in zip(labels, masks):
+            image_index = int(mask_data.get("image_index", 0))
+            if not 0 <= image_index < len(marked):
+                continue
+            mask = np.asarray(mask_data.get("mask"), dtype=bool)
+            image = marked[image_index]
+            if mask.shape != image.shape[:2] or not np.any(mask):
+                continue
+            image[mask] = (
+                0.55 * image[mask].astype(np.float32)
+                + 0.45 * np.array([255, 32, 32], dtype=np.float32)
+            ).astype(np.uint8)
+            ys, xs = np.nonzero(mask)
+            center = (int(np.median(xs)), int(np.median(ys)))
+            cv2.circle(image, center, 24, (255, 255, 255), 4)
+            cv2.circle(image, center, 20, (255, 32, 32), 3)
+            cv2.putText(
+                image,
+                label,
+                (center[0] - 10, center[1] + 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.9,
+                (255, 255, 255),
+                3,
+                cv2.LINE_AA,
+            )
+        return self.compose_images(marked), labels
+
     def merge_objects(self, distance_threshold: float = 0.5) -> None:
         """
-        Merge detected objects that are close to each other with DBSCAN
+        Merge nearby proposal identities while retaining the latest bound surface.
         """
-
-        # Extract centroids
-        centroids = []
-        for obj in self.detected_objects:
-            if obj.centroid is not None:
-                centroids.append(obj.centroid)
-
-        if len(centroids) == 0:
+        valid_pairs = [
+            (index, obj)
+            for index, obj in enumerate(self.detected_objects)
+            if obj.centroid is not None
+        ]
+        if not valid_pairs:
             return
-        centroids = np.array(centroids)
-        # DBSCAN clustering
+        centroids = np.asarray([obj.centroid for _, obj in valid_pairs])
         clustering = DBSCAN(
             eps=distance_threshold, min_samples=1, metric="euclidean"
         ).fit_predict(centroids)
         merged_objects = []
         for cluster_id in np.unique(clustering):
-            cluster_indices = np.where(clustering == cluster_id)[0]
-            if len(cluster_indices) == 0:
+            local_indices = np.where(clustering == cluster_id)[0]
+            members = [valid_pairs[index][1] for index in local_indices]
+            if not members:
                 continue
-            if len(cluster_indices) == 1:
-                merged_objects.append(self.detected_objects[cluster_indices[0]])
+            if len(members) == 1:
+                merged_objects.append(members[0])
                 continue
-            # Merge objects in this cluster
-            merged_obj = self.detected_objects[
-                cluster_indices[0]
-            ]  # start with the first object's data
-
-            merged_centroids = []
-            merged_viewpoints = []
-            observation_count = 0
-            detection_scores = []
-            first_seen_steps = []
-            last_seen_steps = []
-            for idx in cluster_indices:
-                obj = self.detected_objects[idx]
-                if obj.centroid is not None:
-                    merged_centroids.append(obj.centroid)
-                if obj.viewpoint is not None:
-                    merged_viewpoints.append(obj.viewpoint)
-                observation_count += int(getattr(obj, "observation_count", 1))
-                if getattr(obj, "detection_score", None) is not None:
-                    detection_scores.append(float(obj.detection_score))
-                if getattr(obj, "first_seen_step", None) is not None:
-                    first_seen_steps.append(int(obj.first_seen_step))
-                if getattr(obj, "last_seen_step", None) is not None:
-                    last_seen_steps.append(int(obj.last_seen_step))
-
-                # All objects must be valid to keep the merged one valid
-                merged_obj.is_valid = merged_obj.is_valid and obj.is_valid
-
-                # if any object is verified true positive, mark merged as true positive
-                if obj.verification_status == "true_positive":
-                    merged_obj.verification_status = "true_positive"
-                elif obj.verification_status == "false_positive":
-                    if merged_obj.verification_status != "true_positive":
-                        merged_obj.verification_status = "false_positive"
-
+            # Never average instance geometry across time.  Select the newest,
+            # strongest observation and retain older observations as evidence.
+            merged_obj = max(
+                members,
+                key=lambda obj: (
+                    int(obj.last_seen_step or -1),
+                    float(obj.detection_score or 0.0),
+                ),
+            )
+            merged_obj.observation_count = sum(
+                int(getattr(obj, "observation_count", 1)) for obj in members
+            )
+            first_steps = [obj.first_seen_step for obj in members if obj.first_seen_step is not None]
+            if first_steps:
+                merged_obj.first_seen_step = min(first_steps)
+            evidence = []
+            for obj in members:
+                evidence.extend(getattr(obj, "evidence_observations", []))
                 if self.goal_object is not None and obj.id == self.goal_object.id:
                     self.goal_object = merged_obj
-
-            if len(merged_centroids) > 0:
-                merged_obj.centroid = np.mean(merged_centroids, axis=0)
-            if len(merged_viewpoints) > 0:
-                merged_obj.viewpoint = np.mean(merged_viewpoints, axis=0)
-            merged_obj.observation_count = observation_count
-            if detection_scores:
-                merged_obj.detection_score = max(detection_scores)
-            if first_seen_steps:
-                merged_obj.first_seen_step = min(first_seen_steps)
-            if last_seen_steps:
-                merged_obj.last_seen_step = max(last_seen_steps)
-
+            merged_obj.evidence_observations = evidence
             merged_objects.append(merged_obj)
 
         self.detected_objects = merged_objects
@@ -1477,6 +1977,7 @@ class NavigationAgent:
         self.ft_manager = FrontierManager(
             params=self.config, log_level=self.args.log_level, planner=self.planner
         )
+        self.ft_manager.navmesh_planner = getattr(self, "navmesh_planner", None)
         self.ft_manager.logging_file = self.logging_file
         self.ft_manager.filter_bbox = self.bbox
         self.ft_manager.planner.set_bounds(self.bbox)

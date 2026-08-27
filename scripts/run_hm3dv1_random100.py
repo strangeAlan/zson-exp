@@ -430,6 +430,12 @@ def main() -> None:
                 )
                 if not metrics.get("success") and reason == "object_found":
                     reason = "false_positive"
+                target_diagnostics = agent.get_target_diagnostics() if agent else None
+                if target_diagnostics is not None:
+                    target_diagnostics["evaluator_final"] = {
+                        "distance_to_goal": float(metrics.get("distance_to_goal", float("inf"))),
+                        "success_at_1m": bool(metrics.get("success", 0.0)),
+                    }
                 result = {
                     "index": index,
                     "status": "error" if error else "ok",
@@ -443,9 +449,7 @@ def main() -> None:
                     "max_rss_mib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024,
                     "metrics": metrics,
                     "detected_objects": len(agent.detected_objects) if agent else 0,
-                    "target_diagnostics": (
-                        agent.get_target_diagnostics() if agent else None
-                    ),
+                    "target_diagnostics": target_diagnostics,
                     "timings": agent.timings if agent else None,
                     "error": error,
                 }

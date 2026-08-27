@@ -1,0 +1,16 @@
+# OF-base runtime plus candidate-grounded persistent target closure.
+# Exploration/frontier generation, target proposal generation, models, planner,
+# and evaluator protocol remain inherited and unchanged.
+extends: navigation_hm3dv1_qwen.yaml
+
+target_closure_enabled: true
+
+# Whole-composition Qwen retains the original 0.7 pursuit gate.  A lower bound
+# score may keep a locked hypothesis alive for one better observation, but only
+# a fresh score >= 0.7 can authorize STOP.
+target_pursuit_threshold: 0.35
+target_stop_threshold: 0.7
+target_surface_stop_distance: 1.0
+target_reassociation_distance: 1.25
+target_max_reobserve_cycles: 2
+target_max_pursuit_steps: 120
