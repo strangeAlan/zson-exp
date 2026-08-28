@@ -50,6 +50,7 @@ class HabitatAgent(NavigationAgent):
             for goal in episode.goals
             if getattr(goal, "object_id", None) is not None
         }
+        self.latest_semantic = None
 
         agent_state = habitat_env.sim.get_agent_state()
         cam_state = agent_state.sensor_states["rgb"]
@@ -343,6 +344,8 @@ class HabitatAgent(NavigationAgent):
         semantic = obs.get("semantic")
         if semantic is not None and hasattr(self, "target_diagnostics"):
             semantic = np.asarray(semantic).squeeze()
+            if getattr(self, "retain_candidate_evidence", False):
+                self.latest_semantic = semantic.copy()
             target_pixels = int(
                 np.isin(semantic, tuple(self.target_semantic_ids)).sum()
             )
@@ -358,6 +361,8 @@ class HabitatAgent(NavigationAgent):
                     events[-1] = event
             else:
                 events.append(event)
+        elif getattr(self, "retain_candidate_evidence", False):
+            self.latest_semantic = None
 
         if np.max(img) <= 1:
             img = (img * 255).astype(np.uint8)

@@ -73,6 +73,21 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest-only", action="store_true")
     parser.add_argument("--save-images", action="store_true")
     parser.add_argument("--log-level", type=int, default=20)
+    parser.add_argument(
+        "--manifest-cohort",
+        help="Optional exact value of selection[].oracle_cohort to replay",
+    )
+    parser.add_argument(
+        "--manifest-source-probe-index",
+        type=int,
+        help="Analysis smoke: replay one selection[] source_probe_index",
+    )
+    parser.add_argument(
+        "--target-approach-oracle",
+        choices=("a", "b"),
+        help="Use the analysis-only post-acceptance Oracle agent",
+    )
+    parser.add_argument("--oracle-post-accept-steps", type=int, default=300)
     return parser.parse_args()
 
 
@@ -145,13 +160,42 @@ def select_random_episodes(config, *, count: int, seed: int):
     return dataset, identities
 
 
-def select_manifest_episodes(config, manifest_path: Path, dataset_label: str):
+def select_manifest_episodes(
+    config,
+    manifest_path: Path,
+    dataset_label: str,
+    manifest_cohort: str | None = None,
+    manifest_source_probe_index: int | None = None,
+):
     """Resolve a frozen scene/episode manifest against the selected HM3D data."""
 
     payload = json.loads(manifest_path.read_text())
     requested = payload.get("selection")
     if not isinstance(requested, list) or not requested:
         raise ValueError(f"Manifest has no non-empty selection: {manifest_path}")
+
+    if manifest_cohort is not None:
+        requested = [
+            item
+            for item in requested
+            if str(item.get("oracle_cohort")) == manifest_cohort
+        ]
+        if not requested:
+            raise ValueError(
+                f"Manifest has no oracle_cohort={manifest_cohort!r}: {manifest_path}"
+            )
+    if manifest_source_probe_index is not None:
+        requested = [
+            item
+            for item in requested
+            if int(item.get("source_probe_index", -1))
+            == manifest_source_probe_index
+        ]
+        if len(requested) != 1:
+            raise ValueError(
+                "Expected exactly one manifest source_probe_index="
+                f"{manifest_source_probe_index}, found {len(requested)}"
+            )
 
     dataset_config = config.habitat.dataset
     dataset = make_dataset(dataset_config.type, config=dataset_config)
@@ -196,7 +240,7 @@ def select_manifest_episodes(config, manifest_path: Path, dataset_label: str):
 
     dataset.episodes = selected
     configure_sequential_iteration(config)
-    return dataset, identities, payload
+    return dataset, identities, payload, requested
 
 
 def select_all_episodes(config):
@@ -269,7 +313,9 @@ def main() -> None:
     dataset_label = "HM3Dv1" if args.dataset == "hm3dv1" else "HM3Dv2"
     dataset_log_label = f"{dataset_label}-val"
     protocol = (
-        NavigationProtocol(success_distance=1.0)
+        NavigationProtocol(
+            success_distance=1.0, max_episode_steps=args.max_steps
+        )
         if args.dataset == "hm3dv2"
         else None
     )
@@ -277,12 +323,17 @@ def main() -> None:
         args.dataset, seed=args.seed, protocol=protocol, top_down_map=False
     )
     source_manifest = None
+    source_entries = None
     if args.all_episodes:
         dataset, manifest = select_all_episodes(config)
         selection_mode = "all"
     elif args.episode_manifest is not None:
-        dataset, manifest, source_manifest = select_manifest_episodes(
-            config, args.episode_manifest, dataset_label
+        dataset, manifest, source_manifest, source_entries = select_manifest_episodes(
+            config,
+            args.episode_manifest,
+            dataset_label,
+            manifest_cohort=args.manifest_cohort,
+            manifest_source_probe_index=args.manifest_source_probe_index,
         )
         selection_mode = "explicit_manifest"
     else:
@@ -304,6 +355,9 @@ def main() -> None:
         "source_manifest_metadata": (
             source_manifest.get("metadata") if source_manifest else None
         ),
+        "manifest_cohort": args.manifest_cohort,
+        "manifest_source_probe_index": args.manifest_source_probe_index,
+        "target_approach_oracle": args.target_approach_oracle,
         "iterator": {
             "shuffle": True,
             "group_by_scene": True,
@@ -382,7 +436,12 @@ def main() -> None:
             fatal_service_error = None
 
             try:
-                agent = PointnavAgent(
+                agent_class = PointnavAgent
+                if args.target_approach_oracle is not None:
+                    from nav.target_approach_oracle import TargetApproachOracleAgent
+
+                    agent_class = TargetApproachOracleAgent
+                agent = agent_class(
                     env,
                     args,
                     save_dir=str(episode_dir),
@@ -437,6 +496,9 @@ def main() -> None:
                     "scene_id": episode.scene_id,
                     "episode_id": str(episode.episode_id),
                     "target": episode.object_category,
+                    "probe_metadata": (
+                        source_entries[index] if source_entries is not None else None
+                    ),
                     "reason": reason,
                     "navigation_steps": agent.navigation_steps if agent else 0,
                     "elapsed_seconds": elapsed,
