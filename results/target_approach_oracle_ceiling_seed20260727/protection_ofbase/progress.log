@@ -1,0 +1,12 @@
+[ZSON3 EVAL] start dataset=HM3Dv2-val seed=20260727 episodes=10 mode=explicit_manifest resume_from=0 qwen_attention=unknown
+[ZSON3 EVAL] 1/10 scene=VBzV5z6i1WS.basis episode=13 target=chair success=1 spl=0.4683 reason=object_found steps=30 runtime=23.0s SR=100.00% (1/1) mean_SPL=0.4683 SR@0.1m(ref)=100.00% SPL@0.1m(ref)=0.4683
+[ZSON3 EVAL] 2/10 scene=HY1NcmCgn3n.basis episode=6 target=plant success=1 spl=1.0000 reason=object_found steps=29 runtime=25.8s SR=100.00% (2/2) mean_SPL=0.7342 SR@0.1m(ref)=50.00% SPL@0.1m(ref)=0.2342
+[ZSON3 EVAL] 3/10 scene=cvZr5TUy5C5.basis episode=27 target=bed success=1 spl=0.7655 reason=object_found steps=27 runtime=17.3s SR=100.00% (3/3) mean_SPL=0.7446 SR@0.1m(ref)=66.67% SPL@0.1m(ref)=0.4113
+[ZSON3 EVAL] 4/10 scene=Nfvxx8J5NCo.basis episode=10 target=tv_monitor success=1 spl=0.2843 reason=object_found steps=231 runtime=145.7s SR=100.00% (4/4) mean_SPL=0.6295 SR@0.1m(ref)=50.00% SPL@0.1m(ref)=0.3085
+[ZSON3 EVAL] 5/10 scene=eF36g7L6Z9M.basis episode=10 target=plant success=1 spl=0.4098 reason=object_found steps=381 runtime=436.3s SR=100.00% (5/5) mean_SPL=0.5856 SR@0.1m(ref)=40.00% SPL@0.1m(ref)=0.2468
+[ZSON3 EVAL] 6/10 scene=6s7QHgap2fW.basis episode=25 target=toilet success=1 spl=0.2302 reason=object_found steps=444 runtime=182.1s SR=100.00% (6/6) mean_SPL=0.5263 SR@0.1m(ref)=33.33% SPL@0.1m(ref)=0.2056
+[ZSON3 EVAL] 7/10 scene=p53SfW6mjZe.basis episode=15 target=bed success=1 spl=0.1541 reason=object_found steps=488 runtime=391.6s SR=100.00% (7/7) mean_SPL=0.4732 SR@0.1m(ref)=42.86% SPL@0.1m(ref)=0.1983
+[ZSON3 EVAL] 8/10 scene=mL8ThkuaVTM.basis episode=20 target=sofa success=1 spl=0.2044 reason=object_found steps=453 runtime=205.3s SR=100.00% (8/8) mean_SPL=0.4396 SR@0.1m(ref)=37.50% SPL@0.1m(ref)=0.1735
+[ZSON3 EVAL] 9/10 scene=QaLdnwvtxbs.basis episode=3 target=tv_monitor success=1 spl=0.4640 reason=object_found steps=39 runtime=23.8s SR=100.00% (9/9) mean_SPL=0.4423 SR@0.1m(ref)=33.33% SPL@0.1m(ref)=0.1542
+[ZSON3 EVAL] 10/10 scene=DYehNKdT76V.basis episode=9 target=chair success=1 spl=0.6526 reason=object_found steps=410 runtime=228.4s SR=100.00% (10/10) mean_SPL=0.4633 SR@0.1m(ref)=40.00% SPL@0.1m(ref)=0.2041
+[ZSON3 SUMMARY] episodes=10 SR=100.00% SPL=0.4633 SR@0.1m(ref)=40.00% SPL@0.1m(ref)=0.2041 exceptions=0

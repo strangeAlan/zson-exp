@@ -1,0 +1,15 @@
+[ZSON3 EVAL] start dataset=HM3Dv2-val seed=20260727 episodes=13 mode=explicit_manifest resume_from=0 qwen_attention=unknown
+[ZSON3 EVAL] 1/13 scene=QaLdnwvtxbs.basis episode=27 target=tv_monitor success=1 spl=0.2979 reason=oracle_endpoint_reached steps=87 runtime=53.7s SR=100.00% (1/1) mean_SPL=0.2979 SR@0.1m(ref)=0.00% SPL@0.1m(ref)=0.0000
+[ZSON3 EVAL] 2/13 scene=HY1NcmCgn3n.basis episode=3 target=plant success=0 spl=0.0000 reason=oracle_candidate_ambiguous steps=115 runtime=86.1s SR=50.00% (1/2) mean_SPL=0.1489 SR@0.1m(ref)=0.00% SPL@0.1m(ref)=0.0000
+[ZSON3 EVAL] 3/13 scene=TEEsavR23oF.basis episode=26 target=chair success=0 spl=0.0000 reason=oracle_candidate_wrong steps=29 runtime=27.8s SR=33.33% (1/3) mean_SPL=0.0993 SR@0.1m(ref)=0.00% SPL@0.1m(ref)=0.0000
+[ZSON3 EVAL] 4/13 scene=svBbv1Pavdk.basis episode=20 target=chair success=0 spl=0.0000 reason=oracle_candidate_ambiguous steps=185 runtime=81.7s SR=25.00% (1/4) mean_SPL=0.0745 SR@0.1m(ref)=0.00% SPL@0.1m(ref)=0.0000
+[ZSON3 EVAL] 5/13 scene=ziup5kvtCCR.basis episode=0 target=plant success=1 spl=0.1691 reason=oracle_endpoint_reached steps=252 runtime=200.0s SR=40.00% (2/5) mean_SPL=0.0934 SR@0.1m(ref)=20.00% SPL@0.1m(ref)=0.0338
+[ZSON3 EVAL] 6/13 scene=qyAac8rV8Zk.basis episode=25 target=bed success=0 spl=0.0000 reason=oracle_pointnav_failed_before_endpoint steps=89 runtime=55.7s SR=33.33% (2/6) mean_SPL=0.0778 SR@0.1m(ref)=16.67% SPL@0.1m(ref)=0.0282
+[ZSON3 EVAL] 7/13 scene=zt1RVoi7PcG.basis episode=17 target=tv_monitor success=0 spl=0.0000 reason=oracle_pointnav_failed_before_endpoint steps=109 runtime=89.0s SR=28.57% (2/7) mean_SPL=0.0667 SR@0.1m(ref)=14.29% SPL@0.1m(ref)=0.0242
+[ZSON3 EVAL] 8/13 scene=a8BtkwhxdRV.basis episode=17 target=toilet success=0 spl=0.0000 reason=oracle_candidate_ambiguous steps=102 runtime=42.3s SR=25.00% (2/8) mean_SPL=0.0584 SR@0.1m(ref)=12.50% SPL@0.1m(ref)=0.0211
+[ZSON3 EVAL] 9/13 scene=k1cupFYWXJ6.basis episode=1 target=sofa success=0 spl=0.0000 reason=oracle_candidate_wrong steps=56 runtime=39.4s SR=22.22% (2/9) mean_SPL=0.0519 SR@0.1m(ref)=11.11% SPL@0.1m(ref)=0.0188
+[ZSON3 EVAL] 10/13 scene=qyAac8rV8Zk.basis episode=17 target=bed success=0 spl=0.0000 reason=oracle_pointnav_failed_before_endpoint steps=138 runtime=75.2s SR=20.00% (2/10) mean_SPL=0.0467 SR@0.1m(ref)=10.00% SPL@0.1m(ref)=0.0169
+[ZSON3 EVAL] 11/13 scene=p53SfW6mjZe.basis episode=19 target=tv_monitor success=0 spl=0.0000 reason=oracle_pointnav_failed_before_endpoint steps=513 runtime=325.9s SR=18.18% (2/11) mean_SPL=0.0425 SR@0.1m(ref)=9.09% SPL@0.1m(ref)=0.0154
+[ZSON3 EVAL] 12/13 scene=svBbv1Pavdk.basis episode=4 target=tv_monitor success=1 spl=0.6043 reason=oracle_pointnav_failed_before_endpoint steps=60 runtime=23.3s SR=25.00% (3/12) mean_SPL=0.0893 SR@0.1m(ref)=16.67% SPL@0.1m(ref)=0.0644
+[ZSON3 EVAL] 13/13 scene=4ok3usBNeis.basis episode=5 target=toilet success=1 spl=0.7234 reason=oracle_endpoint_reached steps=36 runtime=25.9s SR=30.77% (4/13) mean_SPL=0.1381 SR@0.1m(ref)=23.08% SPL@0.1m(ref)=0.1151
+[ZSON3 SUMMARY] episodes=13 SR=30.77% SPL=0.1381 SR@0.1m(ref)=23.08% SPL@0.1m(ref)=0.1151 exceptions=0

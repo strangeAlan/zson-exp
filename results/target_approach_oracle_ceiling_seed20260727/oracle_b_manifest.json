@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "name": "hm3dv2_approach_oracle_b_failures",
+    "derived_from": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_ceiling_seed20260727/oracle_a",
+    "derivation_rule": "Oracle-A metric failure with candidate classification=correct",
+    "result_dependent_parameter_tuning": false
+  },
+  "selection": [
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "25",
+      "target": "bed",
+      "source_target": "bed",
+      "source_probe_index": 26,
+      "source_full_index": 835,
+      "oracle_cohort": "diagnostic",
+      "evidence_role": "accepted_no_stop",
+      "baseline_success": false,
+      "baseline_navigation_steps": 244
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00839-zt1RVoi7PcG/zt1RVoi7PcG.basis.glb",
+      "episode_id": "17",
+      "target": "tv_monitor",
+      "source_target": "tv_monitor",
+      "source_probe_index": 27,
+      "source_full_index": 995,
+      "oracle_cohort": "diagnostic",
+      "evidence_role": "accepted_no_stop+stable_v0_rescue",
+      "baseline_success": false,
+      "baseline_navigation_steps": 268
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "17",
+      "target": "bed",
+      "source_target": "bed",
+      "source_probe_index": 30,
+      "source_full_index": 827,
+      "oracle_cohort": "diagnostic",
+      "evidence_role": "accepted_no_stop",
+      "baseline_success": false,
+      "baseline_navigation_steps": 464
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "19",
+      "target": "tv_monitor",
+      "source_target": "tv_monitor",
+      "source_probe_index": 31,
+      "source_full_index": 745,
+      "oracle_cohort": "diagnostic",
+      "evidence_role": "accepted_no_stop",
+      "baseline_success": false,
+      "baseline_navigation_steps": 498
+    }
+  ]
+}

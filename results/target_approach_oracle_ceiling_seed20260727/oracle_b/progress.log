@@ -1,0 +1,6 @@
+[ZSON3 EVAL] start dataset=HM3Dv2-val seed=20260727 episodes=4 mode=explicit_manifest resume_from=0 qwen_attention=unknown
+[ZSON3 EVAL] 1/4 scene=qyAac8rV8Zk.basis episode=25 target=bed success=0 spl=0.0000 reason=oracle_pointnav_failed_before_endpoint steps=86 runtime=55.4s SR=0.00% (0/1) mean_SPL=0.0000 SR@0.1m(ref)=0.00% SPL@0.1m(ref)=0.0000
+[ZSON3 EVAL] 2/4 scene=zt1RVoi7PcG.basis episode=17 target=tv_monitor success=0 spl=0.0000 reason=oracle_pointnav_failed_before_endpoint steps=109 runtime=86.8s SR=0.00% (0/2) mean_SPL=0.0000 SR@0.1m(ref)=0.00% SPL@0.1m(ref)=0.0000
+[ZSON3 EVAL] 3/4 scene=qyAac8rV8Zk.basis episode=17 target=bed success=0 spl=0.0000 reason=oracle_pointnav_failed_before_endpoint steps=139 runtime=75.6s SR=0.00% (0/3) mean_SPL=0.0000 SR@0.1m(ref)=0.00% SPL@0.1m(ref)=0.0000
+[ZSON3 EVAL] 4/4 scene=p53SfW6mjZe.basis episode=19 target=tv_monitor success=0 spl=0.0000 reason=oracle_pointnav_failed_before_endpoint steps=519 runtime=327.8s SR=0.00% (0/4) mean_SPL=0.0000 SR@0.1m(ref)=0.00% SPL@0.1m(ref)=0.0000
+[ZSON3 SUMMARY] episodes=4 SR=0.00% SPL=0.0000 SR@0.1m(ref)=0.00% SPL@0.1m(ref)=0.0000 exceptions=0

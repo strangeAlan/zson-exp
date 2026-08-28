@@ -204,6 +204,7 @@ def finalize(args, manifest):
     exact_reason = 0
     exact_steps = 0
     exact_acceptance = 0
+    exact_spl = 0
     for source_index, entry in entries.items():
         if entry["oracle_cohort"] != "protection":
             continue
@@ -218,6 +219,10 @@ def finalize(args, manifest):
         exact_reason += int(replay.get("reason") == source.get("reason"))
         exact_steps += int(replay.get("navigation_steps") == source.get("navigation_steps"))
         exact_acceptance += int(first_acceptance(replay) == first_acceptance(source))
+        exact_spl += int(
+            replay.get("metrics", {}).get("spl")
+            == source.get("metrics", {}).get("spl")
+        )
         protection.append(
             {
                 "source_probe_index": source_index,
@@ -270,6 +275,7 @@ def finalize(args, manifest):
             "exact_reason": exact_reason,
             "exact_steps": exact_steps,
             "exact_first_acceptance": exact_acceptance,
+            "exact_spl": exact_spl,
         },
         "episodes": episodes,
         "protection_episodes": protection,

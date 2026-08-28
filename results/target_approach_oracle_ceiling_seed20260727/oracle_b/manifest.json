@@ -1,0 +1,45 @@
+{
+  "dataset": "HM3Dv2 val",
+  "seed": 20260727,
+  "episodes": 4,
+  "selection_mode": "explicit_manifest",
+  "source_manifest": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_ceiling_seed20260727/oracle_b_manifest.json",
+  "source_manifest_metadata": {
+    "name": "hm3dv2_approach_oracle_b_failures",
+    "derived_from": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_ceiling_seed20260727/oracle_a",
+    "derivation_rule": "Oracle-A metric failure with candidate classification=correct",
+    "result_dependent_parameter_tuning": false
+  },
+  "manifest_cohort": null,
+  "manifest_source_probe_index": null,
+  "target_approach_oracle": "b",
+  "iterator": {
+    "shuffle": true,
+    "group_by_scene": true,
+    "num_episode_sample": -1,
+    "max_scene_repeat_episodes": 1,
+    "max_scene_repeat_steps": -1
+  },
+  "selection": [
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "25",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00839-zt1RVoi7PcG/zt1RVoi7PcG.basis.glb",
+      "episode_id": "17",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "17",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "19",
+      "target": "tv_monitor"
+    }
+  ]
+}
