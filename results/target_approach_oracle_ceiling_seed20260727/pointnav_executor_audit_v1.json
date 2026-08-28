@@ -1,0 +1,3947 @@
+{
+  "schema_version": 1,
+  "audit": "pointnav_executor_final_read_only",
+  "full_root": "/home/hsy/zson-exp-ofbase-hm3dv2/results/openfrontier_base_sam3_full_hm3dv2_1000_seed20260727",
+  "oracle_root": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_ceiling_seed20260727",
+  "full": {
+    "episodes": 1000,
+    "successes": 708,
+    "failures": 292,
+    "theta_range_exposure": {
+      "episodes": 1000,
+      "exposed": 888,
+      "rows": 200685,
+      "out_of_range_rows": 17554
+    },
+    "failure_theta_range_exposure": {
+      "episodes": 292,
+      "exposed": 275
+    },
+    "stage_theta_range_exposure": {
+      "accepted_no_stop": {
+        "episodes": 19,
+        "exposed": 19
+      },
+      "accepted_stop_fail": {
+        "episodes": 107,
+        "exposed": 91
+      },
+      "candidate_no_accept": {
+        "episodes": 50,
+        "exposed": 50
+      },
+      "never_visible": {
+        "episodes": 59,
+        "exposed": 59
+      },
+      "success": {
+        "episodes": 708,
+        "exposed": 613
+      },
+      "visible_no_candidate": {
+        "episodes": 57,
+        "exposed": 56
+      }
+    },
+    "accepted_no_stop": [
+      {
+        "index": 102,
+        "scene": "7MXmsvcQjpJ.basis",
+        "episode_id": "18",
+        "target": "sofa",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 0.11067207902669907,
+        "collisions_total": 156,
+        "accepted_step": 221,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 485,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 238,
+            "turn_left": 125,
+            "turn_right": 121
+          },
+          "turn_fraction": 0.5082644628099173,
+          "rho": {
+            "start": 8.5,
+            "min": 0.13,
+            "final": 1.85,
+            "range": 8.37
+          },
+          "theta": {
+            "min": -4.71,
+            "max": 1.4,
+            "outside_official_range": 51,
+            "branch_cut_jumps": 28
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 6
+        },
+        "post_accept": {
+          "planner_rows": 263,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 121,
+            "turn_left": 79,
+            "turn_right": 63
+          },
+          "turn_fraction": 0.5399239543726235,
+          "rho": {
+            "start": 2.56,
+            "min": 1.7,
+            "final": 1.85,
+            "range": 1.01
+          },
+          "theta": {
+            "min": -4.71,
+            "max": 1.11,
+            "outside_official_range": 39,
+            "branch_cut_jumps": 22
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 428,
+        "scene": "VBzV5z6i1WS.basis",
+        "episode_id": "9",
+        "target": "toilet",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 0.03697318211197853,
+        "collisions_total": 75,
+        "accepted_step": 495,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 499,
+          "actions": {
+            "stop_or_none": 5,
+            "forward": 311,
+            "turn_left": 96,
+            "turn_right": 87
+          },
+          "turn_fraction": 0.37044534412955465,
+          "rho": {
+            "start": 0.62,
+            "min": 0.03,
+            "final": 0.52,
+            "range": 11.930000000000001
+          },
+          "theta": {
+            "min": -4.71,
+            "max": 1.52,
+            "outside_official_range": 37,
+            "branch_cut_jumps": 10
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 8
+        },
+        "post_accept": {
+          "planner_rows": 3,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 2,
+            "turn_left": 0,
+            "turn_right": 1
+          },
+          "turn_fraction": 0.3333333333333333,
+          "rho": {
+            "start": 0.52,
+            "min": 0.52,
+            "final": 0.52,
+            "range": 0.0
+          },
+          "theta": {
+            "min": -0.05,
+            "max": -0.05,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 0
+        }
+      },
+      {
+        "index": 489,
+        "scene": "a8BtkwhxdRV.basis",
+        "episode_id": "14",
+        "target": "toilet",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 7.094859600067139,
+        "collisions_total": 137,
+        "accepted_step": 235,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 478,
+          "actions": {
+            "stop_or_none": 2,
+            "forward": 234,
+            "turn_left": 127,
+            "turn_right": 115
+          },
+          "turn_fraction": 0.5084033613445378,
+          "rho": {
+            "start": 3.17,
+            "min": 0.01,
+            "final": 1.73,
+            "range": 7.62
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.57,
+            "outside_official_range": 91,
+            "branch_cut_jumps": 37
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 9
+        },
+        "post_accept": {
+          "planner_rows": 245,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 108,
+            "turn_left": 69,
+            "turn_right": 68
+          },
+          "turn_fraction": 0.5591836734693878,
+          "rho": {
+            "start": 1.56,
+            "min": 1.48,
+            "final": 1.73,
+            "range": 0.6600000000000001
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.41,
+            "outside_official_range": 78,
+            "branch_cut_jumps": 26
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 492,
+        "scene": "a8BtkwhxdRV.basis",
+        "episode_id": "17",
+        "target": "toilet",
+        "success": false,
+        "reason": "robot_stuck",
+        "final_gt_distance": 7.034449100494385,
+        "collisions_total": 96,
+        "accepted_step": 102,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 261,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 113,
+            "turn_left": 87,
+            "turn_right": 60
+          },
+          "turn_fraction": 0.5653846153846154,
+          "rho": {
+            "start": 2.75,
+            "min": 0.0,
+            "final": 1.62,
+            "range": 2.75
+          },
+          "theta": {
+            "min": -4.57,
+            "max": 1.41,
+            "outside_official_range": 93,
+            "branch_cut_jumps": 36
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 6
+        },
+        "post_accept": {
+          "planner_rows": 158,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 70,
+            "turn_left": 56,
+            "turn_right": 32
+          },
+          "turn_fraction": 0.5569620253164557,
+          "rho": {
+            "start": 1.82,
+            "min": 1.62,
+            "final": 1.62,
+            "range": 0.19999999999999996
+          },
+          "theta": {
+            "min": -4.49,
+            "max": 1.27,
+            "outside_official_range": 73,
+            "branch_cut_jumps": 19
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 4
+        }
+      },
+      {
+        "index": 608,
+        "scene": "eF36g7L6Z9M.basis",
+        "episode_id": "21",
+        "target": "tv_monitor",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 1.1093406677246094,
+        "collisions_total": 109,
+        "accepted_step": 463,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 484,
+          "actions": {
+            "stop_or_none": 2,
+            "forward": 261,
+            "turn_left": 116,
+            "turn_right": 105
+          },
+          "turn_fraction": 0.45850622406639,
+          "rho": {
+            "start": 7.58,
+            "min": 0.12,
+            "final": 1.4,
+            "range": 10.290000000000001
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.57,
+            "outside_official_range": 55,
+            "branch_cut_jumps": 34
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 5
+        },
+        "post_accept": {
+          "planner_rows": 20,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 11,
+            "turn_left": 5,
+            "turn_right": 4
+          },
+          "turn_fraction": 0.45,
+          "rho": {
+            "start": 2.38,
+            "min": 1.4,
+            "final": 1.4,
+            "range": 0.98
+          },
+          "theta": {
+            "min": -0.13,
+            "max": 1.55,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 644,
+        "scene": "k1cupFYWXJ6.basis",
+        "episode_id": "1",
+        "target": "sofa",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 1.9471220970153809,
+        "collisions_total": 177,
+        "accepted_step": 56,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 462,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 207,
+            "turn_left": 147,
+            "turn_right": 108
+          },
+          "turn_fraction": 0.551948051948052,
+          "rho": {
+            "start": 3.11,
+            "min": 0.73,
+            "final": 1.84,
+            "range": 2.38
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.56,
+            "outside_official_range": 77,
+            "branch_cut_jumps": 55
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 5
+        },
+        "post_accept": {
+          "planner_rows": 405,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 184,
+            "turn_left": 130,
+            "turn_right": 91
+          },
+          "turn_fraction": 0.5456790123456791,
+          "rho": {
+            "start": 1.53,
+            "min": 1.27,
+            "final": 1.84,
+            "range": 0.8300000000000001
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.56,
+            "outside_official_range": 75,
+            "branch_cut_jumps": 54
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 645,
+        "scene": "k1cupFYWXJ6.basis",
+        "episode_id": "2",
+        "target": "sofa",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 3.2852494716644287,
+        "collisions_total": 114,
+        "accepted_step": 382,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 485,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 224,
+            "turn_left": 140,
+            "turn_right": 120
+          },
+          "turn_fraction": 0.5371900826446281,
+          "rho": {
+            "start": 5.05,
+            "min": 0.09,
+            "final": 2.77,
+            "range": 15.1
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.56,
+            "outside_official_range": 53,
+            "branch_cut_jumps": 30
+          },
+          "max_forward_heat": 16,
+          "max_rotation_heat": 16
+        },
+        "post_accept": {
+          "planner_rows": 102,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 46,
+            "turn_left": 32,
+            "turn_right": 24
+          },
+          "turn_fraction": 0.5490196078431373,
+          "rho": {
+            "start": 1.33,
+            "min": 1.27,
+            "final": 2.77,
+            "range": 1.5
+          },
+          "theta": {
+            "min": -4.65,
+            "max": 1.56,
+            "outside_official_range": 12,
+            "branch_cut_jumps": 8
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 648,
+        "scene": "k1cupFYWXJ6.basis",
+        "episode_id": "5",
+        "target": "sofa",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 2.632277488708496,
+        "collisions_total": 84,
+        "accepted_step": 440,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 495,
+          "actions": {
+            "stop_or_none": 6,
+            "forward": 241,
+            "turn_left": 129,
+            "turn_right": 119
+          },
+          "turn_fraction": 0.5071574642126789,
+          "rho": {
+            "start": 0.0,
+            "min": 0.0,
+            "final": 1.63,
+            "range": 10.53
+          },
+          "theta": {
+            "min": -4.71,
+            "max": 1.57,
+            "outside_official_range": 59,
+            "branch_cut_jumps": 25
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 9
+        },
+        "post_accept": {
+          "planner_rows": 55,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 26,
+            "turn_left": 14,
+            "turn_right": 15
+          },
+          "turn_fraction": 0.5272727272727272,
+          "rho": {
+            "start": 1.29,
+            "min": 1.28,
+            "final": 1.63,
+            "range": 1.11
+          },
+          "theta": {
+            "min": -4.6,
+            "max": 1.45,
+            "outside_official_range": 6,
+            "branch_cut_jumps": 3
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 651,
+        "scene": "k1cupFYWXJ6.basis",
+        "episode_id": "8",
+        "target": "sofa",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 2.0544910430908203,
+        "collisions_total": 93,
+        "accepted_step": 327,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 493,
+          "actions": {
+            "stop_or_none": 5,
+            "forward": 231,
+            "turn_left": 127,
+            "turn_right": 130
+          },
+          "turn_fraction": 0.5266393442622951,
+          "rho": {
+            "start": 0.0,
+            "min": 0.0,
+            "final": 1.79,
+            "range": 9.19
+          },
+          "theta": {
+            "min": -4.66,
+            "max": 1.57,
+            "outside_official_range": 86,
+            "branch_cut_jumps": 42
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 10
+        },
+        "post_accept": {
+          "planner_rows": 165,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 70,
+            "turn_left": 54,
+            "turn_right": 41
+          },
+          "turn_fraction": 0.5757575757575758,
+          "rho": {
+            "start": 1.56,
+            "min": 1.27,
+            "final": 1.79,
+            "range": 0.6299999999999999
+          },
+          "theta": {
+            "min": -4.65,
+            "max": 1.56,
+            "outside_official_range": 34,
+            "branch_cut_jumps": 26
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 706,
+        "scene": "mv2HUxq3B53.basis",
+        "episode_id": "8",
+        "target": "toilet",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 0.05464570224285126,
+        "collisions_total": 50,
+        "accepted_step": 437,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 495,
+          "actions": {
+            "stop_or_none": 4,
+            "forward": 295,
+            "turn_left": 106,
+            "turn_right": 90
+          },
+          "turn_fraction": 0.39918533604887985,
+          "rho": {
+            "start": 7.4,
+            "min": 0.02,
+            "final": 0.76,
+            "range": 12.3
+          },
+          "theta": {
+            "min": -4.71,
+            "max": 1.54,
+            "outside_official_range": 62,
+            "branch_cut_jumps": 15
+          },
+          "max_forward_heat": 16,
+          "max_rotation_heat": 9
+        },
+        "post_accept": {
+          "planner_rows": 57,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 24,
+            "turn_left": 22,
+            "turn_right": 11
+          },
+          "turn_fraction": 0.5789473684210527,
+          "rho": {
+            "start": 0.76,
+            "min": 0.76,
+            "final": 0.76,
+            "range": 0.0
+          },
+          "theta": {
+            "min": 0.07,
+            "max": 1.12,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 745,
+        "scene": "p53SfW6mjZe.basis",
+        "episode_id": "19",
+        "target": "tv_monitor",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 9.887032508850098,
+        "collisions_total": 85,
+        "accepted_step": 474,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 492,
+          "actions": {
+            "stop_or_none": 7,
+            "forward": 256,
+            "turn_left": 125,
+            "turn_right": 104
+          },
+          "turn_fraction": 0.47216494845360824,
+          "rho": {
+            "start": 0.77,
+            "min": 0.0,
+            "final": 2.02,
+            "range": 15.34
+          },
+          "theta": {
+            "min": -4.67,
+            "max": 1.55,
+            "outside_official_range": 42,
+            "branch_cut_jumps": 19
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 14
+        },
+        "post_accept": {
+          "planner_rows": 25,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 9,
+            "turn_left": 9,
+            "turn_right": 7
+          },
+          "turn_fraction": 0.64,
+          "rho": {
+            "start": 2.06,
+            "min": 2.02,
+            "final": 2.02,
+            "range": 0.040000000000000036
+          },
+          "theta": {
+            "min": -2.13,
+            "max": 1.55,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 749,
+        "scene": "p53SfW6mjZe.basis",
+        "episode_id": "23",
+        "target": "tv_monitor",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 6.634657382965088,
+        "collisions_total": 99,
+        "accepted_step": 337,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 493,
+          "actions": {
+            "stop_or_none": 3,
+            "forward": 242,
+            "turn_left": 105,
+            "turn_right": 143
+          },
+          "turn_fraction": 0.5061224489795918,
+          "rho": {
+            "start": 0.11,
+            "min": 0.01,
+            "final": 3.66,
+            "range": 12.36
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.49,
+            "outside_official_range": 66,
+            "branch_cut_jumps": 24
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 9
+        },
+        "post_accept": {
+          "planner_rows": 155,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 75,
+            "turn_left": 37,
+            "turn_right": 43
+          },
+          "turn_fraction": 0.5161290322580645,
+          "rho": {
+            "start": 3.61,
+            "min": 3.61,
+            "final": 3.66,
+            "range": 1.0400000000000005
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.26,
+            "outside_official_range": 30,
+            "branch_cut_jumps": 7
+          },
+          "max_forward_heat": 6,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 790,
+        "scene": "q5QZSEeHe5g.basis",
+        "episode_id": "8",
+        "target": "toilet",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 1.102944016456604,
+        "collisions_total": 79,
+        "accepted_step": 463,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 491,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 273,
+            "turn_left": 107,
+            "turn_right": 110
+          },
+          "turn_fraction": 0.44285714285714284,
+          "rho": {
+            "start": 0.11,
+            "min": 0.09,
+            "final": 2.01,
+            "range": 8.27
+          },
+          "theta": {
+            "min": -4.61,
+            "max": 1.56,
+            "outside_official_range": 18,
+            "branch_cut_jumps": 9
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 6
+        },
+        "post_accept": {
+          "planner_rows": 27,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 16,
+            "turn_left": 4,
+            "turn_right": 7
+          },
+          "turn_fraction": 0.4074074074074074,
+          "rho": {
+            "start": 4.54,
+            "min": 2.01,
+            "final": 2.01,
+            "range": 2.5300000000000002
+          },
+          "theta": {
+            "min": -1.03,
+            "max": 1.21,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 827,
+        "scene": "qyAac8rV8Zk.basis",
+        "episode_id": "17",
+        "target": "bed",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 1.352088212966919,
+        "collisions_total": 178,
+        "accepted_step": 97,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 466,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 198,
+            "turn_left": 156,
+            "turn_right": 112
+          },
+          "turn_fraction": 0.575107296137339,
+          "rho": {
+            "start": 0.78,
+            "min": 0.0,
+            "final": 1.85,
+            "range": 3.22
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.57,
+            "outside_official_range": 125,
+            "branch_cut_jumps": 66
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 4
+        },
+        "post_accept": {
+          "planner_rows": 368,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 156,
+            "turn_left": 117,
+            "turn_right": 95
+          },
+          "turn_fraction": 0.5760869565217391,
+          "rho": {
+            "start": 1.79,
+            "min": 1.71,
+            "final": 1.85,
+            "range": 0.52
+          },
+          "theta": {
+            "min": -4.68,
+            "max": 1.14,
+            "outside_official_range": 117,
+            "branch_cut_jumps": 60
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 829,
+        "scene": "qyAac8rV8Zk.basis",
+        "episode_id": "19",
+        "target": "sofa",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 0.036278530955314636,
+        "collisions_total": 181,
+        "accepted_step": 60,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 475,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 217,
+            "turn_left": 144,
+            "turn_right": 113
+          },
+          "turn_fraction": 0.5421940928270043,
+          "rho": {
+            "start": 5.08,
+            "min": 0.37,
+            "final": 0.97,
+            "range": 4.71
+          },
+          "theta": {
+            "min": -4.48,
+            "max": 1.45,
+            "outside_official_range": 158,
+            "branch_cut_jumps": 49
+          },
+          "max_forward_heat": 7,
+          "max_rotation_heat": 3
+        },
+        "post_accept": {
+          "planner_rows": 414,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 179,
+            "turn_left": 129,
+            "turn_right": 106
+          },
+          "turn_fraction": 0.5676328502415459,
+          "rho": {
+            "start": 0.92,
+            "min": 0.8,
+            "final": 0.97,
+            "range": 0.30000000000000004
+          },
+          "theta": {
+            "min": -4.48,
+            "max": 1.45,
+            "outside_official_range": 157,
+            "branch_cut_jumps": 48
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 835,
+        "scene": "qyAac8rV8Zk.basis",
+        "episode_id": "25",
+        "target": "bed",
+        "success": false,
+        "reason": "robot_stuck",
+        "final_gt_distance": 1.3764662742614746,
+        "collisions_total": 93,
+        "accepted_step": 51,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 246,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 103,
+            "turn_left": 91,
+            "turn_right": 52
+          },
+          "turn_fraction": 0.5813008130081301,
+          "rho": {
+            "start": 4.37,
+            "min": 1.08,
+            "final": 1.77,
+            "range": 3.29
+          },
+          "theta": {
+            "min": -4.59,
+            "max": 1.56,
+            "outside_official_range": 49,
+            "branch_cut_jumps": 84
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 4
+        },
+        "post_accept": {
+          "planner_rows": 194,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 79,
+            "turn_left": 77,
+            "turn_right": 38
+          },
+          "turn_fraction": 0.5927835051546392,
+          "rho": {
+            "start": 1.77,
+            "min": 1.77,
+            "final": 1.77,
+            "range": 0.0
+          },
+          "theta": {
+            "min": -4.59,
+            "max": 1.17,
+            "outside_official_range": 40,
+            "branch_cut_jumps": 75
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 858,
+        "scene": "svBbv1Pavdk.basis",
+        "episode_id": "20",
+        "target": "chair",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 5.154837608337402,
+        "collisions_total": 150,
+        "accepted_step": 185,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 481,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 226,
+            "turn_left": 142,
+            "turn_right": 113
+          },
+          "turn_fraction": 0.5301455301455301,
+          "rho": {
+            "start": 1.66,
+            "min": 1.06,
+            "final": 1.17,
+            "range": 4.779999999999999
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.53,
+            "outside_official_range": 97,
+            "branch_cut_jumps": 18
+          },
+          "max_forward_heat": 16,
+          "max_rotation_heat": 5
+        },
+        "post_accept": {
+          "planner_rows": 295,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 137,
+            "turn_left": 86,
+            "turn_right": 72
+          },
+          "turn_fraction": 0.535593220338983,
+          "rho": {
+            "start": 1.09,
+            "min": 1.08,
+            "final": 1.17,
+            "range": 2.73
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.53,
+            "outside_official_range": 94,
+            "branch_cut_jumps": 16
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 950,
+        "scene": "ziup5kvtCCR.basis",
+        "episode_id": "0",
+        "target": "plant",
+        "success": false,
+        "reason": "max_steps_reached",
+        "final_gt_distance": 1.4801702499389648,
+        "collisions_total": 38,
+        "accepted_step": 234,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 499,
+          "actions": {
+            "stop_or_none": 2,
+            "forward": 177,
+            "turn_left": 155,
+            "turn_right": 165
+          },
+          "turn_fraction": 0.6438631790744467,
+          "rho": {
+            "start": 4.78,
+            "min": 0.04,
+            "final": 2.41,
+            "range": 9.530000000000001
+          },
+          "theta": {
+            "min": -4.61,
+            "max": 1.56,
+            "outside_official_range": 68,
+            "branch_cut_jumps": 37
+          },
+          "max_forward_heat": 8,
+          "max_rotation_heat": 6
+        },
+        "post_accept": {
+          "planner_rows": 264,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 30,
+            "turn_left": 115,
+            "turn_right": 119
+          },
+          "turn_fraction": 0.8863636363636364,
+          "rho": {
+            "start": 1.94,
+            "min": 1.94,
+            "final": 2.41,
+            "range": 0.4700000000000002
+          },
+          "theta": {
+            "min": -4.29,
+            "max": 1.56,
+            "outside_official_range": 60,
+            "branch_cut_jumps": 29
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 1
+        }
+      },
+      {
+        "index": 995,
+        "scene": "zt1RVoi7PcG.basis",
+        "episode_id": "17",
+        "target": "tv_monitor",
+        "success": false,
+        "reason": "robot_stuck",
+        "final_gt_distance": 5.108558177947998,
+        "collisions_total": 113,
+        "accepted_step": 79,
+        "stage": "accepted_no_stop",
+        "all": {
+          "planner_rows": 270,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 146,
+            "turn_left": 78,
+            "turn_right": 46
+          },
+          "turn_fraction": 0.45925925925925926,
+          "rho": {
+            "start": 6.26,
+            "min": 0.04,
+            "final": 6.26,
+            "range": 6.38
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.54,
+            "outside_official_range": 36,
+            "branch_cut_jumps": 23
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 9
+        },
+        "post_accept": {
+          "planner_rows": 190,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 105,
+            "turn_left": 57,
+            "turn_right": 28
+          },
+          "turn_fraction": 0.4473684210526316,
+          "rho": {
+            "start": 6.26,
+            "min": 6.26,
+            "final": 6.26,
+            "range": 0.0
+          },
+          "theta": {
+            "min": -4.39,
+            "max": 1.37,
+            "outside_official_range": 27,
+            "branch_cut_jumps": 18
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        }
+      }
+    ],
+    "accepted_no_stop_count": 19,
+    "accepted_no_stop_post_accept_theta_exposed": 14,
+    "stagnation_signature_upper_bound": [
+      {
+        "index": 37,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 17,
+            "turn_left": 2,
+            "turn_right": 31
+          },
+          "turn_fraction": 0.66,
+          "rho": {
+            "start": 5.07,
+            "min": 5.07,
+            "final": 7.91,
+            "range": 5.17
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.18,
+            "outside_official_range": 6,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 14
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 42,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 22,
+            "turn_left": 13,
+            "turn_right": 15
+          },
+          "turn_fraction": 0.56,
+          "rho": {
+            "start": 0.9,
+            "min": 0.9,
+            "final": 1.2,
+            "range": 2.35
+          },
+          "theta": {
+            "min": -4.67,
+            "max": 1.35,
+            "outside_official_range": 11,
+            "branch_cut_jumps": 3
+          },
+          "max_forward_heat": 5,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 56,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 14,
+            "turn_left": 24,
+            "turn_right": 11
+          },
+          "turn_fraction": 0.7142857142857143,
+          "rho": {
+            "start": 0.62,
+            "min": 0.47,
+            "final": 0.93,
+            "range": 3.3200000000000003
+          },
+          "theta": {
+            "min": -2.42,
+            "max": 1.53,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 7,
+          "max_rotation_heat": 7
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 58,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 20,
+            "turn_left": 15,
+            "turn_right": 15
+          },
+          "turn_fraction": 0.6,
+          "rho": {
+            "start": 6.22,
+            "min": 6.22,
+            "final": 7.52,
+            "range": 1.2999999999999998
+          },
+          "theta": {
+            "min": -4.66,
+            "max": 1.56,
+            "outside_official_range": 25,
+            "branch_cut_jumps": 7
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 3
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 66,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 0,
+            "turn_left": 14,
+            "turn_right": 36
+          },
+          "turn_fraction": 1.0,
+          "rho": {
+            "start": 9.74,
+            "min": 9.39,
+            "final": 11.97,
+            "range": 11.079999999999998
+          },
+          "theta": {
+            "min": -4.66,
+            "max": 1.53,
+            "outside_official_range": 7,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 16
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 70,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 20,
+            "turn_left": 12,
+            "turn_right": 18
+          },
+          "turn_fraction": 0.6,
+          "rho": {
+            "start": 20.31,
+            "min": 19.68,
+            "final": 20.89,
+            "range": 1.2100000000000009
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.07,
+            "outside_official_range": 21,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 10,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 71,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 12,
+            "turn_left": 19,
+            "turn_right": 19
+          },
+          "turn_fraction": 0.76,
+          "rho": {
+            "start": 2.1,
+            "min": 2.1,
+            "final": 4.18,
+            "range": 2.0799999999999996
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.23,
+            "outside_official_range": 15,
+            "branch_cut_jumps": 4
+          },
+          "max_forward_heat": 11,
+          "max_rotation_heat": 14
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 73,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 14,
+            "turn_left": 20,
+            "turn_right": 16
+          },
+          "turn_fraction": 0.72,
+          "rho": {
+            "start": 17.57,
+            "min": 17.38,
+            "final": 21.53,
+            "range": 4.150000000000002
+          },
+          "theta": {
+            "min": -4.64,
+            "max": 1.17,
+            "outside_official_range": 15,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 11
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 83,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 23,
+            "turn_left": 17,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.54,
+          "rho": {
+            "start": 3.93,
+            "min": 3.12,
+            "final": 4.53,
+            "range": 1.5599999999999996
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.56,
+            "outside_official_range": 23,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 14,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 89,
+        "stage": "visible_no_candidate",
+        "reason": "robot_stuck",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 28,
+            "turn_left": 13,
+            "turn_right": 8
+          },
+          "turn_fraction": 0.42857142857142855,
+          "rho": {
+            "start": 3.19,
+            "min": 0.0,
+            "final": 4.99,
+            "range": 5.08
+          },
+          "theta": {
+            "min": -1.18,
+            "max": 1.18,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 6,
+          "max_rotation_heat": 2
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 102,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 21,
+            "turn_left": 19,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.58,
+          "rho": {
+            "start": 1.93,
+            "min": 1.85,
+            "final": 1.85,
+            "range": 0.11999999999999988
+          },
+          "theta": {
+            "min": -4.67,
+            "max": 1.11,
+            "outside_official_range": 5,
+            "branch_cut_jumps": 3
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 103,
+        "stage": "never_visible",
+        "reason": "robot_stuck",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 0,
+            "turn_left": 25,
+            "turn_right": 25
+          },
+          "turn_fraction": 1.0,
+          "rho": {
+            "start": 1.75,
+            "min": 1.31,
+            "final": 1.75,
+            "range": 0.43999999999999995
+          },
+          "theta": {
+            "min": -1.4,
+            "max": 0.17,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 104,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 16,
+            "turn_left": 25,
+            "turn_right": 9
+          },
+          "turn_fraction": 0.68,
+          "rho": {
+            "start": 3.08,
+            "min": 2.9,
+            "final": 2.91,
+            "range": 1.1400000000000001
+          },
+          "theta": {
+            "min": -4.63,
+            "max": 1.51,
+            "outside_official_range": 17,
+            "branch_cut_jumps": 3
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 107,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 13,
+            "turn_left": 16,
+            "turn_right": 20
+          },
+          "turn_fraction": 0.7346938775510204,
+          "rho": {
+            "start": 2.2,
+            "min": 0.11,
+            "final": 4.93,
+            "range": 5.17
+          },
+          "theta": {
+            "min": -4.66,
+            "max": 1.17,
+            "outside_official_range": 7,
+            "branch_cut_jumps": 6
+          },
+          "max_forward_heat": 9,
+          "max_rotation_heat": 9
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 109,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 19,
+            "turn_left": 21,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.62,
+          "rho": {
+            "start": 1.92,
+            "min": 1.92,
+            "final": 6.87,
+            "range": 4.95
+          },
+          "theta": {
+            "min": -4.52,
+            "max": 1.24,
+            "outside_official_range": 7,
+            "branch_cut_jumps": 6
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 7
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 110,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 14,
+            "turn_left": 19,
+            "turn_right": 17
+          },
+          "turn_fraction": 0.72,
+          "rho": {
+            "start": 1.31,
+            "min": 1.23,
+            "final": 2.15,
+            "range": 1.33
+          },
+          "theta": {
+            "min": -4.59,
+            "max": 1.46,
+            "outside_official_range": 4,
+            "branch_cut_jumps": 1
+          },
+          "max_forward_heat": 11,
+          "max_rotation_heat": 12
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 111,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 19,
+            "turn_left": 17,
+            "turn_right": 14
+          },
+          "turn_fraction": 0.62,
+          "rho": {
+            "start": 1.96,
+            "min": 1.96,
+            "final": 6.66,
+            "range": 5.69
+          },
+          "theta": {
+            "min": -4.52,
+            "max": 1.48,
+            "outside_official_range": 1,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 4,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 113,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 21,
+            "turn_left": 17,
+            "turn_right": 12
+          },
+          "turn_fraction": 0.58,
+          "rho": {
+            "start": 5.3,
+            "min": 2.74,
+            "final": 5.3,
+            "range": 2.5599999999999996
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.2,
+            "outside_official_range": 19,
+            "branch_cut_jumps": 6
+          },
+          "max_forward_heat": 11,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 116,
+        "stage": "never_visible",
+        "reason": "robot_stuck",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 21,
+            "turn_left": 18,
+            "turn_right": 11
+          },
+          "turn_fraction": 0.58,
+          "rho": {
+            "start": 8.1,
+            "min": 2.5,
+            "final": 8.1,
+            "range": 5.6
+          },
+          "theta": {
+            "min": -4.49,
+            "max": 1.27,
+            "outside_official_range": 23,
+            "branch_cut_jumps": 7
+          },
+          "max_forward_heat": 11,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 137,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 12,
+            "turn_left": 22,
+            "turn_right": 15
+          },
+          "turn_fraction": 0.7551020408163265,
+          "rho": {
+            "start": 3.1,
+            "min": 1.9,
+            "final": 5.52,
+            "range": 6.359999999999999
+          },
+          "theta": {
+            "min": -4.47,
+            "max": 1.42,
+            "outside_official_range": 20,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 14
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 141,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 20,
+            "turn_left": 15,
+            "turn_right": 14
+          },
+          "turn_fraction": 0.5918367346938775,
+          "rho": {
+            "start": 0.22,
+            "min": 0.22,
+            "final": 0.23,
+            "range": 3.59
+          },
+          "theta": {
+            "min": -4.54,
+            "max": 1.42,
+            "outside_official_range": 9,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 9,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 146,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 29,
+            "turn_left": 9,
+            "turn_right": 11
+          },
+          "turn_fraction": 0.40816326530612246,
+          "rho": {
+            "start": 0.83,
+            "min": 0.11,
+            "final": 3.58,
+            "range": 5.75
+          },
+          "theta": {
+            "min": -1.48,
+            "max": 1.09,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 7
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 149,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 27,
+            "turn_left": 13,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.46,
+          "rho": {
+            "start": 1.3,
+            "min": 1.16,
+            "final": 5.6,
+            "range": 5.109999999999999
+          },
+          "theta": {
+            "min": -4.63,
+            "max": 1.23,
+            "outside_official_range": 10,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 10,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 168,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 20,
+            "turn_left": 22,
+            "turn_right": 8
+          },
+          "turn_fraction": 0.6,
+          "rho": {
+            "start": 1.29,
+            "min": 0.11,
+            "final": 1.44,
+            "range": 1.66
+          },
+          "theta": {
+            "min": -4.67,
+            "max": 1.25,
+            "outside_official_range": 10,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 6,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 192,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 12,
+            "turn_left": 19,
+            "turn_right": 19
+          },
+          "turn_fraction": 0.76,
+          "rho": {
+            "start": 1.45,
+            "min": 1.45,
+            "final": 1.47,
+            "range": 0.27
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.57,
+            "outside_official_range": 23,
+            "branch_cut_jumps": 7
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 12
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 228,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 26,
+            "turn_left": 15,
+            "turn_right": 8
+          },
+          "turn_fraction": 0.46938775510204084,
+          "rho": {
+            "start": 0.05,
+            "min": 0.05,
+            "final": 0.91,
+            "range": 5.29
+          },
+          "theta": {
+            "min": -4.62,
+            "max": 1.56,
+            "outside_official_range": 10,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 9,
+          "max_rotation_heat": 4
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 238,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 27,
+            "turn_left": 14,
+            "turn_right": 9
+          },
+          "turn_fraction": 0.46,
+          "rho": {
+            "start": 1.49,
+            "min": 0.04,
+            "final": 1.47,
+            "range": 5.12
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.55,
+            "outside_official_range": 6,
+            "branch_cut_jumps": 3
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 256,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 17,
+            "turn_left": 13,
+            "turn_right": 19
+          },
+          "turn_fraction": 0.6530612244897959,
+          "rho": {
+            "start": 2.77,
+            "min": 0.16,
+            "final": 8.13,
+            "range": 7.970000000000001
+          },
+          "theta": {
+            "min": -4.19,
+            "max": 1.38,
+            "outside_official_range": 3,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 262,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 29,
+            "turn_left": 8,
+            "turn_right": 12
+          },
+          "turn_fraction": 0.40816326530612246,
+          "rho": {
+            "start": 0.05,
+            "min": 0.05,
+            "final": 1.43,
+            "range": 5.180000000000001
+          },
+          "theta": {
+            "min": -4.27,
+            "max": 1.31,
+            "outside_official_range": 3,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 3,
+          "max_rotation_heat": 3
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 264,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 28,
+            "turn_left": 9,
+            "turn_right": 12
+          },
+          "turn_fraction": 0.42857142857142855,
+          "rho": {
+            "start": 0.38,
+            "min": 0.14,
+            "final": 2.52,
+            "range": 3.81
+          },
+          "theta": {
+            "min": -1.97,
+            "max": 0.92,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 3,
+          "max_rotation_heat": 3
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 268,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 2,
+            "forward": 21,
+            "turn_left": 11,
+            "turn_right": 16
+          },
+          "turn_fraction": 0.5625,
+          "rho": {
+            "start": 0.8,
+            "min": 0.08,
+            "final": 7.03,
+            "range": 7.9
+          },
+          "theta": {
+            "min": -4.64,
+            "max": 1.27,
+            "outside_official_range": 5,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 7
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 308,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 24,
+            "turn_left": 17,
+            "turn_right": 9
+          },
+          "turn_fraction": 0.52,
+          "rho": {
+            "start": 2.99,
+            "min": 0.0,
+            "final": 4.37,
+            "range": 4.37
+          },
+          "theta": {
+            "min": -3.2,
+            "max": 0.99,
+            "outside_official_range": 3,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 7,
+          "max_rotation_heat": 7
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 310,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 21,
+            "turn_left": 14,
+            "turn_right": 14
+          },
+          "turn_fraction": 0.5714285714285714,
+          "rho": {
+            "start": 1.89,
+            "min": 0.08,
+            "final": 2.81,
+            "range": 2.73
+          },
+          "theta": {
+            "min": -4.65,
+            "max": 1.5,
+            "outside_official_range": 11,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 14,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 313,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 28,
+            "turn_left": 12,
+            "turn_right": 9
+          },
+          "turn_fraction": 0.42857142857142855,
+          "rho": {
+            "start": 1.37,
+            "min": 0.16,
+            "final": 1.74,
+            "range": 3.58
+          },
+          "theta": {
+            "min": -1.73,
+            "max": 0.98,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 7,
+          "max_rotation_heat": 4
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 325,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 24,
+            "turn_left": 15,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.5102040816326531,
+          "rho": {
+            "start": 0.15,
+            "min": 0.15,
+            "final": 1.24,
+            "range": 3.63
+          },
+          "theta": {
+            "min": -4.45,
+            "max": 1.31,
+            "outside_official_range": 3,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 6,
+          "max_rotation_heat": 3
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 328,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 28,
+            "turn_left": 7,
+            "turn_right": 14
+          },
+          "turn_fraction": 0.42857142857142855,
+          "rho": {
+            "start": 0.46,
+            "min": 0.19,
+            "final": 3.02,
+            "range": 7.369999999999999
+          },
+          "theta": {
+            "min": -2.37,
+            "max": 1.55,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 3,
+          "max_rotation_heat": 3
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 331,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 26,
+            "turn_left": 13,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.46938775510204084,
+          "rho": {
+            "start": 1.61,
+            "min": 0.24,
+            "final": 1.99,
+            "range": 2.9800000000000004
+          },
+          "theta": {
+            "min": -4.67,
+            "max": 1.09,
+            "outside_official_range": 2,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 7,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 347,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 3,
+            "forward": 23,
+            "turn_left": 15,
+            "turn_right": 9
+          },
+          "turn_fraction": 0.5106382978723404,
+          "rho": {
+            "start": 2.02,
+            "min": 0.14,
+            "final": 4.24,
+            "range": 4.1000000000000005
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.1,
+            "outside_official_range": 6,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 3,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 391,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 22,
+            "turn_left": 17,
+            "turn_right": 11
+          },
+          "turn_fraction": 0.56,
+          "rho": {
+            "start": 1.55,
+            "min": 0.93,
+            "final": 1.7,
+            "range": 4.13
+          },
+          "theta": {
+            "min": -4.66,
+            "max": 1.57,
+            "outside_official_range": 7,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 4,
+          "max_rotation_heat": 9
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 395,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 20,
+            "turn_left": 15,
+            "turn_right": 14
+          },
+          "turn_fraction": 0.5918367346938775,
+          "rho": {
+            "start": 1.6,
+            "min": 0.49,
+            "final": 2.49,
+            "range": 2.21
+          },
+          "theta": {
+            "min": -4.68,
+            "max": 1.56,
+            "outside_official_range": 19,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 16
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 404,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 20,
+            "turn_left": 15,
+            "turn_right": 15
+          },
+          "turn_fraction": 0.6,
+          "rho": {
+            "start": 3.88,
+            "min": 3.6,
+            "final": 3.98,
+            "range": 0.5699999999999998
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.53,
+            "outside_official_range": 4,
+            "branch_cut_jumps": 4
+          },
+          "max_forward_heat": 12,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 406,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 22,
+            "turn_left": 18,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.56,
+          "rho": {
+            "start": 4.89,
+            "min": 4.32,
+            "final": 5.25,
+            "range": 0.9299999999999997
+          },
+          "theta": {
+            "min": -4.57,
+            "max": 1.34,
+            "outside_official_range": 4,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 11,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 407,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 20,
+            "turn_left": 26,
+            "turn_right": 4
+          },
+          "turn_fraction": 0.6,
+          "rho": {
+            "start": 5.97,
+            "min": 3.34,
+            "final": 8.54,
+            "range": 5.199999999999999
+          },
+          "theta": {
+            "min": -4.37,
+            "max": 1.48,
+            "outside_official_range": 9,
+            "branch_cut_jumps": 1
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 409,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 26,
+            "turn_left": 11,
+            "turn_right": 13
+          },
+          "turn_fraction": 0.48,
+          "rho": {
+            "start": 3.24,
+            "min": 2.63,
+            "final": 6.93,
+            "range": 4.3
+          },
+          "theta": {
+            "min": -4.49,
+            "max": 1.27,
+            "outside_official_range": 22,
+            "branch_cut_jumps": 1
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 414,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 17,
+            "turn_left": 23,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.66,
+          "rho": {
+            "start": 3.66,
+            "min": 3.66,
+            "final": 3.68,
+            "range": 0.8899999999999997
+          },
+          "theta": {
+            "min": -4.21,
+            "max": 1.55,
+            "outside_official_range": 6,
+            "branch_cut_jumps": 1
+          },
+          "max_forward_heat": 13,
+          "max_rotation_heat": 8
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 450,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 20,
+            "turn_left": 17,
+            "turn_right": 12
+          },
+          "turn_fraction": 0.5918367346938775,
+          "rho": {
+            "start": 1.39,
+            "min": 0.12,
+            "final": 3.91,
+            "range": 4.1899999999999995
+          },
+          "theta": {
+            "min": -4.57,
+            "max": 1.53,
+            "outside_official_range": 9,
+            "branch_cut_jumps": 3
+          },
+          "max_forward_heat": 13,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 458,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 28,
+            "turn_left": 9,
+            "turn_right": 12
+          },
+          "turn_fraction": 0.42857142857142855,
+          "rho": {
+            "start": 2.19,
+            "min": 0.06,
+            "final": 5.06,
+            "range": 5.25
+          },
+          "theta": {
+            "min": -4.43,
+            "max": 1.38,
+            "outside_official_range": 1,
+            "branch_cut_jumps": 1
+          },
+          "max_forward_heat": 3,
+          "max_rotation_heat": 3
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 483,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 23,
+            "turn_left": 15,
+            "turn_right": 11
+          },
+          "turn_fraction": 0.5306122448979592,
+          "rho": {
+            "start": 3.58,
+            "min": 0.09,
+            "final": 3.51,
+            "range": 3.9000000000000004
+          },
+          "theta": {
+            "min": -4.71,
+            "max": 1.49,
+            "outside_official_range": 15,
+            "branch_cut_jumps": 4
+          },
+          "max_forward_heat": 10,
+          "max_rotation_heat": 8
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 489,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 23,
+            "turn_left": 6,
+            "turn_right": 21
+          },
+          "turn_fraction": 0.54,
+          "rho": {
+            "start": 1.56,
+            "min": 1.48,
+            "final": 1.73,
+            "range": 0.6600000000000001
+          },
+          "theta": {
+            "min": -4.69,
+            "max": 1.41,
+            "outside_official_range": 15,
+            "branch_cut_jumps": 4
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 492,
+        "stage": "accepted_no_stop",
+        "reason": "robot_stuck",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 23,
+            "turn_left": 17,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.54,
+          "rho": {
+            "start": 1.62,
+            "min": 1.62,
+            "final": 1.62,
+            "range": 0.0
+          },
+          "theta": {
+            "min": -4.49,
+            "max": 1.27,
+            "outside_official_range": 30,
+            "branch_cut_jumps": 6
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 505,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 18,
+            "turn_left": 20,
+            "turn_right": 11
+          },
+          "turn_fraction": 0.6326530612244898,
+          "rho": {
+            "start": 0.82,
+            "min": 0.29,
+            "final": 1.76,
+            "range": 1.47
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.54,
+            "outside_official_range": 7,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 7,
+          "max_rotation_heat": 7
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 521,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 7,
+            "turn_left": 18,
+            "turn_right": 25
+          },
+          "turn_fraction": 0.86,
+          "rho": {
+            "start": 2.05,
+            "min": 2.05,
+            "final": 5.71,
+            "range": 4.23
+          },
+          "theta": {
+            "min": -4.66,
+            "max": 1.32,
+            "outside_official_range": 8,
+            "branch_cut_jumps": 4
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 16
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 524,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 16,
+            "turn_left": 18,
+            "turn_right": 16
+          },
+          "turn_fraction": 0.68,
+          "rho": {
+            "start": 6.21,
+            "min": 6.0,
+            "final": 9.02,
+            "range": 3.0199999999999996
+          },
+          "theta": {
+            "min": -4.47,
+            "max": 1.36,
+            "outside_official_range": 21,
+            "branch_cut_jumps": 6
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 8
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 607,
+        "stage": "never_visible",
+        "reason": "robot_stuck",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 20,
+            "turn_left": 20,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.6,
+          "rho": {
+            "start": 1.12,
+            "min": 1.12,
+            "final": 1.59,
+            "range": 0.47
+          },
+          "theta": {
+            "min": -4.7,
+            "max": 1.06,
+            "outside_official_range": 10,
+            "branch_cut_jumps": 8
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 4
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 626,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 21,
+            "turn_left": 16,
+            "turn_right": 13
+          },
+          "turn_fraction": 0.58,
+          "rho": {
+            "start": 1.95,
+            "min": 1.28,
+            "final": 4.32,
+            "range": 3.04
+          },
+          "theta": {
+            "min": -4.68,
+            "max": 1.51,
+            "outside_official_range": 9,
+            "branch_cut_jumps": 8
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 8
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 631,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 19,
+            "turn_left": 11,
+            "turn_right": 19
+          },
+          "turn_fraction": 0.6122448979591837,
+          "rho": {
+            "start": 1.66,
+            "min": 0.53,
+            "final": 2.78,
+            "range": 2.25
+          },
+          "theta": {
+            "min": -2.45,
+            "max": 1.15,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 12,
+          "max_rotation_heat": 4
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 644,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 23,
+            "turn_left": 15,
+            "turn_right": 12
+          },
+          "turn_fraction": 0.54,
+          "rho": {
+            "start": 2.0,
+            "min": 1.84,
+            "final": 1.84,
+            "range": 0.15999999999999992
+          },
+          "theta": {
+            "min": -4.43,
+            "max": 1.41,
+            "outside_official_range": 4,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 645,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 25,
+            "turn_left": 15,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.5,
+          "rho": {
+            "start": 1.47,
+            "min": 1.29,
+            "final": 2.77,
+            "range": 1.48
+          },
+          "theta": {
+            "min": -4.54,
+            "max": 1.56,
+            "outside_official_range": 1,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 647,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 17,
+            "turn_left": 20,
+            "turn_right": 13
+          },
+          "turn_fraction": 0.66,
+          "rho": {
+            "start": 2.19,
+            "min": 1.98,
+            "final": 3.25,
+            "range": 1.27
+          },
+          "theta": {
+            "min": -4.43,
+            "max": 1.33,
+            "outside_official_range": 1,
+            "branch_cut_jumps": 1
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 648,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 23,
+            "turn_left": 14,
+            "turn_right": 13
+          },
+          "turn_fraction": 0.54,
+          "rho": {
+            "start": 1.29,
+            "min": 1.28,
+            "final": 1.63,
+            "range": 1.11
+          },
+          "theta": {
+            "min": -4.6,
+            "max": 1.45,
+            "outside_official_range": 5,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 651,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 21,
+            "turn_left": 17,
+            "turn_right": 12
+          },
+          "turn_fraction": 0.58,
+          "rho": {
+            "start": 1.79,
+            "min": 1.79,
+            "final": 1.79,
+            "range": 0.0
+          },
+          "theta": {
+            "min": -4.61,
+            "max": 1.15,
+            "outside_official_range": 12,
+            "branch_cut_jumps": 10
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 655,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 22,
+            "turn_left": 16,
+            "turn_right": 12
+          },
+          "turn_fraction": 0.56,
+          "rho": {
+            "start": 0.69,
+            "min": 0.69,
+            "final": 1.36,
+            "range": 0.77
+          },
+          "theta": {
+            "min": -4.44,
+            "max": 1.55,
+            "outside_official_range": 7,
+            "branch_cut_jumps": 4
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 4
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 700,
+        "stage": "never_visible",
+        "reason": "robot_stuck",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 0,
+            "turn_left": 24,
+            "turn_right": 26
+          },
+          "turn_fraction": 1.0,
+          "rho": {
+            "start": 1.41,
+            "min": 1.41,
+            "final": 1.41,
+            "range": 1.14
+          },
+          "theta": {
+            "min": -0.93,
+            "max": 0.47,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 706,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 20,
+            "turn_left": 20,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.6,
+          "rho": {
+            "start": 0.76,
+            "min": 0.76,
+            "final": 0.76,
+            "range": 0.0
+          },
+          "theta": {
+            "min": 0.07,
+            "max": 1.12,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 738,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 19,
+            "turn_left": 19,
+            "turn_right": 11
+          },
+          "turn_fraction": 0.6122448979591837,
+          "rho": {
+            "start": 3.74,
+            "min": 2.11,
+            "final": 9.67,
+            "range": 7.5600000000000005
+          },
+          "theta": {
+            "min": -4.41,
+            "max": 1.37,
+            "outside_official_range": 5,
+            "branch_cut_jumps": 3
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 745,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 19,
+            "turn_left": 16,
+            "turn_right": 14
+          },
+          "turn_fraction": 0.6122448979591837,
+          "rho": {
+            "start": 1.56,
+            "min": 0.38,
+            "final": 2.02,
+            "range": 1.6800000000000002
+          },
+          "theta": {
+            "min": -2.13,
+            "max": 1.55,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 8,
+          "max_rotation_heat": 4
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 747,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 20,
+            "turn_left": 16,
+            "turn_right": 13
+          },
+          "turn_fraction": 0.5918367346938775,
+          "rho": {
+            "start": 3.25,
+            "min": 3.25,
+            "final": 6.23,
+            "range": 3.3099999999999996
+          },
+          "theta": {
+            "min": -4.5,
+            "max": 1.37,
+            "outside_official_range": 11,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 7
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 751,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 2,
+            "turn_left": 25,
+            "turn_right": 22
+          },
+          "turn_fraction": 0.9591836734693877,
+          "rho": {
+            "start": 1.78,
+            "min": 1.78,
+            "final": 7.38,
+            "range": 5.84
+          },
+          "theta": {
+            "min": -4.5,
+            "max": 1.32,
+            "outside_official_range": 9,
+            "branch_cut_jumps": 7
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 16
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 785,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 2,
+            "forward": 26,
+            "turn_left": 13,
+            "turn_right": 9
+          },
+          "turn_fraction": 0.4583333333333333,
+          "rho": {
+            "start": 0.28,
+            "min": 0.03,
+            "final": 0.9,
+            "range": 4.0
+          },
+          "theta": {
+            "min": -4.68,
+            "max": 1.42,
+            "outside_official_range": 6,
+            "branch_cut_jumps": 4
+          },
+          "max_forward_heat": 10,
+          "max_rotation_heat": 3
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 786,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 22,
+            "turn_left": 15,
+            "turn_right": 13
+          },
+          "turn_fraction": 0.56,
+          "rho": {
+            "start": 1.93,
+            "min": 1.87,
+            "final": 2.04,
+            "range": 1.08
+          },
+          "theta": {
+            "min": -3.0,
+            "max": 1.34,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 787,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 22,
+            "turn_left": 11,
+            "turn_right": 17
+          },
+          "turn_fraction": 0.56,
+          "rho": {
+            "start": 2.88,
+            "min": 0.95,
+            "final": 4.82,
+            "range": 3.87
+          },
+          "theta": {
+            "min": -4.62,
+            "max": 1.52,
+            "outside_official_range": 5,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 8,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 797,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 1,
+            "turn_left": 27,
+            "turn_right": 22
+          },
+          "turn_fraction": 0.98,
+          "rho": {
+            "start": 3.65,
+            "min": 3.44,
+            "final": 3.79,
+            "range": 0.3500000000000001
+          },
+          "theta": {
+            "min": -4.67,
+            "max": 1.47,
+            "outside_official_range": 8,
+            "branch_cut_jumps": 4
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 16
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 811,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 23,
+            "turn_left": 12,
+            "turn_right": 15
+          },
+          "turn_fraction": 0.54,
+          "rho": {
+            "start": 1.5,
+            "min": 1.5,
+            "final": 2.43,
+            "range": 1.83
+          },
+          "theta": {
+            "min": -2.52,
+            "max": 0.29,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 13,
+          "max_rotation_heat": 5
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 827,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 22,
+            "turn_left": 18,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.56,
+          "rho": {
+            "start": 1.85,
+            "min": 1.85,
+            "final": 1.85,
+            "range": 0.0
+          },
+          "theta": {
+            "min": -4.62,
+            "max": 1.14,
+            "outside_official_range": 22,
+            "branch_cut_jumps": 12
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 829,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 22,
+            "turn_left": 15,
+            "turn_right": 13
+          },
+          "turn_fraction": 0.56,
+          "rho": {
+            "start": 0.97,
+            "min": 0.89,
+            "final": 0.97,
+            "range": 0.14
+          },
+          "theta": {
+            "min": -4.48,
+            "max": 1.39,
+            "outside_official_range": 19,
+            "branch_cut_jumps": 6
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 835,
+        "stage": "accepted_no_stop",
+        "reason": "robot_stuck",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 20,
+            "turn_left": 20,
+            "turn_right": 10
+          },
+          "turn_fraction": 0.6,
+          "rho": {
+            "start": 1.77,
+            "min": 1.77,
+            "final": 1.77,
+            "range": 0.0
+          },
+          "theta": {
+            "min": -4.59,
+            "max": 1.17,
+            "outside_official_range": 10,
+            "branch_cut_jumps": 19
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 877,
+        "stage": "never_visible",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 27,
+            "turn_left": 19,
+            "turn_right": 4
+          },
+          "turn_fraction": 0.46,
+          "rho": {
+            "start": 0.29,
+            "min": 0.04,
+            "final": 3.97,
+            "range": 6.55
+          },
+          "theta": {
+            "min": -4.54,
+            "max": 1.48,
+            "outside_official_range": 11,
+            "branch_cut_jumps": 1
+          },
+          "max_forward_heat": 12,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 879,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 29,
+            "turn_left": 13,
+            "turn_right": 8
+          },
+          "turn_fraction": 0.42,
+          "rho": {
+            "start": 4.03,
+            "min": 2.84,
+            "final": 6.19,
+            "range": 4.01
+          },
+          "theta": {
+            "min": -4.71,
+            "max": 1.55,
+            "outside_official_range": 7,
+            "branch_cut_jumps": 4
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 937,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 29,
+            "turn_left": 5,
+            "turn_right": 15
+          },
+          "turn_fraction": 0.40816326530612246,
+          "rho": {
+            "start": 2.68,
+            "min": 0.19,
+            "final": 2.9,
+            "range": 5.14
+          },
+          "theta": {
+            "min": -3.07,
+            "max": 0.72,
+            "outside_official_range": 0,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 2,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 946,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 29,
+            "turn_left": 12,
+            "turn_right": 8
+          },
+          "turn_fraction": 0.40816326530612246,
+          "rho": {
+            "start": 2.9,
+            "min": 0.07,
+            "final": 2.9,
+            "range": 2.95
+          },
+          "theta": {
+            "min": -4.71,
+            "max": 1.37,
+            "outside_official_range": 5,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 4
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 948,
+        "stage": "candidate_no_accept",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 29,
+            "turn_left": 13,
+            "turn_right": 8
+          },
+          "turn_fraction": 0.42,
+          "rho": {
+            "start": 0.83,
+            "min": 0.11,
+            "final": 4.3,
+            "range": 8.700000000000001
+          },
+          "theta": {
+            "min": -4.48,
+            "max": 1.34,
+            "outside_official_range": 6,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 5,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 950,
+        "stage": "accepted_no_stop",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 6,
+            "turn_left": 20,
+            "turn_right": 24
+          },
+          "turn_fraction": 0.88,
+          "rho": {
+            "start": 2.41,
+            "min": 2.1,
+            "final": 2.41,
+            "range": 0.31000000000000005
+          },
+          "theta": {
+            "min": -4.25,
+            "max": 1.56,
+            "outside_official_range": 11,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 0,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 985,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 21,
+            "turn_left": 14,
+            "turn_right": 15
+          },
+          "turn_fraction": 0.58,
+          "rho": {
+            "start": 1.43,
+            "min": 1.43,
+            "final": 2.34,
+            "range": 3.5500000000000007
+          },
+          "theta": {
+            "min": -4.2,
+            "max": 1.56,
+            "outside_official_range": 9,
+            "branch_cut_jumps": 1
+          },
+          "max_forward_heat": 11,
+          "max_rotation_heat": 8
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 990,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 22,
+            "turn_left": 18,
+            "turn_right": 9
+          },
+          "turn_fraction": 0.5510204081632653,
+          "rho": {
+            "start": 4.3,
+            "min": 3.48,
+            "final": 6.19,
+            "range": 2.78
+          },
+          "theta": {
+            "min": -4.66,
+            "max": 1.1,
+            "outside_official_range": 23,
+            "branch_cut_jumps": 3
+          },
+          "max_forward_heat": 16,
+          "max_rotation_heat": 6
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 995,
+        "stage": "accepted_no_stop",
+        "reason": "robot_stuck",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 27,
+            "turn_left": 17,
+            "turn_right": 6
+          },
+          "turn_fraction": 0.46,
+          "rho": {
+            "start": 6.26,
+            "min": 6.26,
+            "final": 6.26,
+            "range": 0.0
+          },
+          "theta": {
+            "min": -4.39,
+            "max": 1.37,
+            "outside_official_range": 8,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 1,
+          "max_rotation_heat": 1
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      },
+      {
+        "index": 997,
+        "stage": "visible_no_candidate",
+        "reason": "max_steps_reached",
+        "tail": {
+          "planner_rows": 50,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 22,
+            "turn_left": 17,
+            "turn_right": 11
+          },
+          "turn_fraction": 0.56,
+          "rho": {
+            "start": 0.91,
+            "min": 0.65,
+            "final": 0.79,
+            "range": 0.86
+          },
+          "theta": {
+            "min": -4.41,
+            "max": 1.35,
+            "outside_official_range": 2,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 13,
+          "max_rotation_heat": 4
+        },
+        "endpoint_fixed_or_navmesh_verified": false
+      }
+    ],
+    "stagnation_signature_upper_bound_count": 86
+  },
+  "oracle": {
+    "decision": "NO-GO",
+    "taxonomy": {
+      "A": 5,
+      "B": 2,
+      "C": 0,
+      "D": 4,
+      "E": 0
+    },
+    "oracle_b_count": 4,
+    "oracle_b_rescues": 0,
+    "oracle_b": [
+      {
+        "source_probe_index": 26,
+        "source_full_index": 835,
+        "target": "bed",
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "final_gt_distance": 1.163367509841919,
+        "collisions_total": 29,
+        "requested_endpoint_fixed": true,
+        "effective_endpoint_unique_xy_count_1mm": 1,
+        "max_effective_xy_drift_from_requested": 0.0,
+        "navmesh_path_distance": 1.3764662742614746,
+        "endpoint_to_gt_geodesic": 0.0,
+        "net_xy_motion": 0.3729793939437288,
+        "trace": {
+          "planner_rows": 36,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 16,
+            "turn_left": 14,
+            "turn_right": 6
+          },
+          "turn_fraction": 0.5555555555555556,
+          "rho": {
+            "start": 1.1987714990809382,
+            "min": 1.1599312430363504,
+            "final": 1.1599312430363504,
+            "range": 0.042349875155529126
+          },
+          "theta": {
+            "min": -4.204441714803378,
+            "max": 1.555144967212593,
+            "outside_official_range": 11,
+            "branch_cut_jumps": 3
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 2
+        }
+      },
+      {
+        "source_probe_index": 27,
+        "source_full_index": 995,
+        "target": "tv_monitor",
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "final_gt_distance": 5.108558177947998,
+        "collisions_total": 25,
+        "requested_endpoint_fixed": true,
+        "effective_endpoint_unique_xy_count_1mm": 1,
+        "max_effective_xy_drift_from_requested": 0.0,
+        "navmesh_path_distance": 5.108558177947998,
+        "endpoint_to_gt_geodesic": 0.0,
+        "net_xy_motion": 0.0,
+        "trace": {
+          "planner_rows": 31,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 17,
+            "turn_left": 10,
+            "turn_right": 4
+          },
+          "turn_fraction": 0.45161290322580644,
+          "rho": {
+            "start": 5.106355404831603,
+            "min": 5.106355404831601,
+            "final": 5.106355404831603,
+            "range": 1.7763568394002505e-15
+          },
+          "theta": {
+            "min": -4.479993255354241,
+            "max": 1.2795932772110472,
+            "outside_official_range": 3,
+            "branch_cut_jumps": 2
+          },
+          "max_forward_heat": 16,
+          "max_rotation_heat": 2
+        }
+      },
+      {
+        "source_probe_index": 30,
+        "source_full_index": 827,
+        "target": "bed",
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "final_gt_distance": 1.3646366596221924,
+        "collisions_total": 44,
+        "requested_endpoint_fixed": true,
+        "effective_endpoint_unique_xy_count_1mm": 1,
+        "max_effective_xy_drift_from_requested": 0.5000000000000002,
+        "navmesh_path_distance": 1.3646366596221924,
+        "endpoint_to_gt_geodesic": 0.0,
+        "net_xy_motion": 6.661338147750939e-16,
+        "trace": {
+          "planner_rows": 43,
+          "actions": {
+            "stop_or_none": 1,
+            "forward": 16,
+            "turn_left": 18,
+            "turn_right": 8
+          },
+          "turn_fraction": 0.6190476190476191,
+          "rho": {
+            "start": 0.6619537487342239,
+            "min": 0.6619537487342234,
+            "final": 0.6619537487342234,
+            "range": 1.2212453270876722e-15
+          },
+          "theta": {
+            "min": -4.657107018442342,
+            "max": -3.0863106214829767,
+            "outside_official_range": 42,
+            "branch_cut_jumps": 0
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 2
+        }
+      },
+      {
+        "source_probe_index": 31,
+        "source_full_index": 745,
+        "target": "tv_monitor",
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "final_gt_distance": 9.9176025390625,
+        "collisions_total": 92,
+        "requested_endpoint_fixed": true,
+        "effective_endpoint_unique_xy_count_1mm": 1,
+        "max_effective_xy_drift_from_requested": 0.0,
+        "navmesh_path_distance": 9.84102725982666,
+        "endpoint_to_gt_geodesic": 0.0,
+        "net_xy_motion": 0.07686663119364494,
+        "trace": {
+          "planner_rows": 46,
+          "actions": {
+            "stop_or_none": 0,
+            "forward": 16,
+            "turn_left": 14,
+            "turn_right": 16
+          },
+          "turn_fraction": 0.6521739130434783,
+          "rho": {
+            "start": 2.8825797196266354,
+            "min": 2.8098327884410983,
+            "final": 2.809832788441099,
+            "range": 0.07274693118553754
+          },
+          "theta": {
+            "min": -4.571424432683815,
+            "max": 1.1884166130822353,
+            "outside_official_range": 10,
+            "branch_cut_jumps": 5
+          },
+          "max_forward_heat": 15,
+          "max_rotation_heat": 4
+        }
+      }
+    ]
+  },
+  "interpretation_guardrails": {
+    "theta_exposure_is_not_rescue_headroom": true,
+    "full_logs_do_not_record_raw_and_final_actions_separately": true,
+    "normal_mode_final_action_equals_raw_policy_action_by_code": true,
+    "frontier_endpoint_reachability_not_reconstructable_from_full_logs": true,
+    "stagnation_signature_is_an_upper_bound_not_executor_attribution": true
+  }
+}
