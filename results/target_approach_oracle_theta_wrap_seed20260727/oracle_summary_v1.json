@@ -1,0 +1,2027 @@
+{
+  "schema_version": 1,
+  "experiment": "Target Approach Oracle Ceiling",
+  "frozen_baseline_commit": "3a79d97556f25be9a291aac6b32e09cd76445f50",
+  "decision": "NO-GO",
+  "decision_rule": "Oracle A rescues >=50% of correct-candidate accepted-no-STOP failures and protection loss=0",
+  "candidate_correct_failures": 6,
+  "oracle_a_rescued_failures": 2,
+  "oracle_a_rescue_rate_all_correct_failures": 0.3333333333333333,
+  "accepted_no_stop_correct_candidates": 5,
+  "accepted_no_stop_oracle_a_rescues": 1,
+  "accepted_no_stop_oracle_a_rescue_rate": 0.2,
+  "oracle_b_additional_rescues": 0,
+  "pointnav_failures": 4,
+  "taxonomy": {
+    "A": 5,
+    "B": 2,
+    "C": 0,
+    "D": 4,
+    "E": 0
+  },
+  "taxonomy_labels": {
+    "A": "wrong / ambiguous target candidate",
+    "B": "candidate correct, Oracle A success",
+    "C": "Oracle A failed, GT-viewpoint Oracle B success",
+    "D": "GT-viewpoint Oracle B still failed",
+    "E": "data, replay, or navmesh anomaly"
+  },
+  "protection": {
+    "episodes": 10,
+    "losses": 0,
+    "exact_success": 10,
+    "exact_reason": 10,
+    "exact_steps": 10,
+    "exact_first_acceptance": 10
+  },
+  "episodes": [
+    {
+      "source_probe_index": 12,
+      "scene": "00829-QaLdnwvtxbs",
+      "episode_id": "27",
+      "target": "tv_monitor",
+      "evidence_role": "stable_v0_rescue",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 70,
+        "candidate_id": 1,
+        "label": "television_screen",
+        "composition_bbox": [
+          "285",
+          "700",
+          "354",
+          "742"
+        ],
+        "raw_centroid": [
+          2.4280878967571518,
+          -0.4125619949335431,
+          1.437112301310137
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "correct",
+        "ambiguity_reason": null,
+        "predicted_pixels": 2176,
+        "target_pixels": 8130,
+        "intersection_pixels": 2013,
+        "precision": 0.9250919117647058,
+        "recall": 0.24760147601476015,
+        "iou": 0.24273483660918846,
+        "source_frame_bbox": [
+          122,
+          92,
+          202,
+          226
+        ],
+        "source_step": 65,
+        "image_index": 5,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/000_QaLdnwvtxbs.basis_27/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/000_QaLdnwvtxbs.basis_27/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/000_QaLdnwvtxbs.basis_27/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": true,
+        "reason": "oracle_endpoint_reached",
+        "navigation_steps": 87,
+        "final_gt_distance": 0.10236645489931107,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "position_hab": [
+            3.2199320793151855,
+            0.13573911786079407,
+            0.8054767847061157
+          ],
+          "radius": 0.7,
+          "angle_index": 22,
+          "snap_displacement": 0.18531020721564523,
+          "surface_distance": 0.7767317964026185,
+          "current_geodesic": 1.3025009632110596,
+          "gt_geodesic": 0.10114824771881104,
+          "line_of_sight": true,
+          "source": "candidate_surface",
+          "pose": [
+            [
+              0.3491715201585199,
+              5.551115123125783e-17,
+              -0.9370588292685731,
+              3.2199320793151855
+            ],
+            [
+              0.9370588292685731,
+              -1.6653345369377348e-16,
+              0.3491715201585198,
+              -0.8054767847061157
+            ],
+            [
+              -5.551115123125783e-17,
+              -1.0,
+              -2.220446049250313e-16,
+              1.0157390832901
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 79,
+        "rho": {
+          "start": 1.1022451650585225,
+          "min": 0.1617562363150948,
+          "final": 0.1617562363150953
+        },
+        "endpoint_distance": {
+          "start": 1.1022451650585223,
+          "min": 0.1617562363150948,
+          "final": 0.1617562363150953
+        },
+        "actions": {
+          "1": 8,
+          "2": 5,
+          "3": 4,
+          "None": 1
+        },
+        "post_accept_steps": 18,
+        "oracle_outcome": "oracle_endpoint_reached",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/000_QaLdnwvtxbs.basis_27/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/000_QaLdnwvtxbs.basis_27/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/000_QaLdnwvtxbs.basis_27/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/000_QaLdnwvtxbs.basis_27/oracle_assets/oracle_a_pursuit.mp4"
+      },
+      "oracle_b": null,
+      "primary_attribution": "B"
+    },
+    {
+      "source_probe_index": 14,
+      "scene": "00894-HY1NcmCgn3n",
+      "episode_id": "3",
+      "target": "plant",
+      "evidence_role": "stable_v0_rescue",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 115,
+        "candidate_id": 9,
+        "label": "potted_plant",
+        "composition_bbox": [
+          "102",
+          "35",
+          "138",
+          "79"
+        ],
+        "raw_centroid": [
+          16.217093835746425,
+          0.5437128734843893,
+          0.9618077353342801
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "ambiguous",
+        "ambiguity_reason": "boundary_overlap",
+        "predicted_pixels": 1165,
+        "target_pixels": 516,
+        "intersection_pixels": 124,
+        "precision": 0.10643776824034334,
+        "recall": 0.24031007751937986,
+        "iou": 0.07964033397559409,
+        "source_frame_bbox": [
+          70,
+          204,
+          156,
+          274
+        ],
+        "source_step": 90,
+        "image_index": 0,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/001_HY1NcmCgn3n.basis_3/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/001_HY1NcmCgn3n.basis_3/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/001_HY1NcmCgn3n.basis_3/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": false,
+        "reason": "oracle_candidate_ambiguous",
+        "navigation_steps": 115,
+        "final_gt_distance": 1.643681526184082,
+        "candidate_classification": "ambiguous",
+        "selected_endpoint": null,
+        "candidate_viewpoint_count": 0,
+        "rho": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "endpoint_distance": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "actions": {
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "None": 0
+        },
+        "post_accept_steps": 0,
+        "oracle_outcome": "oracle_candidate_ambiguous",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/001_HY1NcmCgn3n.basis_3/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/001_HY1NcmCgn3n.basis_3/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/001_HY1NcmCgn3n.basis_3/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": null
+      },
+      "oracle_b": null,
+      "primary_attribution": "A"
+    },
+    {
+      "source_probe_index": 19,
+      "scene": "00800-TEEsavR23oF",
+      "episode_id": "26",
+      "target": "chair",
+      "evidence_role": "stable_v0_rescue",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 29,
+        "candidate_id": 19,
+        "label": "chair",
+        "composition_bbox": [
+          "364",
+          "814",
+          "461",
+          "937"
+        ],
+        "raw_centroid": [
+          -6.482939703101687,
+          2.2984303093631837,
+          3.6296264978144
+        ],
+        "qwen_probability": 0.95,
+        "qwen_accepted": true,
+        "classification": "wrong",
+        "ambiguity_reason": null,
+        "predicted_pixels": 5578,
+        "target_pixels": 4808,
+        "intersection_pixels": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "iou": 0.0,
+        "source_frame_bbox": [
+          350,
+          250,
+          592,
+          440
+        ],
+        "source_step": 23,
+        "image_index": 5,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/002_TEEsavR23oF.basis_26/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/002_TEEsavR23oF.basis_26/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/002_TEEsavR23oF.basis_26/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": false,
+        "reason": "oracle_candidate_wrong",
+        "navigation_steps": 29,
+        "final_gt_distance": 2.2700552940368652,
+        "candidate_classification": "wrong",
+        "selected_endpoint": null,
+        "candidate_viewpoint_count": 0,
+        "rho": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "endpoint_distance": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "actions": {
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "None": 0
+        },
+        "post_accept_steps": 0,
+        "oracle_outcome": "oracle_candidate_wrong",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/002_TEEsavR23oF.basis_26/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/002_TEEsavR23oF.basis_26/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/002_TEEsavR23oF.basis_26/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": null
+      },
+      "oracle_b": null,
+      "primary_attribution": "A"
+    },
+    {
+      "source_probe_index": 24,
+      "scene": "00813-svBbv1Pavdk",
+      "episode_id": "20",
+      "target": "chair",
+      "evidence_role": "accepted_no_stop",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 185,
+        "candidate_id": 35,
+        "label": "chair",
+        "composition_bbox": [
+          "153",
+          "638",
+          "239",
+          "749"
+        ],
+        "raw_centroid": [
+          11.606047519542736,
+          -5.293261678823325,
+          0.40518797922577876
+        ],
+        "qwen_probability": 0.95,
+        "qwen_accepted": true,
+        "classification": "ambiguous",
+        "ambiguity_reason": "gt_not_visible_or_unannotated",
+        "predicted_pixels": 3084,
+        "target_pixels": 0,
+        "intersection_pixels": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "iou": 0.0,
+        "source_frame_bbox": [
+          2,
+          310,
+          216,
+          476
+        ],
+        "source_step": 182,
+        "image_index": 2,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/003_svBbv1Pavdk.basis_20/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/003_svBbv1Pavdk.basis_20/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/003_svBbv1Pavdk.basis_20/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": false,
+        "reason": "oracle_candidate_ambiguous",
+        "navigation_steps": 185,
+        "final_gt_distance": 5.240729808807373,
+        "candidate_classification": "ambiguous",
+        "selected_endpoint": null,
+        "candidate_viewpoint_count": 0,
+        "rho": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "endpoint_distance": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "actions": {
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "None": 0
+        },
+        "post_accept_steps": 0,
+        "oracle_outcome": "oracle_candidate_ambiguous",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/003_svBbv1Pavdk.basis_20/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/003_svBbv1Pavdk.basis_20/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/003_svBbv1Pavdk.basis_20/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": null
+      },
+      "oracle_b": null,
+      "primary_attribution": "A"
+    },
+    {
+      "source_probe_index": 25,
+      "scene": "00848-ziup5kvtCCR",
+      "episode_id": "0",
+      "target": "plant",
+      "evidence_role": "accepted_no_stop+stable_v0_rescue",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 234,
+        "candidate_id": 93,
+        "label": "potted_plant",
+        "composition_bbox": [
+          "353",
+          "861",
+          "366",
+          "869"
+        ],
+        "raw_centroid": [
+          1.6763614224816294,
+          -7.766686456691142,
+          0.9080999957549057
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "correct",
+        "ambiguity_reason": null,
+        "predicted_pixels": 77,
+        "target_pixels": 5048,
+        "intersection_pixels": 65,
+        "precision": 0.8441558441558441,
+        "recall": 0.012876386687797147,
+        "iou": 0.012845849802371542,
+        "source_frame_bbox": [
+          444,
+          226,
+          456,
+          250
+        ],
+        "source_step": 209,
+        "image_index": 5,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/004_ziup5kvtCCR.basis_0/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/004_ziup5kvtCCR.basis_0/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/004_ziup5kvtCCR.basis_0/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": true,
+        "reason": "oracle_endpoint_reached",
+        "navigation_steps": 252,
+        "final_gt_distance": 0.009163307026028633,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "position_hab": [
+            3.426983594894409,
+            0.021223172545433044,
+            8.239852905273438
+          ],
+          "radius": 2.0,
+          "angle_index": 22,
+          "snap_displacement": 0.3729573471859236,
+          "surface_distance": 1.7590713797227324,
+          "current_geodesic": 2.6283557415008545,
+          "gt_geodesic": 0.0017836145125329494,
+          "line_of_sight": true,
+          "source": "candidate_surface",
+          "pose": [
+            [
+              0.34040306685352145,
+              -1.6653345369377348e-16,
+              -0.9402796137727952,
+              3.426983594894409
+            ],
+            [
+              0.9402796137727951,
+              -2.7755575615628914e-16,
+              0.34040306685352145,
+              -8.239852905273438
+            ],
+            [
+              -3.3306690738754696e-16,
+              -1.0,
+              5.551115123125783e-17,
+              0.9012231826782225
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 61,
+        "rho": {
+          "start": 2.628355709420536,
+          "min": 0.11294861395863239,
+          "final": 0.11294861395863326
+        },
+        "endpoint_distance": {
+          "start": 2.628355709420536,
+          "min": 0.11294861395863239,
+          "final": 0.11294861395863326
+        },
+        "actions": {
+          "1": 11,
+          "2": 2,
+          "3": 5,
+          "None": 1
+        },
+        "post_accept_steps": 19,
+        "oracle_outcome": "oracle_endpoint_reached",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/004_ziup5kvtCCR.basis_0/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/004_ziup5kvtCCR.basis_0/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/004_ziup5kvtCCR.basis_0/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/004_ziup5kvtCCR.basis_0/oracle_assets/oracle_a_pursuit.mp4"
+      },
+      "oracle_b": null,
+      "primary_attribution": "B"
+    },
+    {
+      "source_probe_index": 26,
+      "scene": "00832-qyAac8rV8Zk",
+      "episode_id": "25",
+      "target": "bed",
+      "evidence_role": "accepted_no_stop",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 51,
+        "candidate_id": 124,
+        "label": "bed",
+        "composition_bbox": [
+          "139",
+          "248",
+          "210",
+          "382"
+        ],
+        "raw_centroid": [
+          -8.02631259951581,
+          -1.6194148557357364,
+          3.4342398444040096
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "correct",
+        "ambiguity_reason": null,
+        "predicted_pixels": 6963,
+        "target_pixels": 29523,
+        "intersection_pixels": 6517,
+        "precision": 0.9359471492172914,
+        "recall": 0.2207431494089354,
+        "iou": 0.21745803997464047,
+        "source_frame_bbox": [
+          0,
+          278,
+          638,
+          414
+        ],
+        "source_step": 12,
+        "image_index": 0,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/005_qyAac8rV8Zk.basis_25/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/005_qyAac8rV8Zk.basis_25/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/005_qyAac8rV8Zk.basis_25/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": false,
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "navigation_steps": 89,
+        "final_gt_distance": 1.1823623180389404,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "position_hab": [
+            -7.400668621063232,
+            3.219202995300293,
+            2.510080337524414
+          ],
+          "radius": 2.0,
+          "angle_index": 19,
+          "snap_displacement": 6.880336421063394e-08,
+          "surface_distance": 0.7594244033212608,
+          "current_geodesic": 1.830572247505188,
+          "gt_geodesic": 0.15176193416118622,
+          "line_of_sight": true,
+          "source": "candidate_surface",
+          "pose": [
+            [
+              0.9659258336499936,
+              3.0531133177191805e-16,
+              -0.2588190176311718,
+              -7.400668621063232
+            ],
+            [
+              0.25881901763117177,
+              -1.6653345369377348e-16,
+              0.9659258336499936,
+              -2.510080337524414
+            ],
+            [
+              2.7755575615628914e-16,
+              -1.0,
+              -1.6653345369377348e-16,
+              3.9683127403259277
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 10,
+        "rho": {
+          "start": 1.5645648861658255,
+          "min": 1.5385878980588519,
+          "final": 1.5983162071876014
+        },
+        "endpoint_distance": {
+          "start": 1.5645648861658252,
+          "min": 1.5385878980588519,
+          "final": 1.5983162071876014
+        },
+        "actions": {
+          "1": 16,
+          "2": 11,
+          "3": 12,
+          "None": 0
+        },
+        "post_accept_steps": 39,
+        "oracle_outcome": "oracle_pointnav_failed_before_endpoint",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/005_qyAac8rV8Zk.basis_25/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/005_qyAac8rV8Zk.basis_25/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/005_qyAac8rV8Zk.basis_25/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/005_qyAac8rV8Zk.basis_25/oracle_assets/oracle_a_pursuit.mp4"
+      },
+      "oracle_b": {
+        "success": false,
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "navigation_steps": 86,
+        "final_gt_distance": 1.163367509841919,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "goal_index": 0,
+          "view_index": 382,
+          "position_hab": [
+            -6.95293,
+            3.0692,
+            2.42879
+          ],
+          "iou": 0.32211,
+          "current_geodesic": 1.3764662742614746,
+          "gt_geodesic": 0.0,
+          "source": "gt_success_viewpoint",
+          "pose": [
+            [
+              0.6020632917640643,
+              3.885780586188048e-16,
+              -0.798448365713287,
+              -6.95293
+            ],
+            [
+              0.798448365713287,
+              -3.885780586188048e-16,
+              0.6020632917640641,
+              -2.42879
+            ],
+            [
+              -5.551115123125783e-17,
+              -0.9999999999999999,
+              -5.551115123125783e-16,
+              3.9683127403259277
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 0,
+        "rho": {
+          "start": 1.1987714990809382,
+          "min": 1.1599312430363504,
+          "final": 1.1599312430363504
+        },
+        "endpoint_distance": {
+          "start": 1.1987714990809382,
+          "min": 1.1599312430363502,
+          "final": 1.1599312430363502
+        },
+        "actions": {
+          "1": 16,
+          "2": 14,
+          "3": 6,
+          "None": 0
+        },
+        "post_accept_steps": 36,
+        "oracle_outcome": "oracle_pointnav_failed_before_endpoint",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/000_qyAac8rV8Zk.basis_25/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/000_qyAac8rV8Zk.basis_25/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/000_qyAac8rV8Zk.basis_25/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/000_qyAac8rV8Zk.basis_25/oracle_assets/oracle_b_pursuit.mp4"
+      },
+      "primary_attribution": "D"
+    },
+    {
+      "source_probe_index": 27,
+      "scene": "00839-zt1RVoi7PcG",
+      "episode_id": "17",
+      "target": "tv_monitor",
+      "evidence_role": "accepted_no_stop+stable_v0_rescue",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 79,
+        "candidate_id": 151,
+        "label": "television_screen",
+        "composition_bbox": [
+          "340",
+          "713",
+          "366",
+          "758"
+        ],
+        "raw_centroid": [
+          7.147075923834303,
+          -9.484355151106552,
+          -1.8002887397090468
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "correct",
+        "ambiguity_reason": null,
+        "predicted_pixels": 1096,
+        "target_pixels": 5022,
+        "intersection_pixels": 1096,
+        "precision": 1.0,
+        "recall": 0.21823974512146554,
+        "iou": 0.21823974512146554,
+        "source_frame_bbox": [
+          148,
+          202,
+          234,
+          250
+        ],
+        "source_step": 77,
+        "image_index": 5,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/006_zt1RVoi7PcG.basis_17/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/006_zt1RVoi7PcG.basis_17/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/006_zt1RVoi7PcG.basis_17/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": false,
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "navigation_steps": 109,
+        "final_gt_distance": 5.108558177947998,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "position_hab": [
+            6.446516990661621,
+            -2.8870632648468018,
+            10.704562187194824
+          ],
+          "radius": 1.4,
+          "angle_index": 16,
+          "snap_displacement": 3.576673171503796e-07,
+          "surface_distance": 0.8945141095121555,
+          "current_geodesic": 5.395592212677002,
+          "gt_geodesic": 0.14999793469905853,
+          "line_of_sight": true,
+          "source": "candidate_surface",
+          "pose": [
+            [
+              0.866025507358527,
+              -1.1102230246251565e-16,
+              0.49999982060437326,
+              6.446516990661621
+            ],
+            [
+              -0.49999982060437326,
+              0.0,
+              0.866025507358527,
+              -10.704562187194824
+            ],
+            [
+              -1.1102230246251565e-16,
+              -0.9999999999999998,
+              0.0,
+              -2.007063388824463
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 47,
+        "rho": {
+          "start": 5.395592267668003,
+          "min": 5.395592267668001,
+          "final": 5.395592267668003
+        },
+        "endpoint_distance": {
+          "start": 5.395592267668003,
+          "min": 5.395592267668001,
+          "final": 5.395592267668003
+        },
+        "actions": {
+          "1": 17,
+          "2": 10,
+          "3": 4,
+          "None": 0
+        },
+        "post_accept_steps": 31,
+        "oracle_outcome": "oracle_pointnav_failed_before_endpoint",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/006_zt1RVoi7PcG.basis_17/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/006_zt1RVoi7PcG.basis_17/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/006_zt1RVoi7PcG.basis_17/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/006_zt1RVoi7PcG.basis_17/oracle_assets/oracle_a_pursuit.mp4"
+      },
+      "oracle_b": {
+        "success": false,
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "navigation_steps": 109,
+        "final_gt_distance": 5.108558177947998,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "goal_index": 7,
+          "view_index": 69,
+          "position_hab": [
+            6.10691,
+            -3.03706,
+            10.195
+          ],
+          "iou": 0.38918,
+          "current_geodesic": 5.108558177947998,
+          "gt_geodesic": 0.0,
+          "source": "gt_success_viewpoint",
+          "pose": [
+            [
+              0.5641173422804244,
+              5.551115123125783e-17,
+              0.8256946312883899,
+              6.10691
+            ],
+            [
+              -0.8256946312883899,
+              3.3306690738754696e-16,
+              0.5641173422804244,
+              -10.195
+            ],
+            [
+              -2.220446049250313e-16,
+              -1.0,
+              2.220446049250313e-16,
+              -2.007063388824463
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 0,
+        "rho": {
+          "start": 5.106355404831603,
+          "min": 5.106355404831601,
+          "final": 5.106355404831603
+        },
+        "endpoint_distance": {
+          "start": 5.106355404831603,
+          "min": 5.106355404831601,
+          "final": 5.106355404831603
+        },
+        "actions": {
+          "1": 17,
+          "2": 10,
+          "3": 4,
+          "None": 0
+        },
+        "post_accept_steps": 31,
+        "oracle_outcome": "oracle_pointnav_failed_before_endpoint",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/001_zt1RVoi7PcG.basis_17/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/001_zt1RVoi7PcG.basis_17/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/001_zt1RVoi7PcG.basis_17/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/001_zt1RVoi7PcG.basis_17/oracle_assets/oracle_b_pursuit.mp4"
+      },
+      "primary_attribution": "D"
+    },
+    {
+      "source_probe_index": 28,
+      "scene": "00849-a8BtkwhxdRV",
+      "episode_id": "17",
+      "target": "toilet",
+      "evidence_role": "accepted_no_stop",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 102,
+        "candidate_id": 176,
+        "label": "toilet",
+        "composition_bbox": [
+          "386",
+          "835",
+          "455",
+          "895"
+        ],
+        "raw_centroid": [
+          0.46345136915751545,
+          0.04555745415320401,
+          1.4801790611560055
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "ambiguous",
+        "ambiguity_reason": "gt_not_visible_or_unannotated",
+        "predicted_pixels": 2162,
+        "target_pixels": 0,
+        "intersection_pixels": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "iou": 0.0,
+        "source_frame_bbox": [
+          390,
+          294,
+          508,
+          428
+        ],
+        "source_step": 101,
+        "image_index": 5,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/007_a8BtkwhxdRV.basis_17/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/007_a8BtkwhxdRV.basis_17/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/007_a8BtkwhxdRV.basis_17/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": false,
+        "reason": "oracle_candidate_ambiguous",
+        "navigation_steps": 102,
+        "final_gt_distance": 7.034815311431885,
+        "candidate_classification": "ambiguous",
+        "selected_endpoint": null,
+        "candidate_viewpoint_count": 0,
+        "rho": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "endpoint_distance": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "actions": {
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "None": 0
+        },
+        "post_accept_steps": 0,
+        "oracle_outcome": "oracle_candidate_ambiguous",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/007_a8BtkwhxdRV.basis_17/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/007_a8BtkwhxdRV.basis_17/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/007_a8BtkwhxdRV.basis_17/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": null
+      },
+      "oracle_b": null,
+      "primary_attribution": "A"
+    },
+    {
+      "source_probe_index": 29,
+      "scene": "00803-k1cupFYWXJ6",
+      "episode_id": "1",
+      "target": "sofa",
+      "evidence_role": "accepted_no_stop",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 56,
+        "candidate_id": 186,
+        "label": "loveseat",
+        "composition_bbox": [
+          "381",
+          "45",
+          "480",
+          "109"
+        ],
+        "raw_centroid": [
+          -4.182183118293611,
+          7.802839106838189,
+          -14.575562209485604
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "wrong",
+        "ambiguity_reason": null,
+        "predicted_pixels": 2445,
+        "target_pixels": 7242,
+        "intersection_pixels": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "iou": 0.0,
+        "source_frame_bbox": [
+          90,
+          284,
+          214,
+          478
+        ],
+        "source_step": 51,
+        "image_index": 3,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/008_k1cupFYWXJ6.basis_1/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/008_k1cupFYWXJ6.basis_1/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/008_k1cupFYWXJ6.basis_1/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": false,
+        "reason": "oracle_candidate_wrong",
+        "navigation_steps": 56,
+        "final_gt_distance": 2.7807626724243164,
+        "candidate_classification": "wrong",
+        "selected_endpoint": null,
+        "candidate_viewpoint_count": 0,
+        "rho": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "endpoint_distance": {
+          "start": null,
+          "min": null,
+          "final": null
+        },
+        "actions": {
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "None": 0
+        },
+        "post_accept_steps": 0,
+        "oracle_outcome": "oracle_candidate_wrong",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/008_k1cupFYWXJ6.basis_1/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/008_k1cupFYWXJ6.basis_1/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/008_k1cupFYWXJ6.basis_1/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": null
+      },
+      "oracle_b": null,
+      "primary_attribution": "A"
+    },
+    {
+      "source_probe_index": 30,
+      "scene": "00832-qyAac8rV8Zk",
+      "episode_id": "17",
+      "target": "bed",
+      "evidence_role": "accepted_no_stop",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 97,
+        "candidate_id": 221,
+        "label": "bed",
+        "composition_bbox": [
+          "375",
+          "319",
+          "467",
+          "417"
+        ],
+        "raw_centroid": [
+          -8.020516912213589,
+          -0.22707559888945802,
+          3.4004355370111408
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "correct",
+        "ambiguity_reason": null,
+        "predicted_pixels": 5563,
+        "target_pixels": 21656,
+        "intersection_pixels": 5276,
+        "precision": 0.948409131763437,
+        "recall": 0.2436276320650166,
+        "iou": 0.24044114296130883,
+        "source_frame_bbox": [
+          0,
+          274,
+          192,
+          450
+        ],
+        "source_step": 94,
+        "image_index": 4,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/009_qyAac8rV8Zk.basis_17/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/009_qyAac8rV8Zk.basis_17/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/009_qyAac8rV8Zk.basis_17/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": false,
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "navigation_steps": 138,
+        "final_gt_distance": 1.3764853477478027,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "position_hab": [
+            -7.729207992553711,
+            3.219202995300293,
+            2.273808717727661
+          ],
+          "radius": 2.0,
+          "angle_index": 18,
+          "snap_displacement": 0.17575906330976082,
+          "surface_distance": 1.7647144546139457,
+          "current_geodesic": 2.1472134590148926,
+          "gt_geodesic": 0.15117309987545013,
+          "line_of_sight": true,
+          "source": "candidate_surface",
+          "pose": [
+            [
+              0.9978908636875383,
+              9.020562075079397e-16,
+              -0.06491397514355986,
+              -7.729207992553711
+            ],
+            [
+              0.06491397514355986,
+              1.6653345369377348e-16,
+              0.9978908636875383,
+              -2.273808717727661
+            ],
+            [
+              9.159339953157541e-16,
+              -1.0,
+              5.551115123125783e-17,
+              3.905009269714356
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 6,
+        "rho": {
+          "start": 1.6662894674575874,
+          "min": 1.666289467457587,
+          "final": 1.700493769733064
+        },
+        "endpoint_distance": {
+          "start": 1.6662894674575874,
+          "min": 1.666289467457587,
+          "final": 1.7004937697330638
+        },
+        "actions": {
+          "1": 16,
+          "2": 16,
+          "3": 10,
+          "None": 0
+        },
+        "post_accept_steps": 42,
+        "oracle_outcome": "oracle_pointnav_failed_before_endpoint",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/009_qyAac8rV8Zk.basis_17/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/009_qyAac8rV8Zk.basis_17/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/009_qyAac8rV8Zk.basis_17/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/009_qyAac8rV8Zk.basis_17/oracle_assets/oracle_a_pursuit.mp4"
+      },
+      "oracle_b": {
+        "success": false,
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "navigation_steps": 139,
+        "final_gt_distance": 1.3646366596221924,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "goal_index": 0,
+          "view_index": 382,
+          "position_hab": [
+            -6.95293,
+            3.0692,
+            2.42879
+          ],
+          "iou": 0.32211,
+          "current_geodesic": 1.3646366596221924,
+          "gt_geodesic": 0.0,
+          "source": "gt_success_viewpoint",
+          "pose": [
+            [
+              0.899799824751612,
+              -8.326672684688674e-17,
+              -0.43630296283313097,
+              -6.95293
+            ],
+            [
+              0.43630296283313097,
+              -1.1102230246251565e-16,
+              0.899799824751612,
+              -2.42879
+            ],
+            [
+              -1.6653345369377348e-16,
+              -1.0,
+              -1.1102230246251565e-16,
+              3.905009269714356
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 0,
+        "rho": {
+          "start": 0.6619537487342239,
+          "min": 0.6619537487342234,
+          "final": 0.6619537487342234
+        },
+        "endpoint_distance": {
+          "start": 1.161953748734224,
+          "min": 1.1619537487342235,
+          "final": 1.1619537487342235
+        },
+        "actions": {
+          "1": 16,
+          "2": 18,
+          "3": 8,
+          "None": 1
+        },
+        "post_accept_steps": 43,
+        "oracle_outcome": "oracle_pointnav_failed_before_endpoint",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/002_qyAac8rV8Zk.basis_17/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/002_qyAac8rV8Zk.basis_17/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/002_qyAac8rV8Zk.basis_17/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/002_qyAac8rV8Zk.basis_17/oracle_assets/oracle_b_pursuit.mp4"
+      },
+      "primary_attribution": "D"
+    },
+    {
+      "source_probe_index": 31,
+      "scene": "00814-p53SfW6mjZe",
+      "episode_id": "19",
+      "target": "tv_monitor",
+      "evidence_role": "accepted_no_stop",
+      "baseline_success": false,
+      "candidate_audit": {
+        "accepted_step": 474,
+        "candidate_id": 284,
+        "label": "television_screen",
+        "composition_bbox": [
+          "319",
+          "300",
+          "353",
+          "349"
+        ],
+        "raw_centroid": [
+          3.5876611088053307,
+          -7.2599104436796535,
+          1.2855189098313446
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "correct",
+        "ambiguity_reason": null,
+        "predicted_pixels": 1339,
+        "target_pixels": 3591,
+        "intersection_pixels": 783,
+        "precision": 0.5847647498132935,
+        "recall": 0.21804511278195488,
+        "iou": 0.1888111888111888,
+        "source_frame_bbox": [
+          0,
+          160,
+          638,
+          224
+        ],
+        "source_step": 424,
+        "image_index": 4,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/010_p53SfW6mjZe.basis_19/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/010_p53SfW6mjZe.basis_19/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/010_p53SfW6mjZe.basis_19/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": false,
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "navigation_steps": 513,
+        "final_gt_distance": 9.504715919494629,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "position_hab": [
+            4.777358531951904,
+            0.019661694765090942,
+            7.452313423156738
+          ],
+          "radius": 1.0,
+          "angle_index": 14,
+          "snap_displacement": 1.6200901228183539e-07,
+          "surface_distance": 0.9471935993143266,
+          "current_geodesic": 11.498656272888184,
+          "gt_geodesic": 0.028543870896100998,
+          "line_of_sight": true,
+          "source": "candidate_surface",
+          "pose": [
+            [
+              0.49999991700773866,
+              -2.220446049250313e-16,
+              0.8660254517000374,
+              4.777358531951904
+            ],
+            [
+              -0.8660254517000373,
+              -5.551115123125783e-17,
+              0.49999991700773866,
+              -7.452313423156738
+            ],
+            [
+              -5.551115123125783e-17,
+              -0.9999999999999996,
+              -1.6653345369377348e-16,
+              0.8848131895065308
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 37,
+        "rho": {
+          "start": 3.221868378983463,
+          "min": 3.155101311182214,
+          "final": 3.8391846201787523
+        },
+        "endpoint_distance": {
+          "start": 3.221868378983463,
+          "min": 3.155101311182215,
+          "final": 3.839184620178752
+        },
+        "actions": {
+          "1": 16,
+          "2": 12,
+          "3": 12,
+          "None": 0
+        },
+        "post_accept_steps": 40,
+        "oracle_outcome": "oracle_pointnav_failed_before_endpoint",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/010_p53SfW6mjZe.basis_19/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/010_p53SfW6mjZe.basis_19/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/010_p53SfW6mjZe.basis_19/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/010_p53SfW6mjZe.basis_19/oracle_assets/oracle_a_pursuit.mp4"
+      },
+      "oracle_b": {
+        "success": false,
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "navigation_steps": 519,
+        "final_gt_distance": 9.9176025390625,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "goal_index": 1,
+          "view_index": 128,
+          "position_hab": [
+            4.62676,
+            0.01095,
+            5.76707
+          ],
+          "iou": 0.22879,
+          "current_geodesic": 9.84102725982666,
+          "gt_geodesic": 0.0,
+          "source": "gt_success_viewpoint",
+          "pose": [
+            [
+              -0.8207502226929965,
+              -4.440892098500626e-16,
+              -0.5712872061838918,
+              4.62676
+            ],
+            [
+              0.5712872061838917,
+              2.42861286636753e-16,
+              -0.8207502226929965,
+              -5.76707
+            ],
+            [
+              4.996003610813204e-16,
+              -0.9999999999999999,
+              2.0816681711721685e-17,
+              0.8848131895065308
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 0,
+        "rho": {
+          "start": 2.8825797196266354,
+          "min": 2.8098327884410983,
+          "final": 2.809832788441099
+        },
+        "endpoint_distance": {
+          "start": 2.8825797196266354,
+          "min": 2.8098327884410983,
+          "final": 2.8098327884410987
+        },
+        "actions": {
+          "1": 16,
+          "2": 14,
+          "3": 16,
+          "None": 0
+        },
+        "post_accept_steps": 46,
+        "oracle_outcome": "oracle_pointnav_failed_before_endpoint",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/003_p53SfW6mjZe.basis_19/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/003_p53SfW6mjZe.basis_19/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/003_p53SfW6mjZe.basis_19/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_b/episode_logs/003_p53SfW6mjZe.basis_19/oracle_assets/oracle_b_pursuit.mp4"
+      },
+      "primary_attribution": "D"
+    },
+    {
+      "source_probe_index": 32,
+      "scene": "00813-svBbv1Pavdk",
+      "episode_id": "4",
+      "target": "tv_monitor",
+      "evidence_role": "stable_v0_regression_loss",
+      "baseline_success": true,
+      "candidate_audit": {
+        "accepted_step": 21,
+        "candidate_id": 322,
+        "label": "television_screen",
+        "composition_bbox": [
+          "334",
+          "834",
+          "435",
+          "882"
+        ],
+        "raw_centroid": [
+          7.739068226547403,
+          -3.696177528222241,
+          0.846606546413484
+        ],
+        "qwen_probability": 0.9,
+        "qwen_accepted": true,
+        "classification": "correct",
+        "ambiguity_reason": null,
+        "predicted_pixels": 3804,
+        "target_pixels": 15960,
+        "intersection_pixels": 3597,
+        "precision": 0.945583596214511,
+        "recall": 0.22537593984962406,
+        "iou": 0.22249025793282612,
+        "source_frame_bbox": [
+          390,
+          190,
+          482,
+          388
+        ],
+        "source_step": 17,
+        "image_index": 5,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/011_svBbv1Pavdk.basis_4/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/011_svBbv1Pavdk.basis_4/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/011_svBbv1Pavdk.basis_4/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": true,
+        "reason": "oracle_pointnav_failed_before_endpoint",
+        "navigation_steps": 60,
+        "final_gt_distance": 0.091082863509655,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "position_hab": [
+            7.810048580169678,
+            0.07754743099212646,
+            3.237467050552368
+          ],
+          "radius": 0.4,
+          "angle_index": 4,
+          "snap_displacement": 0.1038762873507646,
+          "surface_distance": 0.4316486532932682,
+          "current_geodesic": 1.206673502922058,
+          "gt_geodesic": 0.02473369613289833,
+          "line_of_sight": true,
+          "source": "candidate_surface",
+          "pose": [
+            [
+              -0.9114371448722921,
+              1.942890293094024e-16,
+              -0.4114393405437117,
+              7.810048580169678
+            ],
+            [
+              0.4114393405437117,
+              4.510281037539698e-16,
+              -0.9114371448722922,
+              -3.237467050552368
+            ],
+            [
+              -2.7755575615628914e-17,
+              -1.0,
+              -4.926614671774132e-16,
+              0.9575474262237549
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 89,
+        "rho": {
+          "start": 1.1466584089503697,
+          "min": 1.146658408950367,
+          "final": 1.4732176587216426
+        },
+        "endpoint_distance": {
+          "start": 1.1466584089503697,
+          "min": 1.146658408950367,
+          "final": 1.4732176587216423
+        },
+        "actions": {
+          "1": 16,
+          "2": 14,
+          "3": 10,
+          "None": 0
+        },
+        "post_accept_steps": 40,
+        "oracle_outcome": "oracle_pointnav_failed_before_endpoint",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/011_svBbv1Pavdk.basis_4/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/011_svBbv1Pavdk.basis_4/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/011_svBbv1Pavdk.basis_4/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/011_svBbv1Pavdk.basis_4/oracle_assets/oracle_a_pursuit.mp4"
+      },
+      "oracle_b": null,
+      "primary_attribution": null
+    },
+    {
+      "source_probe_index": 35,
+      "scene": "00877-4ok3usBNeis",
+      "episode_id": "5",
+      "target": "toilet",
+      "evidence_role": "stable_v0_regression_loss",
+      "baseline_success": true,
+      "candidate_audit": {
+        "accepted_step": 26,
+        "candidate_id": 330,
+        "label": "toilet",
+        "composition_bbox": [
+          "168",
+          "234",
+          "234",
+          "303"
+        ],
+        "raw_centroid": [
+          3.9098096755204175,
+          -4.987877223185388,
+          2.3210530112200116
+        ],
+        "qwen_probability": 0.95,
+        "qwen_accepted": true,
+        "classification": "correct",
+        "ambiguity_reason": null,
+        "predicted_pixels": 2522,
+        "target_pixels": 14604,
+        "intersection_pixels": 2426,
+        "precision": 0.9619349722442506,
+        "recall": 0.16611887154204327,
+        "iou": 0.16503401360544218,
+        "source_frame_bbox": [
+          470,
+          336,
+          604,
+          466
+        ],
+        "source_step": 18,
+        "image_index": 0,
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/012_4ok3usBNeis.basis_5/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/012_4ok3usBNeis.basis_5/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/012_4ok3usBNeis.basis_5/oracle_assets/candidate_masks.npz"
+        }
+      },
+      "oracle_a": {
+        "success": true,
+        "reason": "oracle_endpoint_reached",
+        "navigation_steps": 36,
+        "final_gt_distance": 0.03999386727809906,
+        "candidate_classification": "correct",
+        "selected_endpoint": {
+          "position_hab": [
+            3.2760300636291504,
+            2.0644748210906982,
+            4.958320617675781
+          ],
+          "radius": 0.7,
+          "angle_index": 12,
+          "snap_displacement": 0.09188414295090573,
+          "surface_distance": 0.4268633307111601,
+          "current_geodesic": 1.5578279495239258,
+          "gt_geodesic": 0.009469092823565006,
+          "line_of_sight": true,
+          "source": "candidate_surface",
+          "pose": [
+            [
+              3.891459531280006e-07,
+              -5.551115123125783e-17,
+              0.9999999999999241,
+              3.2760300636291504
+            ],
+            [
+              -0.9999999999999241,
+              5.551115123125783e-17,
+              3.891459531280006e-07,
+              -4.958320617675781
+            ],
+            [
+              -5.551115123125783e-17,
+              -0.9999999999999999,
+              -5.551115123125783e-17,
+              2.944474697113037
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        "candidate_viewpoint_count": 44,
+        "rho": {
+          "start": 1.3845534830245938,
+          "min": 0.11411915161781425,
+          "final": 0.11411915161781458
+        },
+        "endpoint_distance": {
+          "start": 1.5578279655334457,
+          "min": 0.11411915161781425,
+          "final": 0.1141191516178146
+        },
+        "actions": {
+          "1": 6,
+          "2": 3,
+          "3": 1,
+          "None": 1
+        },
+        "post_accept_steps": 11,
+        "oracle_outcome": "oracle_endpoint_reached",
+        "artifacts": {
+          "overlay": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/012_4ok3usBNeis.basis_5/oracle_assets/candidate_gt_overlay.png",
+          "source_rgb": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/012_4ok3usBNeis.basis_5/oracle_assets/candidate_source_rgb.png",
+          "masks": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/012_4ok3usBNeis.basis_5/oracle_assets/candidate_masks.npz"
+        },
+        "pursuit_video": "/home/hsy/zson-exp-ofbase-hm3dv2/results/target_approach_oracle_theta_wrap_seed20260727/oracle_a/episode_logs/012_4ok3usBNeis.basis_5/oracle_assets/oracle_a_pursuit.mp4"
+      },
+      "oracle_b": null,
+      "primary_attribution": null
+    }
+  ],
+  "protection_episodes": [
+    {
+      "source_probe_index": 33,
+      "target": "chair",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 30,
+        "first_acceptance": {
+          "step": 30,
+          "centroid": [
+            5.311988324757352,
+            6.1253642263688075,
+            0.4920630648420251
+          ],
+          "probability": 0.95
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 30,
+        "first_acceptance": {
+          "step": 30,
+          "centroid": [
+            5.311988324757352,
+            6.1253642263688075,
+            0.4920630648420251
+          ],
+          "probability": 0.95
+        }
+      }
+    },
+    {
+      "source_probe_index": 34,
+      "target": "plant",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 29,
+        "first_acceptance": {
+          "step": 20,
+          "centroid": [
+            16.156959738976177,
+            2.813478211839279,
+            0.9473995475242082
+          ],
+          "probability": 0.9
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 29,
+        "first_acceptance": {
+          "step": 20,
+          "centroid": [
+            16.156959738976177,
+            2.813478211839279,
+            0.9473995475242082
+          ],
+          "probability": 0.9
+        }
+      }
+    },
+    {
+      "source_probe_index": 36,
+      "target": "bed",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 27,
+        "first_acceptance": {
+          "step": 27,
+          "centroid": [
+            -6.282496651807981,
+            -5.649745064175349,
+            3.5939517444579208
+          ],
+          "probability": 1.0
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 27,
+        "first_acceptance": {
+          "step": 27,
+          "centroid": [
+            -6.282496651807981,
+            -5.649745064175349,
+            3.5939517444579208
+          ],
+          "probability": 1.0
+        }
+      }
+    },
+    {
+      "source_probe_index": 38,
+      "target": "tv_monitor",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 231,
+        "first_acceptance": {
+          "step": 231,
+          "centroid": [
+            -7.465594310733948,
+            2.6405091043141344,
+            1.8600970380375494
+          ],
+          "probability": 0.9
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 231,
+        "first_acceptance": {
+          "step": 231,
+          "centroid": [
+            -7.465594310733948,
+            2.6405091043141344,
+            1.8600970380375494
+          ],
+          "probability": 0.9
+        }
+      }
+    },
+    {
+      "source_probe_index": 40,
+      "target": "plant",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 381,
+        "first_acceptance": {
+          "step": 359,
+          "centroid": [
+            2.051085596370749,
+            -11.039752323106754,
+            1.3013835949072405
+          ],
+          "probability": 0.9
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 381,
+        "first_acceptance": {
+          "step": 359,
+          "centroid": [
+            2.051085596370749,
+            -11.039752323106754,
+            1.3013835949072405
+          ],
+          "probability": 0.9
+        }
+      }
+    },
+    {
+      "source_probe_index": 41,
+      "target": "toilet",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 444,
+        "first_acceptance": {
+          "step": 308,
+          "centroid": [
+            24.38483697164524,
+            -0.4492639948590529,
+            0.5984249888934502
+          ],
+          "probability": 0.9
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 444,
+        "first_acceptance": {
+          "step": 308,
+          "centroid": [
+            24.38483697164524,
+            -0.4492639948590529,
+            0.5984249888934502
+          ],
+          "probability": 0.9
+        }
+      }
+    },
+    {
+      "source_probe_index": 42,
+      "target": "bed",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 488,
+        "first_acceptance": {
+          "step": 488,
+          "centroid": [
+            -13.320828458386359,
+            -4.676543808742345,
+            0.5622788426695637
+          ],
+          "probability": 0.95
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 488,
+        "first_acceptance": {
+          "step": 488,
+          "centroid": [
+            -13.320828458386359,
+            -4.676543808742345,
+            0.5622788426695637
+          ],
+          "probability": 0.95
+        }
+      }
+    },
+    {
+      "source_probe_index": 43,
+      "target": "sofa",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 453,
+        "first_acceptance": {
+          "step": 453,
+          "centroid": [
+            0.7929287316655967,
+            -0.07555358709089902,
+            -2.1632057645078953
+          ],
+          "probability": 0.9
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 453,
+        "first_acceptance": {
+          "step": 453,
+          "centroid": [
+            0.7929287316655967,
+            -0.07555358709089902,
+            -2.1632057645078953
+          ],
+          "probability": 0.9
+        }
+      }
+    },
+    {
+      "source_probe_index": 44,
+      "target": "tv_monitor",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 39,
+        "first_acceptance": {
+          "step": 39,
+          "centroid": [
+            -6.218550581134272,
+            -1.0555890494092304,
+            1.1690491448979254
+          ],
+          "probability": 0.9
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 39,
+        "first_acceptance": {
+          "step": 39,
+          "centroid": [
+            -6.218550581134272,
+            -1.0555890494092304,
+            1.1690491448979254
+          ],
+          "probability": 0.9
+        }
+      }
+    },
+    {
+      "source_probe_index": 49,
+      "target": "chair",
+      "source": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 410,
+        "first_acceptance": {
+          "step": 410,
+          "centroid": [
+            -1.8574562865606812,
+            -0.13336399634195306,
+            3.74465266685631
+          ],
+          "probability": 1.0
+        }
+      },
+      "replay": {
+        "success": true,
+        "reason": "object_found",
+        "steps": 410,
+        "first_acceptance": {
+          "step": 410,
+          "centroid": [
+            -1.8574562865606812,
+            -0.13336399634195306,
+            3.74465266685631
+          ],
+          "probability": 1.0
+        }
+      }
+    }
+  ]
+}

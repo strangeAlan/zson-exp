@@ -1,0 +1,95 @@
+{
+  "dataset": "HM3Dv2 val",
+  "seed": 20260727,
+  "episodes": 13,
+  "selection_mode": "explicit_manifest",
+  "source_manifest": "/home/hsy/zson-exp-ofbase-hm3dv2/config/evaluation/hm3dv2_approach_oracle_probe23.json",
+  "source_manifest_metadata": {
+    "name": "hm3dv2_approach_oracle_probe23",
+    "frozen_baseline_tag": "of-base-full-v1-v2-20260727",
+    "frozen_baseline_commit": "3a79d97556f25be9a291aac6b32e09cd76445f50",
+    "source_probe": "hm3dv2_target_closure_probe64",
+    "selection_frozen_before_oracle_results": true,
+    "diagnostic_unique_episodes": 13,
+    "protection_episodes": 10,
+    "diagnostic_composition": "8 accepted-no-STOP + 5 Stable-v0 rescues + 2 Stable-v0 regressions; rescue indices 25 and 27 overlap accepted-no-STOP",
+    "protection_rule": "exclude diagnostic episodes; fixed target-matched short/long OF-base successes across distinct scenes: tv/plant/chair/bed x2, toilet/sofa x1"
+  },
+  "manifest_cohort": "diagnostic",
+  "manifest_source_probe_index": null,
+  "target_approach_oracle": "a",
+  "iterator": {
+    "shuffle": true,
+    "group_by_scene": true,
+    "num_episode_sample": -1,
+    "max_scene_repeat_episodes": 1,
+    "max_scene_repeat_steps": -1
+  },
+  "selection": [
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "27",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00894-HY1NcmCgn3n/HY1NcmCgn3n.basis.glb",
+      "episode_id": "3",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00800-TEEsavR23oF/TEEsavR23oF.basis.glb",
+      "episode_id": "26",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00813-svBbv1Pavdk/svBbv1Pavdk.basis.glb",
+      "episode_id": "20",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00848-ziup5kvtCCR/ziup5kvtCCR.basis.glb",
+      "episode_id": "0",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "25",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00839-zt1RVoi7PcG/zt1RVoi7PcG.basis.glb",
+      "episode_id": "17",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00849-a8BtkwhxdRV/a8BtkwhxdRV.basis.glb",
+      "episode_id": "17",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00803-k1cupFYWXJ6/k1cupFYWXJ6.basis.glb",
+      "episode_id": "1",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00832-qyAac8rV8Zk/qyAac8rV8Zk.basis.glb",
+      "episode_id": "17",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "19",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00813-svBbv1Pavdk/svBbv1Pavdk.basis.glb",
+      "episode_id": "4",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00877-4ok3usBNeis/4ok3usBNeis.basis.glb",
+      "episode_id": "5",
+      "target": "toilet"
+    }
+  ]
+}

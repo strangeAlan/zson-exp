@@ -1,0 +1,23 @@
+{
+  "decision": "NO-GO",
+  "accepted_no_stop_correct_candidates": 5,
+  "accepted_no_stop_oracle_a_rescues": 1,
+  "accepted_no_stop_oracle_a_rescue_rate": 0.2,
+  "oracle_b_additional_rescues": 0,
+  "pointnav_failures": 4,
+  "taxonomy": {
+    "A": 5,
+    "B": 2,
+    "C": 0,
+    "D": 4,
+    "E": 0
+  },
+  "protection": {
+    "episodes": 10,
+    "losses": 0,
+    "exact_success": 10,
+    "exact_reason": 10,
+    "exact_steps": 10,
+    "exact_first_acceptance": 10
+  }
+}
