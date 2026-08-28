@@ -277,6 +277,7 @@ class PointnavPlanner(PlannerBase):
         # Polar coordinates (Habitat/PointNav style)
         rho = np.sqrt(dx_body**2 + dy_body**2)
         theta = np.arctan2(dy_body, dx_body) - np.pi / 2
+        theta = np.arctan2(np.sin(theta), np.cos(theta))
 
         return rho, theta
 
