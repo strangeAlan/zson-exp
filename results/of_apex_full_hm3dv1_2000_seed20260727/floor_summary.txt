@@ -1,0 +1,6 @@
+protocol=hm3dv1_goal_viewpoint_vertical_gap_v1
+policy_visible=false
+floor_height_threshold_m=1.500
+all: dataset=2000 fraction=1.000000 evaluated=2000 successes=1009 sr=0.504500 spl=0.229982 successes_at_1m=1086 sr_at_1m=0.543000 spl_at_1m=0.247243 exceptions=3
+same_floor_available: dataset=1659 fraction=0.829500 evaluated=1659 successes=1000 sr=0.602773 spl=0.274552 successes_at_1m=1077 sr_at_1m=0.649186 spl_at_1m=0.295361 exceptions=2
+cross_floor_required: dataset=341 fraction=0.170500 evaluated=341 successes=9 sr=0.026393 spl=0.013144 successes_at_1m=9 sr_at_1m=0.026393 spl_at_1m=0.013144 exceptions=1

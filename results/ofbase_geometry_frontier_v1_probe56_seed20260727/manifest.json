@@ -1,0 +1,307 @@
+{
+  "dataset": "HM3Dv2 val",
+  "seed": 20260727,
+  "episodes": 56,
+  "selection_mode": "explicit_manifest",
+  "source_manifest": "/home/hsy/zson-exp-ofbase-hm3dv2/config/evaluation/hm3dv2_ofbase_geometry_frontier_probe_v0.json",
+  "source_manifest_metadata": {
+    "name": "hm3dv2_ofbase_geometry_frontier_probe_v0",
+    "dataset": "HM3Dv2 val",
+    "source_run": "openfrontier_base_sam3_full_hm3dv2_1000_seed20260727",
+    "source_manifest_sha256": "c7ef8f4bcc42a54d29932c71ff6371e46bccb8e720ad9afaa9f89df2e6271374",
+    "source_code_tag": "of-base-full-v1-v2-20260727",
+    "selection_policy": "28 OF-base target-never-visible exploration failures under the frozen audit definition (target never reaches 50 semantic pixels; 21 max-steps, 4 stuck, 3 no-frontiers) plus 28 OF-base successes matched exactly by category and stratified 9 short / 10 medium / 9 long. Apex cases excluded.",
+    "target_visible_threshold_pixels": 50,
+    "failure_probe_count": 28,
+    "regression_probe_count": 28
+  },
+  "iterator": {
+    "shuffle": true,
+    "group_by_scene": true,
+    "num_episode_sample": -1,
+    "max_scene_repeat_episodes": 1,
+    "max_scene_repeat_steps": -1
+  },
+  "selection": [
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00827-BAbdmeyTvMZ/BAbdmeyTvMZ.basis.glb",
+      "episode_id": "27",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00847-bCPU9suPUw9/bCPU9suPUw9.basis.glb",
+      "episode_id": "22",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00821-eF36g7L6Z9M/eF36g7L6Z9M.basis.glb",
+      "episode_id": "1",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00827-BAbdmeyTvMZ/BAbdmeyTvMZ.basis.glb",
+      "episode_id": "4",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00821-eF36g7L6Z9M/eF36g7L6Z9M.basis.glb",
+      "episode_id": "20",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00876-mv2HUxq3B53/mv2HUxq3B53.basis.glb",
+      "episode_id": "2",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00823-7MXmsvcQjpJ/7MXmsvcQjpJ.basis.glb",
+      "episode_id": "19",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00843-DYehNKdT76V/DYehNKdT76V.basis.glb",
+      "episode_id": "14",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00861-GLAQ4DNUx5U/GLAQ4DNUx5U.basis.glb",
+      "episode_id": "13",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00862-LT9Jq6dN3Ea/LT9Jq6dN3Ea.basis.glb",
+      "episode_id": "15",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00880-Nfvxx8J5NCo/Nfvxx8J5NCo.basis.glb",
+      "episode_id": "14",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00800-TEEsavR23oF/TEEsavR23oF.basis.glb",
+      "episode_id": "13",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00878-XB4GS9ShBRE/XB4GS9ShBRE.basis.glb",
+      "episode_id": "7",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00821-eF36g7L6Z9M/eF36g7L6Z9M.basis.glb",
+      "episode_id": "18",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00815-h1zeeAwLh9Z/h1zeeAwLh9Z.basis.glb",
+      "episode_id": "11",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "8",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00844-q5QZSEeHe5g/q5QZSEeHe5g.basis.glb",
+      "episode_id": "4",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00802-wcojb4TFT35/wcojb4TFT35.basis.glb",
+      "episode_id": "7",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00890-6s7QHgap2fW/6s7QHgap2fW.basis.glb",
+      "episode_id": "10",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00827-BAbdmeyTvMZ/BAbdmeyTvMZ.basis.glb",
+      "episode_id": "1",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00894-HY1NcmCgn3n/HY1NcmCgn3n.basis.glb",
+      "episode_id": "10",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00894-HY1NcmCgn3n/HY1NcmCgn3n.basis.glb",
+      "episode_id": "17",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00823-7MXmsvcQjpJ/7MXmsvcQjpJ.basis.glb",
+      "episode_id": "14",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00810-CrMo8WxCyVb/CrMo8WxCyVb.basis.glb",
+      "episode_id": "0",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00876-mv2HUxq3B53/mv2HUxq3B53.basis.glb",
+      "episode_id": "27",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00802-wcojb4TFT35/wcojb4TFT35.basis.glb",
+      "episode_id": "10",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "18",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00847-bCPU9suPUw9/bCPU9suPUw9.basis.glb",
+      "episode_id": "21",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00876-mv2HUxq3B53/mv2HUxq3B53.basis.glb",
+      "episode_id": "12",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00827-BAbdmeyTvMZ/BAbdmeyTvMZ.basis.glb",
+      "episode_id": "2",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00821-eF36g7L6Z9M/eF36g7L6Z9M.basis.glb",
+      "episode_id": "2",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00843-DYehNKdT76V/DYehNKdT76V.basis.glb",
+      "episode_id": "10",
+      "target": "bed"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "4",
+      "target": "chair"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00876-mv2HUxq3B53/mv2HUxq3B53.basis.glb",
+      "episode_id": "19",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00843-DYehNKdT76V/DYehNKdT76V.basis.glb",
+      "episode_id": "5",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00810-CrMo8WxCyVb/CrMo8WxCyVb.basis.glb",
+      "episode_id": "11",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00876-mv2HUxq3B53/mv2HUxq3B53.basis.glb",
+      "episode_id": "7",
+      "target": "plant"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00847-bCPU9suPUw9/bCPU9suPUw9.basis.glb",
+      "episode_id": "20",
+      "target": "sofa"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00880-Nfvxx8J5NCo/Nfvxx8J5NCo.basis.glb",
+      "episode_id": "5",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00823-7MXmsvcQjpJ/7MXmsvcQjpJ.basis.glb",
+      "episode_id": "6",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00814-p53SfW6mjZe/p53SfW6mjZe.basis.glb",
+      "episode_id": "2",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00802-wcojb4TFT35/wcojb4TFT35.basis.glb",
+      "episode_id": "8",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00847-bCPU9suPUw9/bCPU9suPUw9.basis.glb",
+      "episode_id": "14",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00827-BAbdmeyTvMZ/BAbdmeyTvMZ.basis.glb",
+      "episode_id": "15",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00861-GLAQ4DNUx5U/GLAQ4DNUx5U.basis.glb",
+      "episode_id": "7",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00862-LT9Jq6dN3Ea/LT9Jq6dN3Ea.basis.glb",
+      "episode_id": "18",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00821-eF36g7L6Z9M/eF36g7L6Z9M.basis.glb",
+      "episode_id": "26",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00847-bCPU9suPUw9/bCPU9suPUw9.basis.glb",
+      "episode_id": "26",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00861-GLAQ4DNUx5U/GLAQ4DNUx5U.basis.glb",
+      "episode_id": "25",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00862-LT9Jq6dN3Ea/LT9Jq6dN3Ea.basis.glb",
+      "episode_id": "27",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00844-q5QZSEeHe5g/q5QZSEeHe5g.basis.glb",
+      "episode_id": "12",
+      "target": "toilet"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00813-svBbv1Pavdk/svBbv1Pavdk.basis.glb",
+      "episode_id": "4",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00880-Nfvxx8J5NCo/Nfvxx8J5NCo.basis.glb",
+      "episode_id": "22",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00829-QaLdnwvtxbs/QaLdnwvtxbs.basis.glb",
+      "episode_id": "11",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00877-4ok3usBNeis/4ok3usBNeis.basis.glb",
+      "episode_id": "24",
+      "target": "tv_monitor"
+    },
+    {
+      "scene_id": "/home/hsy/datasets/scene_datasets/hm3d_v0.2/val/00821-eF36g7L6Z9M/eF36g7L6Z9M.basis.glb",
+      "episode_id": "5",
+      "target": "tv_monitor"
+    }
+  ]
+}

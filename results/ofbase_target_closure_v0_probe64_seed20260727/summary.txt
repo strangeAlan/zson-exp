@@ -1,0 +1,10 @@
+episodes=64
+successes=35
+sr=0.546875
+spl=0.262421
+successes_at_0_1m=25
+sr_at_0_1m=0.390625
+spl_at_0_1m=0.199733
+elapsed_seconds=12044.207
+exceptions=0
+exit_code=0
