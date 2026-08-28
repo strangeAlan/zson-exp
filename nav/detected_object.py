@@ -26,6 +26,9 @@ class DetectedObject:
         self.observation_count = 1
         self.first_seen_step = None
         self.last_seen_step = None
+        # Evaluation evidence retained in-memory only. These fields do not
+        # participate in merging, scoring, planning, or serialization.
+        self.evidence = []
 
     @classmethod
     def from_mask(
@@ -35,6 +38,7 @@ class DetectedObject:
         viewpoint: np.ndarray,
         intrinsic_mat: np.ndarray,
         step: int | None = None,
+        retain_evidence: bool = False,
     ):
         obj = cls()
         obj.label = mask.get("label", "")
@@ -45,11 +49,24 @@ class DetectedObject:
         obj.last_seen_step = step
 
         mask_array = np.array(mask["mask"])
+        if retain_evidence:
+            obj.mask = mask_array.astype(bool)
         mask_depth = mask_array * depth
 
         obj.depth = depth
         obj.viewpoint = viewpoint
         obj.centroid = cls.get_object_location(mask_depth, viewpoint, intrinsic_mat)
+        if retain_evidence:
+            obj.evidence = [
+                {
+                    "mask": obj.mask.copy(),
+                    "box_2d": obj.box_2d,
+                    "depth": np.asarray(depth).copy(),
+                    "viewpoint": np.asarray(viewpoint).copy(),
+                    "step": step,
+                    "image_index": obj.image_index,
+                }
+            ]
         return obj
 
     @classmethod
@@ -110,6 +127,9 @@ class DetectedObject:
             "observation_count": self.observation_count,
             "first_seen_step": self.first_seen_step,
             "last_seen_step": self.last_seen_step,
+            "mask_pixels": (
+                None if self.mask is None else int(np.asarray(self.mask).sum())
+            ),
             "frontier_id": (
                 None if self.frontier is None else getattr(self.frontier, "id", None)
             ),

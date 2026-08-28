@@ -1173,11 +1173,15 @@ class FrontierManager(Base):
         self, current_pose: np.ndarray, use_graph: bool = True
     ) -> np.ndarray:
         if self.object_lockin is not None:
-            goal_pose = np.eye(4)
-            goal_pose[:3, 3] = self.get_object_free_point(
-                current_pose, self.object_lockin.centroid
-            )
-            goal_pose[:3, :3] = current_pose[:3, :3]  # keep current orientation
+            fixed_pose = getattr(self, "oracle_fixed_goal_pose", None)
+            if fixed_pose is not None:
+                goal_pose = np.asarray(fixed_pose, dtype=float).copy()
+            else:
+                goal_pose = np.eye(4)
+                goal_pose[:3, 3] = self.get_object_free_point(
+                    current_pose, self.object_lockin.centroid
+                )
+                goal_pose[:3, :3] = current_pose[:3, :3]  # keep current orientation
             goal_ft = None
             self.current_goal_ft_id = None
             self.current_goal_pose = None

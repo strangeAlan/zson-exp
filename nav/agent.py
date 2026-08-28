@@ -172,6 +172,7 @@ class NavigationAgent:
         self.termination_images = []
         self.composition_depths = []
         self.composition_viewpoints = []
+        self.composition_semantics = []
         self.detected_objects = []
         self.goal_object = None
         self.appoaching_object = False
@@ -343,6 +344,10 @@ class NavigationAgent:
         self.termination_images.append(rgb)
         self.composition_depths.append(depth)
         self.composition_viewpoints.append(W_T_C2.copy())
+        latest_semantic = getattr(self, "latest_semantic", None)
+        self.composition_semantics.append(
+            None if latest_semantic is None else latest_semantic.copy()
+        )
 
         if (
             len(self.composition_images) == self.n_images
@@ -416,7 +421,23 @@ class NavigationAgent:
                         viewpoint=viewpoint,
                         intrinsic_mat=self.cam_intrinsic.intrinsic_matrix,
                         step=self.navigation_steps,
+                        retain_evidence=bool(
+                            getattr(self, "retain_candidate_evidence", False)
+                        ),
                     )
+                    if obj.evidence:
+                        evidence = obj.evidence[-1]
+                        evidence["rgb"] = np.asarray(
+                            self.composition_images[image_index]
+                        ).copy()
+                        semantic = self.composition_semantics[image_index]
+                        evidence["semantic"] = (
+                            None if semantic is None else np.asarray(semantic).copy()
+                        )
+                        evidence["source_step"] = int(
+                            self.navigation_steps
+                            - (len(self.composition_images) - 1 - image_index)
+                        )
 
                     self.detected_objects.append(obj)
 
@@ -464,6 +485,7 @@ class NavigationAgent:
             self.composition_images = []
             self.composition_depths = []
             self.composition_viewpoints = []
+            self.composition_semantics = []
             end_segm = time.time()
             self.timings["total_segmentation"]["total_time"] += (end_segm - start_segm)
             self.timings["total_segmentation"]["calls"] += 1
@@ -885,6 +907,11 @@ class NavigationAgent:
                             if self.path_to_go
                             else None
                         )
+                        self.on_target_accepted(
+                            current_pose=W_T_C2,
+                            depth=depth,
+                            verification_event=verification_event,
+                        )
                     else:
                         self.goal_object.is_valid = False
                         self.goal_object.verification_status = "false_positive"
@@ -914,7 +941,16 @@ class NavigationAgent:
                 f"Approaching locked-in object. Distance to object center: {dist:.2f} m",
             )
 
-            if len(self.path_to_go) == 0 or dist < self.success_threshold:
+            oracle_decision = self.handle_oracle_target_lockin(
+                current_pose=W_T_C2,
+                depth=depth,
+                raw_centroid_distance=float(dist),
+            )
+            if oracle_decision is not None:
+                navigate, reason = oracle_decision
+                if not navigate:
+                    return False, reason
+            elif len(self.path_to_go) == 0 or dist < self.success_threshold:
                 self.target_diagnostics["termination_event"] = {
                     "step": self.navigation_steps,
                     "object_id": self.ft_manager.object_lockin.id,
@@ -984,6 +1020,26 @@ class NavigationAgent:
             )
         
         return True, "continue_navigation"
+
+    def on_target_accepted(
+        self,
+        *,
+        current_pose: np.ndarray,
+        depth: np.ndarray,
+        verification_event: dict,
+    ) -> None:
+        """Optional analysis hook; OF-base agents intentionally do nothing."""
+
+    def handle_oracle_target_lockin(
+        self,
+        *,
+        current_pose: np.ndarray,
+        depth: np.ndarray,
+        raw_centroid_distance: float,
+    ):
+        """Optional analysis hook; ``None`` preserves legacy STOP semantics."""
+
+        return None
 
     def get_target_diagnostics(self) -> dict:
         """Return episode-level target evidence without changing policy state."""
@@ -1307,6 +1363,7 @@ class NavigationAgent:
         self.termination_images.clear()
         self.composition_depths.clear()
         self.composition_viewpoints.clear()
+        self.composition_semantics.clear()
         self.last_rgb = None
         self.last_som_img = None
         self.segmentation_image = None
@@ -1381,6 +1438,7 @@ class NavigationAgent:
             detection_scores = []
             first_seen_steps = []
             last_seen_steps = []
+            merged_evidence = []
             for idx in cluster_indices:
                 obj = self.detected_objects[idx]
                 if obj.centroid is not None:
@@ -1394,6 +1452,7 @@ class NavigationAgent:
                     first_seen_steps.append(int(obj.first_seen_step))
                 if getattr(obj, "last_seen_step", None) is not None:
                     last_seen_steps.append(int(obj.last_seen_step))
+                merged_evidence.extend(getattr(obj, "evidence", []))
 
                 # All objects must be valid to keep the merged one valid
                 merged_obj.is_valid = merged_obj.is_valid and obj.is_valid
@@ -1419,6 +1478,15 @@ class NavigationAgent:
                 merged_obj.first_seen_step = min(first_seen_steps)
             if last_seen_steps:
                 merged_obj.last_seen_step = max(last_seen_steps)
+            if merged_evidence:
+                merged_evidence.sort(
+                    key=lambda item: (
+                        -1 if item.get("source_step") is None else item["source_step"],
+                        -1 if item.get("image_index") is None else item["image_index"],
+                    )
+                )
+                merged_obj.evidence = merged_evidence
+                merged_obj.mask = merged_evidence[-1]["mask"]
 
             merged_objects.append(merged_obj)
 
